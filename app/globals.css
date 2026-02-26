@@ -1,26 +1,16 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@theme {
+  /* Sodoh Nigeria Limited brand colours */
+  --color-primary: #0df20d;
+  --color-primary-dark: #0ac20a;
+  --color-bg-light: #f5f8f5;
+  --color-bg-dark: #102210;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-bg-light);
+  color: #0f172a;
+  /* font will be set via inline style from root layout (Poppins) */
+  font-family: var(--font-poppins), system-ui, sans-serif;
 }

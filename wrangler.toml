@@ -1,0 +1,17 @@
+name = "sodoh-app"
+main = "dist/index.js"
+compatibility_date = "2024-12-16"
+compatibility_flags = ["nodejs_compat"]
+
+# Cloudflare Pages build configuration
+[env.production]
+routes = [
+  { pattern = "example.com", zone_name = "example.com" }
+]
+
+# Local development
+[docs]
+theme = "raindrop"
+
+# For use with wrangler pages publish
+pages_build_output_dir = ".vercel/output/static"
