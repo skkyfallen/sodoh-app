@@ -2,7 +2,7 @@
  * Supabase Database type definitions.
  * Matches the schema defined in supabase/schema.sql.
  *
- * You can regenerate this automatically once you have the Supabase CLI:
+ * Regenerate automatically with the Supabase CLI:
  *   npx supabase gen types typescript --project-id <YOUR_PROJECT_ID> > types/database.ts
  */
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
@@ -10,33 +10,223 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
-      page_content: {
+      /* ── site_content ── */
+      site_content: {
         Row: {
-          id:          string;
-          page:        "home" | "about" | "contact";
-          section_key: string;
-          content:     string;
-          updated_at:  string;
-          updated_by:  string | null;
+          id:         string;
+          page:       string;
+          section:    string;
+          content:    Json;
+          updated_at: string;
+          updated_by: string | null;
         };
         Insert: {
-          id?:         string;
-          page:        "home" | "about" | "contact";
-          section_key: string;
-          content?:    string;
+          id?:        string;
+          page:       string;
+          section:    string;
+          content?:   Json;
           updated_at?: string;
           updated_by?: string | null;
         };
         Update: {
-          id?:         string;
-          page?:       "home" | "about" | "contact";
-          section_key?: string;
-          content?:    string;
+          id?:        string;
+          page?:      string;
+          section?:   string;
+          content?:   Json;
           updated_at?: string;
           updated_by?: string | null;
         };
         Relationships: [];
       };
+
+      /* ── products ── */
+      products: {
+        Row: {
+          id:            string;
+          title:         string;
+          slug:          string;
+          region:        string | null;
+          description:   string | null;
+          image_url:     string | null;
+          image_alt:     string | null;
+          icon:          string | null;
+          display_order: number;
+          is_active:     boolean;
+          created_at:    string;
+          updated_at:    string;
+        };
+        Insert: {
+          id?:           string;
+          title:         string;
+          slug:          string;
+          region?:       string | null;
+          description?:  string | null;
+          image_url?:    string | null;
+          image_alt?:    string | null;
+          icon?:         string | null;
+          display_order?: number;
+          is_active?:    boolean;
+          created_at?:   string;
+          updated_at?:   string;
+        };
+        Update: {
+          id?:           string;
+          title?:        string;
+          slug?:         string;
+          region?:       string | null;
+          description?:  string | null;
+          image_url?:    string | null;
+          image_alt?:    string | null;
+          icon?:         string | null;
+          display_order?: number;
+          is_active?:    boolean;
+          created_at?:   string;
+          updated_at?:   string;
+        };
+        Relationships: [];
+      };
+
+      /* ── stats ── */
+      stats: {
+        Row: {
+          id:            string;
+          value:         string;
+          label:         string;
+          sub:           string | null;
+          display_order: number;
+          created_at:    string;
+          updated_at:    string;
+        };
+        Insert: {
+          id?:           string;
+          value:         string;
+          label:         string;
+          sub?:          string | null;
+          display_order?: number;
+          created_at?:   string;
+          updated_at?:   string;
+        };
+        Update: {
+          id?:           string;
+          value?:        string;
+          label?:        string;
+          sub?:          string | null;
+          display_order?: number;
+          created_at?:   string;
+          updated_at?:   string;
+        };
+        Relationships: [];
+      };
+
+      /* ── pillars ── */
+      pillars: {
+        Row: {
+          id:            string;
+          step:          string;
+          title:         string;
+          tag:           string | null;
+          description:   string | null;
+          icon:          string | null;
+          display_order: number;
+          created_at:    string;
+          updated_at:    string;
+        };
+        Insert: {
+          id?:           string;
+          step:          string;
+          title:         string;
+          tag?:          string | null;
+          description?:  string | null;
+          icon?:         string | null;
+          display_order?: number;
+          created_at?:   string;
+          updated_at?:   string;
+        };
+        Update: {
+          id?:           string;
+          step?:         string;
+          title?:        string;
+          tag?:          string | null;
+          description?:  string | null;
+          icon?:         string | null;
+          display_order?: number;
+          created_at?:   string;
+          updated_at?:   string;
+        };
+        Relationships: [];
+      };
+
+      /* ── faqs ── */
+      faqs: {
+        Row: {
+          id:            string;
+          question:      string;
+          answer:        string;
+          display_order: number;
+          is_active:     boolean;
+          created_at:    string;
+          updated_at:    string;
+        };
+        Insert: {
+          id?:           string;
+          question:      string;
+          answer:        string;
+          display_order?: number;
+          is_active?:    boolean;
+          created_at?:   string;
+          updated_at?:   string;
+        };
+        Update: {
+          id?:           string;
+          question?:     string;
+          answer?:       string;
+          display_order?: number;
+          is_active?:    boolean;
+          created_at?:   string;
+          updated_at?:   string;
+        };
+        Relationships: [];
+      };
+
+      /* ── testimonials ── */
+      testimonials: {
+        Row: {
+          id:            string;
+          quote:         string;
+          author_name:   string;
+          author_role:   string | null;
+          author_image:  string | null;
+          is_active:     boolean;
+          display_order: number;
+          created_at:    string;
+          updated_at:    string;
+        };
+        Insert: {
+          id?:           string;
+          quote:         string;
+          author_name:   string;
+          author_role?:  string | null;
+          author_image?: string | null;
+          is_active?:    boolean;
+          display_order?: number;
+          created_at?:   string;
+          updated_at?:   string;
+        };
+        Update: {
+          id?:           string;
+          quote?:        string;
+          author_name?:  string;
+          author_role?:  string | null;
+          author_image?: string | null;
+          is_active?:    boolean;
+          display_order?: number;
+          created_at?:   string;
+          updated_at?:   string;
+        };
+        Relationships: [];
+      };
+
+      /* ── contact_submissions ── */
       contact_submissions: {
         Row: {
           id:         string;
@@ -70,7 +260,9 @@ export type Database = {
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
-    Enums: Record<string, never>;
+    Enums: {
+      submission_status: "new" | "read" | "archived";
+    };
     CompositeTypes: Record<string, never>;
   };
 };

@@ -1,63 +1,116 @@
 import Link from "next/link";
-import Image from "next/image";
 import AnimateIn from "@/components/ui/AnimateIn";
+import StatsStack from "@/components/ui/StatsStack";
+import type { HeroContent, AnnouncementContent, Stat } from "@/types/content";
 
-export default function Hero() {
-  return (
-    <section className="relative px-4 py-8 md:px-20 md:py-12">
-      <div className="overflow-hidden rounded-xl shadow-2xl">
-        <div className="relative min-h-[500px] md:min-h-[640px]">
-          {/* Background image */}
-          <Image
-            alt="Lush green expansive Nigerian farmland at sunrise"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAct8vFx8c0lxCuqk0i5FQi2B1Ejw4DuRf4kKN9szBGjxyBTZIg-pRu8MQzqyxHssrx_ECxIajpPBMW1ld7_V8oy_WlEfWg4Ok1IsNAtheWyqTSdyKCdPnLfIk6he7lgo3EPzYSxuCceBiOw42U7Ri7J2DBlG55NHW9Vc64f051Pl0emsf0VL-GE7P02ig7IWnhgz3mbqfHsGZO27D_MYJQSg9VpzPvd3VyHjKD0LfCRMZ6oMRYlwcK8Lv63u1UB4B16ZqTp8uG9hrq"
-            fill
-            priority
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 100vw"
+type Props = {
+  hero: HeroContent;
+  announcement?: AnnouncementContent | null;
+  stats: Stat[];
+};
+
+export default function Hero({ hero, announcement, stats }: Props) {
+  /** Split title around highlight_word so we can wrap it in the skewed badge */
+  const renderTitle = () => {
+    const word = hero.highlight_word;
+    if (!word || !hero.title.includes(word)) {
+      return <>{hero.title}</>;
+    }
+    const idx = hero.title.indexOf(word);
+    const before = hero.title.slice(0, idx);
+    const after = hero.title.slice(idx + word.length);
+    return (
+      <>
+        {before}
+        <span className="relative inline-block">
+          <span className="relative z-10 text-white px-2">{word}</span>
+          <span
+            aria-hidden="true"
+            className="absolute inset-0 bg-[#016936] rounded-md -skew-x-2"
           />
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[rgba(16,34,16,0.9)] via-[rgba(16,34,16,0.5)] to-[rgba(16,34,16,0.1)]" />
-          {/* Content */}
-          <div className="relative z-10 flex flex-col gap-6 items-start justify-end px-6 pb-16 md:px-16 md:pb-24 min-h-[500px] md:min-h-[640px]">
-            <AnimateIn variant="fade-down" delay={100} duration={700}>
-              <span className="bg-[#0df20d]/20 text-[#0df20d] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest w-fit border border-[#0df20d]/30">
-                Innovating African Agriculture
-              </span>
-            </AnimateIn>
+        </span>{" "}
+        {after}
+      </>
+    );
+  };
 
-            <AnimateIn variant="fade-up" delay={250} duration={700}>
-              <h1 className="text-white text-4xl font-black leading-tight tracking-tight md:text-6xl">
-                Cultivating a Greener Future for Nigeria
+  return (
+    <>
+      {/* Announcement bar */}
+      {announcement && (
+        <div className="w-full bg-[#e6f9e6] border-b border-[#cdeccc] px-4 py-2.5 text-center text-sm text-[#016936] font-semibold">
+          {announcement.text}{" "}
+          {announcement.link_text && announcement.link_href && (
+            <Link
+              href={announcement.link_href}
+              className="underline underline-offset-2 font-bold hover:text-[#016936] transition-colors"
+            >
+              {announcement.link_text}
+            </Link>
+          )}
+        </div>
+      )}
+
+      {/* Hero — two-column layout */}
+      <section className="bg-white px-6 pt-20 pb-24 md:px-20 md:pt-28 md:pb-32 flex items-center">
+        <div className="w-full flex flex-col lg:flex-row lg:items-center lg:gap-16">
+
+          {/* Left column — text */}
+          <div className="flex-1 flex flex-col items-start">
+
+            {hero.badge && (
+              <AnimateIn variant="fade-left" delay={80} duration={700}>
+                <div className="border-l-4 border-[#016936] pl-3 mb-8">
+                  <span className="text-[#016936] text-xs font-bold uppercase tracking-widest">
+                    {hero.badge}
+                  </span>
+                </div>
+              </AnimateIn>
+            )}
+
+            <AnimateIn variant="fade-left" delay={200} duration={700}>
+              <h1 className="text-slate-900 text-4xl font-black leading-[1.1] tracking-tight md:text-5xl lg:text-6xl max-w-[90vw] lg:max-w-none">
+                {renderTitle()}
               </h1>
             </AnimateIn>
 
-            <AnimateIn variant="fade-up" delay={400} duration={700}>
-              <p className="text-slate-200 text-base font-medium leading-relaxed md:text-xl max-w-[600px]">
-                Sodoh Nigeria Limited empowers local farmers with sustainable
-                technology and delivers premium organic produce across the nation.
-              </p>
-            </AnimateIn>
+            {hero.subtitle && (
+              <AnimateIn variant="fade-left" delay={360} duration={700}>
+                <p className="text-slate-800 font-semibold text-base md:text-lg leading-relaxed max-w-[95vw] lg:max-w-[60vw] mt-7">
+                  {hero.subtitle}
+                </p>
+              </AnimateIn>
+            )}
 
-            <AnimateIn variant="fade-up" delay={550} duration={700}>
-              <div className="flex gap-4 mt-4">
-                <Link
-                  href="/about"
-                  className="flex min-w-[140px] cursor-pointer items-center justify-center rounded-full h-12 px-6 bg-[#0df20d] text-[#102210] text-base font-bold transition-all hover:shadow-lg hover:shadow-[#0df20d]/20"
-                >
-                  Learn More
-                </Link>
-                <Link
-                  href="/#farms"
-                  className="flex min-w-[140px] cursor-pointer items-center justify-center rounded-full h-12 px-6 bg-white/10 backdrop-blur-md text-white border border-white/20 text-base font-bold transition-all hover:bg-white/20"
-                >
-                  Our Farms
-                </Link>
+            <AnimateIn variant="fade-left" delay={500} duration={700}>
+              <div className="flex flex-col sm:flex-row gap-4 mt-10">
+                {hero.cta_primary_text && hero.cta_primary_href && (
+                  <Link
+                    href={hero.cta_primary_href}
+                    className="flex items-center justify-center rounded-full h-12 px-8 bg-[#016936] text-white text-base font-bold transition-all hover:shadow-lg hover:shadow-[#016936]/30 hover:scale-[1.03]"
+                  >
+                    {hero.cta_primary_text}
+                  </Link>
+                )}
+                {hero.cta_secondary_text && hero.cta_secondary_href && (
+                  <Link
+                    href={hero.cta_secondary_href}
+                    className="flex items-center justify-center rounded-full h-12 px-8 bg-transparent text-slate-900 border border-slate-300 text-base font-bold transition-all hover:bg-slate-100"
+                  >
+                    {hero.cta_secondary_text}
+                  </Link>
+                )}
               </div>
             </AnimateIn>
           </div>
+
+          {/* Right column — interactive stacked cards */}
+          <AnimateIn variant="fade-left" delay={300} duration={700}>
+            <StatsStack stats={stats} />
+          </AnimateIn>
+
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }

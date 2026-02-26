@@ -4,15 +4,97 @@
  * use these for presentational / form-layer code.
  */
 
-export type PageContent = {
+import type { Json } from "./database";
+
+/* ── CMS site content ── */
+export type SiteContent = {
   id: string;
-  page: "home" | "about" | "contact";
-  section_key: string;
-  content: string;
+  page: string;
+  section: string;
+  content: Json;
   updated_at: string;
   updated_by: string | null;
 };
 
+/** Parsed content map: section → parsed JSON */
+export type SiteContentMap = Record<string, Record<string, unknown>>;
+
+/* ── Hero section shape (shared across pages) ── */
+export type HeroContent = {
+  badge?: string;
+  title: string;
+  highlight_word?: string;
+  subtitle?: string;
+  cta_primary_text?: string;
+  cta_primary_href?: string;
+  cta_secondary_text?: string;
+  cta_secondary_href?: string;
+};
+
+/* ── Announcement bar ── */
+export type AnnouncementContent = {
+  text: string;
+  link_text?: string;
+  link_href?: string;
+};
+
+/* ── Products ── */
+export type Product = {
+  id: string;
+  title: string;
+  slug: string;
+  region: string | null;
+  description: string | null;
+  image_url: string | null;
+  image_alt: string | null;
+  icon: string | null;
+  display_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+/* ── Stats ── */
+export type Stat = {
+  id: string;
+  value: string;
+  label: string;
+  sub: string | null;
+  display_order: number;
+};
+
+/* ── Pillars ── */
+export type Pillar = {
+  id: string;
+  step: string;
+  title: string;
+  tag: string | null;
+  description: string | null;
+  icon: string | null;
+  display_order: number;
+};
+
+/* ── FAQ ── */
+export type FAQ = {
+  id: string;
+  question: string;
+  answer: string;
+  display_order: number;
+  is_active: boolean;
+};
+
+/* ── Testimonial ── */
+export type Testimonial = {
+  id: string;
+  quote: string;
+  author_name: string;
+  author_role: string | null;
+  author_image: string | null;
+  is_active: boolean;
+  display_order: number;
+};
+
+/* ── Contact submissions ── */
 export type ContactSubmission = {
   id: string;
   name: string;
@@ -30,6 +112,3 @@ export type ContactFormData = {
   subject: string;
   message: string;
 };
-
-/** A map of section_key → content for a single page */
-export type PageContentMap = Record<string, string>;

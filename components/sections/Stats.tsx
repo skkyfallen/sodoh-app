@@ -1,13 +1,11 @@
 import AnimateIn from "@/components/ui/AnimateIn";
+import type { Stat } from "@/types/content";
 
-const stats = [
-  { value: "500+", label: "Local Farmers Supported" },
-  { value: "10k+", label: "Tons of Produce" },
-  { value: "36", label: "States Reached" },
-  { value: "98%", label: "Client Satisfaction" },
-];
+type Props = {
+  stats: Stat[];
+};
 
-export default function Stats() {
+export default function Stats({ stats }: Props) {
   return (
     <section className="bg-[#102210] py-20 px-6 md:px-20 text-white overflow-hidden relative">
       {/* Decorative glows */}

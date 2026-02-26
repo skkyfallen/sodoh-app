@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
-const poppins = Poppins({
-  variable: "--font-poppins",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
-  weight: ["300","400","500","600","700"],
+  weight: ["400","500","600","700","800"],
   display: "swap",
 });
 
@@ -37,7 +37,7 @@ export default function RootLayout({
       </head>
       <body
         className="antialiased"
-        style={{ fontFamily: poppins.style.fontFamily }}
+        style={{ fontFamily: inter.style.fontFamily }}
       >
         {children}
       </body>

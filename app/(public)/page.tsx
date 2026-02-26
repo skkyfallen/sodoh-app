@@ -3,6 +3,13 @@ import Hero from "@/components/sections/Hero";
 import CorePillars from "@/components/sections/CorePillars";
 import Stats from "@/components/sections/Stats";
 import Testimonial from "@/components/sections/Testimonial";
+import {
+  getPageContent,
+  getStats,
+  getPillars,
+  getTestimonials,
+} from "@/lib/data";
+import type { HeroContent, AnnouncementContent } from "@/types/content";
 
 export const metadata: Metadata = {
   title: "Sodoh Nigeria Limited — Premium Nigerian Agricultural Produce",
@@ -16,13 +23,23 @@ export const metadata: Metadata = {
   },
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [content, stats, pillars, testimonials] = await Promise.all([
+    getPageContent("home"),
+    getStats(),
+    getPillars(),
+    getTestimonials(),
+  ]);
+
+  const hero = (content.hero ?? {}) as HeroContent;
+  const announcement = (content.announcement ?? null) as AnnouncementContent | null;
+
   return (
     <>
-      <Hero />
-      <CorePillars />
-      <Stats />
-      <Testimonial />
+      <Hero hero={hero} announcement={announcement} stats={stats} />
+      <CorePillars pillars={pillars} />
+      <Stats stats={stats} />
+      <Testimonial testimonials={testimonials} />
     </>
   );
 }
