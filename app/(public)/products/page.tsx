@@ -139,65 +139,71 @@ export default async function ProductsPage() {
           </div>
         </AnimateIn>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((product, i) => {
-            const Icon = iconMap[product.icon ?? ""] ?? MdEco;
-            return (
-              <AnimateIn
-                key={product.id}
-                variant="fade-up"
-                delay={i * 100}
-                duration={600}
-                threshold={0.1}
-              >
-                <div className="group flex flex-col gap-4 p-6 rounded-2xl bg-white border border-[#0df20d]/10 hover:border-[#0df20d]/40 transition-all hover:shadow-xl hover:-translate-y-1 h-full">
-                  {/* Icon */}
-                  <div className="bg-[#0df20d]/10 text-[#0ac20a] size-12 rounded-xl flex items-center justify-center shrink-0">
-                    <Icon className="text-2xl" />
-                  </div>
-
-                  {/* Product image */}
-                  {product.image_url && (
-                    <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-slate-100">
-                      <Image
-                        src={product.image_url}
-                        alt={product.image_alt ?? product.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      />
+        {products.length === 0 ? (
+          <p className="text-center w-full text-slate-600 italic">
+            No products available at the moment. Please check back later.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products.map((product, i) => {
+              const Icon = iconMap[product.icon ?? ""] ?? MdEco;
+              return (
+                <AnimateIn
+                  key={product.id}
+                  variant="fade-up"
+                  delay={i * 100}
+                  duration={600}
+                  threshold={0.1}
+                >
+                  <div className="group flex flex-col gap-4 p-6 rounded-2xl bg-white border border-[#0df20d]/10 hover:border-[#0df20d]/40 transition-all hover:shadow-xl hover:-translate-y-1 h-full">
+                    {/* Icon */}
+                    <div className="bg-[#0df20d]/10 text-[#0ac20a] size-12 rounded-xl flex items-center justify-center shrink-0">
+                      <Icon className="text-2xl" />
                     </div>
-                  )}
 
-                  {/* Copy */}
-                  <div className="flex flex-col flex-1 gap-2">
-                    <div>
-                      <h3 className="text-slate-900 text-xl font-bold leading-tight">
-                        {product.title}
-                      </h3>
-                      {product.region && (
-                        <p className="text-[#0ac20a] text-xs font-semibold mt-1">
-                          {product.region}
+                    {/* Product image */}
+                    {product.image_url && (
+                      <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-slate-100">
+                        <Image
+                          src={product.image_url}
+                          alt={product.image_alt ?? product.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        />
+                      </div>
+                    )}
+
+                    {/* Copy */}
+                    <div className="flex flex-col flex-1 gap-2">
+                      <div>
+                        <h3 className="text-slate-900 text-xl font-bold leading-tight">
+                          {product.title}
+                        </h3>
+                        {product.region && (
+                          <p className="text-[#0ac20a] text-xs font-semibold mt-1">
+                            {product.region}
+                          </p>
+                        )}
+                      </div>
+                      {product.description && (
+                        <p className="text-slate-600 text-sm leading-relaxed flex-1">
+                          {product.description}
                         </p>
                       )}
+                      <Link
+                        href="/contact"
+                        className="mt-2 w-full py-2 text-center rounded-xl bg-slate-100 hover:bg-[#0df20d] hover:text-[#102210] transition-colors font-bold text-sm"
+                      >
+                        Request Quote
+                      </Link>
                     </div>
-                    {product.description && (
-                      <p className="text-slate-600 text-sm leading-relaxed flex-1">
-                        {product.description}
-                      </p>
-                    )}
-                    <Link
-                      href="/contact"
-                      className="mt-2 w-full py-2 text-center rounded-xl bg-slate-100 hover:bg-[#0df20d] hover:text-[#102210] transition-colors font-bold text-sm"
-                    >
-                      Request Quote
-                    </Link>
                   </div>
-                </div>
-              </AnimateIn>
-            );
-          })}
-        </div>
+                </AnimateIn>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* CTA Banner */}

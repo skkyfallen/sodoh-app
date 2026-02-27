@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import type { Tables } from "@/types/database";
 
@@ -9,6 +10,8 @@ type Product = Tables<"products">;
 type Props = {
   initialProducts: Product[];
 };
+
+const BUCKET = "product-images";
 
 const emptyProduct: Omit<Product, "id" | "created_at" | "updated_at"> = {
   title: "",
@@ -21,6 +24,122 @@ const emptyProduct: Omit<Product, "id" | "created_at" | "updated_at"> = {
   display_order: 0,
   is_active: true,
 };
+
+// ─── Image uploader ──────────────────────────────────────────────────────────
+
+type ImageUploaderProps = {
+  currentUrl: string;
+  onUploaded: (url: string) => void;
+};
+
+function ImageUploader({ currentUrl, onUploaded }: ImageUploaderProps) {
+  const supabase = createClient();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleFile = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      setError("Please select an image file.");
+      return;
+    }
+    if (file.size > 50 * 1024 * 1024) {
+      setError("Image must be under 50 MB.");
+      return;
+    }
+
+    setError(null);
+    setUploading(true);
+
+    const ext = file.name.split(".").pop() ?? "jpg";
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from(BUCKET)
+      .upload(path, file, { upsert: false, contentType: file.type });
+
+    if (uploadError) {
+      setError(uploadError.message);
+      setUploading(false);
+      return;
+    }
+
+    const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
+    onUploaded(data.publicUrl);
+    setUploading(false);
+  };
+
+  const handleRemove = async () => {
+    if (!currentUrl) return;
+    // Extract the file path from the public URL
+    const path = currentUrl.split(`/${BUCKET}/`)[1];
+    if (path) await supabase.storage.from(BUCKET).remove([path]);
+    onUploaded("");
+  };
+
+  return (
+    <div className="flex flex-col gap-2">
+      <label className="block text-sm font-semibold text-slate-600">Product Image</label>
+
+      {currentUrl ? (
+        <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
+          <Image src={currentUrl} alt="Product preview" fill className="object-cover" sizes="(max-width: 768px) 100vw, 500px" />
+          <div className="absolute inset-0 flex items-end justify-end p-2">
+            <button
+              type="button"
+              onClick={handleRemove}
+              className="bg-white/90 hover:bg-red-50 text-red-600 border border-red-200 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors shadow-sm"
+            >
+              Remove
+            </button>
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              className="ml-2 bg-white/90 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors shadow-sm"
+            >
+              Replace
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          className="flex flex-col items-center justify-center w-full aspect-video rounded-xl border-2 border-dashed border-slate-300 hover:border-[#016936] hover:bg-[#016936]/5 transition-colors text-slate-500 hover:text-[#016936] disabled:opacity-60"
+        >
+          {uploading ? (
+            <span className="text-sm font-semibold">Uploading…</span>
+          ) : (
+            <>
+              <svg className="w-8 h-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+              </svg>
+              <span className="text-sm font-semibold">Click to upload image</span>
+              <span className="text-xs mt-1">PNG, JPG, WEBP — max 50 MB</span>
+            </>
+          )}
+        </button>
+      )}
+
+      {error && <p className="text-xs text-red-500 font-medium">{error}</p>}
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) handleFile(file);
+          e.target.value = "";
+        }}
+      />
+    </div>
+  );
+}
+
+// ─── Products manager ────────────────────────────────────────────────────────
 
 export default function ProductsManager({ initialProducts }: Props) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
@@ -63,9 +182,7 @@ export default function ProductsManager({ initialProducts }: Props) {
         .insert(rest as never)
         .select()
         .single();
-      if (!error && data) {
-        setProducts((prev) => [...prev, data as Product]);
-      }
+      if (!error && data) setProducts((prev) => [...prev, data as Product]);
     } else {
       const { created_at: _c, updated_at: _u, ...rest } = editing;
       void _c; void _u;
@@ -73,11 +190,10 @@ export default function ProductsManager({ initialProducts }: Props) {
         .from("products")
         .update(rest)
         .eq("id", editing.id);
-      if (!error) {
+      if (!error)
         setProducts((prev) =>
           prev.map((p) => (p.id === editing.id ? { ...p, ...rest } : p))
         );
-      }
     }
 
     setSaving(false);
@@ -87,9 +203,7 @@ export default function ProductsManager({ initialProducts }: Props) {
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this product?")) return;
     const { error } = await supabase.from("products").delete().eq("id", id);
-    if (!error) {
-      setProducts((prev) => prev.filter((p) => p.id !== id));
-    }
+    if (!error) setProducts((prev) => prev.filter((p) => p.id !== id));
   };
 
   const handleToggle = async (id: string, current: boolean) => {
@@ -97,12 +211,27 @@ export default function ProductsManager({ initialProducts }: Props) {
       .from("products")
       .update({ is_active: !current })
       .eq("id", id);
-    if (!error) {
+    if (!error)
       setProducts((prev) =>
         prev.map((p) => (p.id === id ? { ...p, is_active: !current } : p))
       );
-    }
   };
+
+  const field = (key: keyof Product, label: string, type: "text" | "number" = "text") => (
+    <div key={key}>
+      <label className="block text-sm font-semibold text-slate-600 mb-1">{label}</label>
+      <input
+        type={type}
+        value={String(editing?.[key] ?? "")}
+        onChange={(e) =>
+          setEditing((prev) =>
+            prev ? { ...prev, [key]: type === "number" ? Number(e.target.value) : e.target.value } : prev
+          )
+        }
+        className="w-full h-10 rounded-lg border border-slate-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#016936]"
+      />
+    </div>
+  );
 
   return (
     <div>
@@ -135,25 +264,17 @@ export default function ProductsManager({ initialProducts }: Props) {
                   <button
                     onClick={() => handleToggle(p.id, p.is_active)}
                     className={`text-xs font-bold px-2 py-1 rounded-full ${
-                      p.is_active
-                        ? "bg-green-100 text-green-700"
-                        : "bg-slate-100 text-slate-500"
+                      p.is_active ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-500"
                     }`}
                   >
                     {p.is_active ? "Active" : "Hidden"}
                   </button>
                 </td>
                 <td className="px-4 py-3 text-right">
-                  <button
-                    onClick={() => openEdit(p)}
-                    className="text-[#016936] font-semibold hover:underline mr-3"
-                  >
+                  <button onClick={() => openEdit(p)} className="text-[#016936] font-semibold hover:underline mr-3">
                     Edit
                   </button>
-                  <button
-                    onClick={() => handleDelete(p.id)}
-                    className="text-red-500 font-semibold hover:underline"
-                  >
+                  <button onClick={() => handleDelete(p.id)} className="text-red-500 font-semibold hover:underline">
                     Delete
                   </button>
                 </td>
@@ -161,16 +282,14 @@ export default function ProductsManager({ initialProducts }: Props) {
             ))}
             {products.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-slate-400">
-                  No products yet.
-                </td>
+                <td colSpan={5} className="px-4 py-8 text-center text-slate-400">No products yet.</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
 
-      {/* Edit Modal */}
+      {/* Modal */}
       {editing && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
@@ -179,54 +298,26 @@ export default function ProductsManager({ initialProducts }: Props) {
             </h2>
 
             <div className="flex flex-col gap-4">
-              {(
-                [
-                  ["title", "Title"],
-                  ["slug", "Slug"],
-                  ["region", "Region"],
-                  ["icon", "Icon (e.g. MdEco)"],
-                  ["image_url", "Image URL"],
-                  ["image_alt", "Image Alt Text"],
-                  ["display_order", "Display Order"],
-                ] as [keyof Product, string][]
-              ).map(([key, label]) => (
-                <div key={key}>
-                  <label className="block text-sm font-semibold text-slate-600 mb-1">
-                    {label}
-                  </label>
-                  <input
-                    type={key === "display_order" ? "number" : "text"}
-                    value={String(editing[key] ?? "")}
-                    onChange={(e) =>
-                      setEditing((prev) =>
-                        prev
-                          ? {
-                              ...prev,
-                              [key]:
-                                key === "display_order"
-                                  ? Number(e.target.value)
-                                  : e.target.value,
-                            }
-                          : prev
-                      )
-                    }
-                    className="w-full h-10 rounded-lg border border-slate-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#016936]"
-                  />
-                </div>
-              ))}
+              {field("title", "Title")}
+              {field("slug", "Slug")}
+              {field("region", "Region")}
+              {field("icon", "Icon (e.g. MdEco)")}
+              {field("display_order", "Display Order", "number")}
+
+              {/* Image upload */}
+              <ImageUploader
+                currentUrl={editing.image_url ?? ""}
+                onUploaded={(url) => setEditing((prev) => prev ? { ...prev, image_url: url } : prev)}
+              />
+
+              {field("image_alt", "Image Alt Text")}
 
               <div>
-                <label className="block text-sm font-semibold text-slate-600 mb-1">
-                  Description
-                </label>
+                <label className="block text-sm font-semibold text-slate-600 mb-1">Description</label>
                 <textarea
                   rows={3}
                   value={editing.description ?? ""}
-                  onChange={(e) =>
-                    setEditing((prev) =>
-                      prev ? { ...prev, description: e.target.value } : prev
-                    )
-                  }
+                  onChange={(e) => setEditing((prev) => prev ? { ...prev, description: e.target.value } : prev)}
                   className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#016936] resize-y"
                 />
               </div>
@@ -235,11 +326,7 @@ export default function ProductsManager({ initialProducts }: Props) {
                 <input
                   type="checkbox"
                   checked={editing.is_active}
-                  onChange={(e) =>
-                    setEditing((prev) =>
-                      prev ? { ...prev, is_active: e.target.checked } : prev
-                    )
-                  }
+                  onChange={(e) => setEditing((prev) => prev ? { ...prev, is_active: e.target.checked } : prev)}
                   className="size-4 accent-[#016936]"
                 />
                 <label className="text-sm font-semibold text-slate-600">Active</label>
@@ -247,17 +334,10 @@ export default function ProductsManager({ initialProducts }: Props) {
             </div>
 
             <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={close}
-                className="h-10 px-5 rounded-lg bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-colors"
-              >
+              <button onClick={close} className="h-10 px-5 rounded-lg bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-colors">
                 Cancel
               </button>
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="h-10 px-5 rounded-lg bg-[#016936] text-white font-bold text-sm hover:bg-[#015a2d] disabled:opacity-60 transition-colors"
-              >
+              <button onClick={handleSave} disabled={saving} className="h-10 px-5 rounded-lg bg-[#016936] text-white font-bold text-sm hover:bg-[#015a2d] disabled:opacity-60 transition-colors">
                 {saving ? "Saving…" : "Save"}
               </button>
             </div>

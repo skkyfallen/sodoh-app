@@ -65,7 +65,7 @@ export default function StatsStack({ stats: propStats }: Props) {
           >
             {/* Header — always visible */}
             <div className="flex items-center gap-4 px-6 py-5">
-              <span className="text-3xl font-black text-[#016936] leading-none w-16 shrink-0">
+              <span className="text-3xl font-black text-[#016936] leading-none shrink-0 whitespace-nowrap">
                 {stat.value}
               </span>
               <span className="text-slate-800 text-sm font-bold leading-snug">

@@ -20,10 +20,7 @@ function LoginForm() {
     setLoading(true);
 
     const supabase = createClient();
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
 
     if (authError) {
       setError(authError.message);
@@ -52,13 +49,12 @@ function LoginForm() {
 
           <form onSubmit={handleLogin} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="email" className="text-sm font-semibold text-slate-700">
-                Email
-              </label>
+              <label htmlFor="email" className="text-sm font-semibold text-slate-700">Email</label>
               <input
                 id="email"
                 type="email"
                 required
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="h-11 rounded-lg border border-slate-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#016936] focus:border-[#016936] transition-all"
@@ -66,13 +62,12 @@ function LoginForm() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="password" className="text-sm font-semibold text-slate-700">
-                Password
-              </label>
+              <label htmlFor="password" className="text-sm font-semibold text-slate-700">Password</label>
               <input
                 id="password"
                 type="password"
                 required
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"

@@ -9,7 +9,7 @@ import { revalidatePath } from "next/cache";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const paths: string[] = body.paths ?? ["/", "/products", "/contact"];
+    const paths: string[] = body.paths ?? ["/", "/about", "/products", "/contact"];
 
     for (const p of paths) {
       revalidatePath(p);
