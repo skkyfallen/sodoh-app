@@ -2,8 +2,6 @@ import { getPillars } from "@/lib/data";
 import CrudManager from "@/components/admin/CrudManager";
 import type { FieldDef } from "@/components/admin/CrudManager";
 
-export const runtime = 'edge';
-
 const fields: FieldDef[] = [
   { key: "step",          label: "Step (e.g. 01)" },
   { key: "title",         label: "Title" },

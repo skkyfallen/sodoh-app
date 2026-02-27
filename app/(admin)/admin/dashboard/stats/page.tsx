@@ -2,8 +2,6 @@ import { getStats } from "@/lib/data";
 import CrudManager from "@/components/admin/CrudManager";
 import type { FieldDef } from "@/components/admin/CrudManager";
 
-export const runtime = 'edge';
-
 const fields: FieldDef[] = [
   { key: "value",         label: "Value (e.g. 500+)" },
   { key: "label",         label: "Label" },

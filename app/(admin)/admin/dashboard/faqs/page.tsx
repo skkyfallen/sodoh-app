@@ -2,8 +2,6 @@ import { getFAQs } from "@/lib/data";
 import CrudManager from "@/components/admin/CrudManager";
 import type { FieldDef } from "@/components/admin/CrudManager";
 
-export const runtime = 'edge';
-
 const fields: FieldDef[] = [
   { key: "question",      label: "Question" },
   { key: "answer",        label: "Answer",         type: "textarea" },

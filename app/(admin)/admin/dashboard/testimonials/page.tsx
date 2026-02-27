@@ -2,8 +2,6 @@ import { getTestimonials } from "@/lib/data";
 import CrudManager from "@/components/admin/CrudManager";
 import type { FieldDef } from "@/components/admin/CrudManager";
 
-export const runtime = 'edge';
-
 const fields: FieldDef[] = [
   { key: "quote",         label: "Quote",          type: "textarea" },
   { key: "author_name",   label: "Author Name" },
