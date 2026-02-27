@@ -12,7 +12,7 @@ import type { IconType } from "react-icons";
 import { getPageContent, getStats } from "@/lib/data";
 import type { HeroContent } from "@/types/content";
 
-export const runtime = "edge";
+
 
 /**
  * Revalidate the About page at most once per minute.
