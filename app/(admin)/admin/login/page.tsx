@@ -61,7 +61,6 @@ function LoginForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@sodohnigeria.com"
                 className="h-11 rounded-lg border border-slate-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#016936] focus:border-[#016936] transition-all"
               />
             </div>
