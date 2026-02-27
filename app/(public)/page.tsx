@@ -23,6 +23,9 @@ export const metadata: Metadata = {
   },
 };
 
+export const runtime = "edge";
+export const revalidate = 60;
+
 export default async function HomePage() {
   const [content, stats, pillars, testimonials] = await Promise.all([
     getPageContent("home"),
@@ -32,6 +35,8 @@ export default async function HomePage() {
   ]);
 
   const hero = (content.hero ?? {}) as HeroContent;
+  // Content guard: fall back to a safe title so the hero never renders blank
+  if (!hero.title) hero.title = "One Trusted Source For Premium Nigerian Agricultural Produce";
   const announcement = (content.announcement ?? null) as AnnouncementContent | null;
 
   return (

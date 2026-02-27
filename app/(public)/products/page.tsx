@@ -35,6 +35,9 @@ export const metadata: Metadata = {
   },
 };
 
+export const runtime = "edge";
+export const revalidate = 60;
+
 export default async function ProductsPage() {
   const [content, products, stats] = await Promise.all([
     getPageContent("products"),
@@ -43,8 +46,12 @@ export default async function ProductsPage() {
   ]);
 
   const hero = (content.hero ?? {}) as HeroContent;
+  if (!hero.title) hero.title = 'Our Premium Produce';
   const gridHeading = (content.grid_heading as Record<string, string>)?.heading ?? "Our Agricultural Products";
   const ctaBanner = (content.cta_banner ?? {}) as Record<string, string>;
+  if (!ctaBanner.heading) ctaBanner.heading = "Ready to source quality produce?";
+  if (!ctaBanner.cta_text) ctaBanner.cta_text = "Contact Us Now";
+  if (!ctaBanner.cta_href) ctaBanner.cta_href = "/contact";
 
   /** Split title around highlight_word */
   const renderTitle = () => {

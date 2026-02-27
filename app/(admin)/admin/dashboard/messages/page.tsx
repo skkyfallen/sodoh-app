@@ -1,4 +1,4 @@
-import { getContactSubmissions } from "@/lib/data";
+import { getContactSubmissions } from "@/lib/data-admin";
 import MessagesManager from "@/components/admin/MessagesManager";
 
 export default async function MessagesPage() {

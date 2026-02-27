@@ -21,6 +21,9 @@ export const metadata: Metadata = {
   },
 };
 
+export const runtime = "edge";
+export const revalidate = 60;
+
 export default async function ContactPage() {
   const [content, stats, faqs] = await Promise.all([
     getPageContent("contact"),
@@ -29,6 +32,7 @@ export default async function ContactPage() {
   ]);
 
   const hero = (content.hero ?? {}) as HeroContent;
+  if (!hero.title) hero.title = "Get in Touch with Sodoh Nigeria";
   const info = content.info as Record<string, unknown> | undefined;
   const contactDetails = (info?.details ?? []) as Array<{
     icon: string;

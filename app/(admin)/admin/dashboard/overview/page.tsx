@@ -1,11 +1,11 @@
 import {
-  getContactSubmissionCounts,
   getProducts,
   getStats,
   getPillars,
   getFAQs,
   getTestimonials,
 } from "@/lib/data";
+import { getContactSubmissionCounts } from "@/lib/data-admin";
 import { MdShoppingBag, MdBarChart, MdMail, MdViewColumn, MdQuestionAnswer, MdStar } from "react-icons/md";
 
 export default async function OverviewPage() {

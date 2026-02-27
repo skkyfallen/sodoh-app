@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import type {
   HeroContent,
   AnnouncementContent,
@@ -7,7 +7,6 @@ import type {
   Pillar,
   FAQ,
   Testimonial,
-  ContactSubmission,
 } from "@/types/content";
 
 /* ─── helpers ─── */
@@ -17,7 +16,7 @@ import type {
  * map of section → parsed content object.
  */
 export async function getPageContent(page: string) {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("site_content")
     .select("section, content")
@@ -52,7 +51,7 @@ export async function getAnnouncementContent(): Promise<AnnouncementContent | nu
 /* ─── table queries ─── */
 
 export async function getProducts(): Promise<Product[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("products")
     .select("*")
@@ -67,7 +66,7 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function getStats(): Promise<Stat[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("stats")
     .select("*")
@@ -81,7 +80,7 @@ export async function getStats(): Promise<Stat[]> {
 }
 
 export async function getPillars(): Promise<Pillar[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("pillars")
     .select("*")
@@ -95,7 +94,7 @@ export async function getPillars(): Promise<Pillar[]> {
 }
 
 export async function getFAQs(): Promise<FAQ[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("faqs")
     .select("*")
@@ -110,7 +109,7 @@ export async function getFAQs(): Promise<FAQ[]> {
 }
 
 export async function getTestimonials(): Promise<Testimonial[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("testimonials")
     .select("*")
@@ -122,37 +121,4 @@ export async function getTestimonials(): Promise<Testimonial[]> {
     return [];
   }
   return (data ?? []) as Testimonial[];
-}
-
-/* ─── admin-only queries ─── */
-
-export async function getContactSubmissions(): Promise<ContactSubmission[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("contact_submissions")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("[getContactSubmissions]", error.message);
-    return [];
-  }
-  return (data ?? []) as ContactSubmission[];
-}
-
-export async function getContactSubmissionCounts() {
-  const supabase = await createClient();
-
-  const [newRes, readRes, archivedRes] = await Promise.all([
-    supabase.from("contact_submissions").select("id", { count: "exact", head: true }).eq("status", "new"),
-    supabase.from("contact_submissions").select("id", { count: "exact", head: true }).eq("status", "read"),
-    supabase.from("contact_submissions").select("id", { count: "exact", head: true }).eq("status", "archived"),
-  ]);
-
-  return {
-    new: newRes.count ?? 0,
-    read: readRes.count ?? 0,
-    archived: archivedRes.count ?? 0,
-    total: (newRes.count ?? 0) + (readRes.count ?? 0) + (archivedRes.count ?? 0),
-  };
 }
