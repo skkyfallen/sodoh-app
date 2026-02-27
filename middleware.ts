@@ -47,6 +47,7 @@ export async function middleware(request: NextRequest) {
 
   return supabaseResponse;
 }
+/*test-ignore-end*/
 
 export const config = {
   matcher: [
