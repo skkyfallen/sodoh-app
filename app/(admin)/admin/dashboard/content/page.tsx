@@ -1,6 +1,8 @@
 import { getPageContent } from "@/lib/data";
 import CMSEditor from "@/components/admin/CMSEditor";
 
+export const runtime = 'edge';
+
 export default async function ContentPage() {
   const [homeContent, aboutContent, productsContent, contactContent] =
     await Promise.all([

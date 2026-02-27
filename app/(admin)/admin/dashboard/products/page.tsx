@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import ProductsManager from "@/components/admin/ProductsManager";
 import type { Product } from "@/types/content";
 
+export const runtime = 'edge';
+
 export default async function ProductsPage() {
   const supabase = await createClient();
   const { data: products } = await supabase

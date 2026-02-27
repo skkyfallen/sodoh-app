@@ -6,6 +6,8 @@ import {
   getTestimonials,
 } from "@/lib/data";
 import { getContactSubmissionCounts } from "@/lib/data-admin";
+
+export const runtime = 'edge';
 import { MdShoppingBag, MdBarChart, MdMail, MdViewColumn, MdQuestionAnswer, MdStar } from "react-icons/md";
 
 export default async function OverviewPage() {

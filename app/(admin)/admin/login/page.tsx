@@ -4,6 +4,8 @@ import { Suspense, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
+export const runtime = 'edge';
+
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
