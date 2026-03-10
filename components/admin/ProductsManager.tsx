@@ -54,6 +54,10 @@ function ImageUploader({ currentUrl, onUploaded }: ImageUploaderProps) {
     const ext = file.name.split(".").pop() ?? "jpg";
     const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
+    if (path.includes('..')) {
+      throw new Error("Invalid path");
+    }
+
     const { error: uploadError } = await supabase.storage
       .from(BUCKET)
       .upload(path, file, { upsert: false, contentType: file.type });
