@@ -7,7 +7,24 @@ import { createClient } from "@/lib/supabase/client";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") ?? "/admin/dashboard/overview";
+  const rawRedirect = searchParams.get("redirectTo") ?? "";
+  // Validate the redirect target to prevent open-redirect attacks.
+  // Use the URL API to normalise the value (handles encoded slashes, backslashes,
+  // protocol-relative paths, etc.) before checking it is a safe /admin path.
+  let redirectTo = "/admin/dashboard/overview";
+  try {
+    // Using a dummy localhost base is intentional: the URL API normalises any
+    // encoded slashes, backslashes, and protocol-relative tricks so we can
+    // inspect the pathname safely. We only use parsed.pathname — the base
+    // origin is never used for anything other than normalisation.
+    const parsed = new URL(rawRedirect, "http://localhost");
+    // Only allow same-origin paths that start with /admin
+    if (parsed.origin === "http://localhost" && parsed.pathname.startsWith("/admin")) {
+      redirectTo = parsed.pathname + parsed.search;
+    }
+  } catch {
+    // Invalid URL — fall through to the safe default
+  }
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
