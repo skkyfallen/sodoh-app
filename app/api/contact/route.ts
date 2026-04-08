@@ -1,11 +1,19 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_NAME = 100;
 const MAX_EMAIL = 254;
 const MAX_SUBJECT = 200;
 const MAX_MESSAGE = 5000;
+
+function isValidEmail(email: string): boolean {
+  // Simple structural check: one @, non-empty local and domain parts, domain contains a dot
+  const atIdx = email.indexOf("@");
+  if (atIdx < 1 || atIdx !== email.lastIndexOf("@")) return false;
+  const domain = email.slice(atIdx + 1);
+  const dotIdx = domain.lastIndexOf(".");
+  return dotIdx > 0 && dotIdx < domain.length - 1;
+}
 
 export async function POST(request: Request) {
   try {
@@ -30,7 +38,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!EMAIL_RE.test(email) || email.length > MAX_EMAIL) {
+    if (email.length > MAX_EMAIL || !isValidEmail(email.trim())) {
       return NextResponse.json({ error: "Invalid email address." }, { status: 400 });
     }
 
@@ -54,7 +62,7 @@ export async function POST(request: Request) {
 
     const { error } = await supabase.from("contact_submissions").insert({
       name: name.trim(),
-      email: email.trim().toLowerCase(),
+      email: email.trim(),
       subject: subject ? subject.trim() || null : null,
       message: message.trim(),
     });
