@@ -7,10 +7,12 @@ const MAX_SUBJECT = 200;
 const MAX_MESSAGE = 5000;
 
 function isValidEmail(email: string): boolean {
-  // Simple structural check: one @, non-empty local and domain parts, domain contains a dot
+  // Structural check: one @, non-empty local part, non-empty domain with a dot
   const atIdx = email.indexOf("@");
   if (atIdx < 1 || atIdx !== email.lastIndexOf("@")) return false;
+  const local = email.slice(0, atIdx);
   const domain = email.slice(atIdx + 1);
+  if (local.length === 0 || domain.length === 0) return false;
   const dotIdx = domain.lastIndexOf(".");
   return dotIdx > 0 && dotIdx < domain.length - 1;
 }
@@ -31,27 +33,31 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid field types." }, { status: 400 });
     }
 
-    if (name.trim().length === 0 || name.length > MAX_NAME) {
+    // Trim inputs early so all subsequent checks operate on the final stored value
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    const trimmedMessage = message.trim();
+    const trimmedSubject = typeof subject === "string" ? subject.trim() : null;
+
+    if (trimmedName.length === 0 || trimmedName.length > MAX_NAME) {
       return NextResponse.json(
         { error: `Name must be between 1 and ${MAX_NAME} characters.` },
         { status: 400 }
       );
     }
 
-    if (email.length > MAX_EMAIL || !isValidEmail(email.trim())) {
+    if (trimmedEmail.length > MAX_EMAIL || !isValidEmail(trimmedEmail)) {
       return NextResponse.json({ error: "Invalid email address." }, { status: 400 });
     }
 
-    if (subject !== undefined && subject !== null) {
-      if (typeof subject !== "string" || subject.length > MAX_SUBJECT) {
-        return NextResponse.json(
-          { error: `Subject must be at most ${MAX_SUBJECT} characters.` },
-          { status: 400 }
-        );
-      }
+    if (trimmedSubject !== null && trimmedSubject.length > MAX_SUBJECT) {
+      return NextResponse.json(
+        { error: `Subject must be at most ${MAX_SUBJECT} characters.` },
+        { status: 400 }
+      );
     }
 
-    if (message.trim().length === 0 || message.length > MAX_MESSAGE) {
+    if (trimmedMessage.length === 0 || trimmedMessage.length > MAX_MESSAGE) {
       return NextResponse.json(
         { error: `Message must be between 1 and ${MAX_MESSAGE} characters.` },
         { status: 400 }
@@ -61,10 +67,10 @@ export async function POST(request: Request) {
     const supabase = await createClient();
 
     const { error } = await supabase.from("contact_submissions").insert({
-      name: name.trim(),
-      email: email.trim(),
-      subject: subject ? subject.trim() || null : null,
-      message: message.trim(),
+      name: trimmedName,
+      email: trimmedEmail,
+      subject: trimmedSubject || null,
+      message: trimmedMessage,
     });
 
     if (error) {
