@@ -276,7 +276,6 @@ function SectionCard({
 
 function PageGroup({
   page,
-  sections,
   data,
   onFieldChange,
   onSaveSection,
@@ -284,7 +283,6 @@ function PageGroup({
   savedState,
 }: {
   page: string;
-  sections: SectionMap;
   data: SectionMap;
   onFieldChange: (section: string, key: string, val: unknown) => void;
   onSaveSection: (section: string) => void;
@@ -445,7 +443,6 @@ export default function CMSEditor({ pages }: Props) {
         <PageGroup
           key={page}
           page={page}
-          sections={data[page]}
           data={data[page]}
           onFieldChange={(section, key, val) =>
             handleFieldChange(page, section, key, val)
