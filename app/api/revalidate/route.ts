@@ -1,16 +1,26 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
 
 const ALLOWED_PATHS = ["/", "/about", "/products", "/contact"];
 
 /**
  * POST /api/revalidate
  * Revalidates pages after admin edits. Expects { paths: string[] } body.
- * Protected by checking the Supabase auth cookie via middleware.
+ * Protected by verifying an active Supabase session.
  * Only paths in the allow-list are revalidated to prevent path injection.
  */
 export async function POST(request: Request) {
   try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+
     const body = await request.json();
     const requestedPaths: unknown[] = Array.isArray(body.paths)
       ? body.paths

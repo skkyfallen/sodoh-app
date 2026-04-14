@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const securityHeaders = [
+  // Enable DNS prefetching for improved performance
+  { key: "X-DNS-Prefetch-Control", value: "on" },
   // Prevent the site from being embedded in an iframe (clickjacking protection)
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
   // Prevent MIME-type sniffing
@@ -12,10 +14,10 @@ const securityHeaders = [
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
   },
-  // Force HTTPS for 1 year (only applied in production)
+  // Force HTTPS for 2 years (only applied in production)
   {
     key: "Strict-Transport-Security",
-    value: "max-age=31536000; includeSubDomains",
+    value: "max-age=63072000; includeSubDomains; preload",
   },
   // Basic Content-Security-Policy
   {
@@ -28,7 +30,7 @@ const securityHeaders = [
       "img-src 'self' data: blob: https:",
       // Allow connections to Supabase
       "connect-src 'self' https://*.supabase.co https://*.supabase.io wss://*.supabase.co",
-      "font-src 'self'",
+      "font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com",
       "frame-src 'none'",
       "object-src 'none'",
       "base-uri 'self'",

@@ -1,6 +1,16 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+const MAX_NAME = 100;
+const MAX_EMAIL = 254;
+const MAX_MESSAGE = 5000;
+
+const ALLOWED_SUBJECTS = [
+  "General Inquiry",
+  "Partnership Proposal",
+  "Technical Support",
+  "Press & Media",
+];
 
 /**
  * Basic email sanity check using a split-based approach rather than a
@@ -13,17 +23,12 @@ import { createClient } from "@/lib/supabase/server";
 function isValidEmail(email: string): boolean {
   const atIdx = email.indexOf("@");
   if (atIdx <= 0 || atIdx !== email.lastIndexOf("@")) return false;
+  const local = email.slice(0, atIdx);
   const domain = email.slice(atIdx + 1);
+  if (local.length === 0 || domain.length === 0) return false;
   const dotIdx = domain.lastIndexOf(".");
   return dotIdx > 0 && dotIdx < domain.length - 1;
 }
-
-const ALLOWED_SUBJECTS = [
-  "General Inquiry",
-  "Partnership Proposal",
-  "Technical Support",
-  "Press & Media",
-];
 
 export async function POST(request: Request) {
   try {
@@ -37,38 +42,46 @@ export async function POST(request: Request) {
       );
     }
 
-    // Length limits to prevent abuse
-    if (
-      typeof name !== "string" ||
-      typeof email !== "string" ||
-      typeof message !== "string" ||
-      name.trim().length > 100 ||
-      email.trim().length > 254 ||
-      message.trim().length > 5000
-    ) {
-      return NextResponse.json({ error: "Invalid input." }, { status: 400 });
+    if (typeof name !== "string" || typeof email !== "string" || typeof message !== "string") {
+      return NextResponse.json({ error: "Invalid field types." }, { status: 400 });
     }
 
-    // Basic email format validation
-    if (!isValidEmail(email.trim())) {
+    // Trim inputs early so all subsequent checks operate on the final stored value
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+    const trimmedMessage = message.trim();
+    const trimmedSubject = typeof subject === "string" ? subject.trim() : null;
+
+    if (trimmedName.length === 0 || trimmedName.length > MAX_NAME) {
       return NextResponse.json(
-        { error: "Invalid email address." },
+        { error: `Name must be between 1 and ${MAX_NAME} characters.` },
         { status: 400 }
       );
     }
 
+    if (trimmedEmail.length > MAX_EMAIL || !isValidEmail(trimmedEmail)) {
+      return NextResponse.json({ error: "Invalid email address." }, { status: 400 });
+    }
+
     // Subject must be one of the allowed values (or omitted)
-    if (subject && !ALLOWED_SUBJECTS.includes(subject)) {
+    if (trimmedSubject !== null && !ALLOWED_SUBJECTS.includes(trimmedSubject)) {
       return NextResponse.json({ error: "Invalid subject." }, { status: 400 });
+    }
+
+    if (trimmedMessage.length === 0 || trimmedMessage.length > MAX_MESSAGE) {
+      return NextResponse.json(
+        { error: `Message must be between 1 and ${MAX_MESSAGE} characters.` },
+        { status: 400 }
+      );
     }
 
     const supabase = await createClient();
 
     const { error } = await supabase.from("contact_submissions").insert({
-      name: name.trim(),
-      email: email.trim(),
-      subject: subject ?? null,
-      message: message.trim(),
+      name: trimmedName,
+      email: trimmedEmail,
+      subject: trimmedSubject || null,
+      message: trimmedMessage,
     });
 
     if (error) {
