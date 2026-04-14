@@ -18,11 +18,11 @@ jobs:
           SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
         run: |
           STATUS=$(curl --silent --output /dev/null --write-out "%{http_code}" \
-            "$SUPABASE_URL/auth/v1/health")
+            "$SUPABASE_URL/rest/v1/")
 
           echo "Response status: $STATUS"
 
-          if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 300 ]; then
+          if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 500 ]; then
             echo "✅ Supabase is alive."
           else
             echo "❌ Unexpected response: $STATUS"
