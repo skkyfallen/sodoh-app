@@ -3,13 +3,26 @@ import { createClient } from "@/lib/supabase/server";
 
 const MAX_NAME = 100;
 const MAX_EMAIL = 254;
-const MAX_SUBJECT = 200;
 const MAX_MESSAGE = 5000;
 
+const ALLOWED_SUBJECTS = [
+  "General Inquiry",
+  "Partnership Proposal",
+  "Technical Support",
+  "Press & Media",
+];
+
+/**
+ * Basic email sanity check using a split-based approach rather than a
+ * backtracking-prone regex, to avoid ReDoS vulnerability.
+ * The check is intentionally permissive — it only verifies that there is
+ * exactly one "@" symbol, a non-empty local part, and a domain with at
+ * least one dot. Full RFC 5321 validation is left to the database/email
+ * provider layer to avoid false rejections of unusual but valid addresses.
+ */
 function isValidEmail(email: string): boolean {
-  // Structural check: one @, non-empty local part, non-empty domain with a dot
   const atIdx = email.indexOf("@");
-  if (atIdx < 1 || atIdx !== email.lastIndexOf("@")) return false;
+  if (atIdx <= 0 || atIdx !== email.lastIndexOf("@")) return false;
   const local = email.slice(0, atIdx);
   const domain = email.slice(atIdx + 1);
   if (local.length === 0 || domain.length === 0) return false;
@@ -50,11 +63,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid email address." }, { status: 400 });
     }
 
-    if (trimmedSubject !== null && trimmedSubject.length > MAX_SUBJECT) {
-      return NextResponse.json(
-        { error: `Subject must be at most ${MAX_SUBJECT} characters.` },
-        { status: 400 }
-      );
+    // Subject must be one of the allowed values (or omitted)
+    if (trimmedSubject !== null && !ALLOWED_SUBJECTS.includes(trimmedSubject)) {
+      return NextResponse.json({ error: "Invalid subject." }, { status: 400 });
     }
 
     if (trimmedMessage.length === 0 || trimmedMessage.length > MAX_MESSAGE) {
