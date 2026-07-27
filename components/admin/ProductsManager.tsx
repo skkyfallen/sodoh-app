@@ -77,7 +77,10 @@ function ImageUploader({ currentUrl, onUploaded }: ImageUploaderProps) {
     if (!currentUrl) return;
     // Extract the file path from the public URL
     const path = currentUrl.split(`/${BUCKET}/`)[1];
-    if (path) await supabase.storage.from(BUCKET).remove([path]);
+    if (path) {
+      if (path.includes('..')) throw new Error('Invalid path');
+      await supabase.storage.from(BUCKET).remove([path]);
+    }
     onUploaded("");
   };
 
