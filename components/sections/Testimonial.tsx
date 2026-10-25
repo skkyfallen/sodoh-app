@@ -28,7 +28,7 @@ export default function Testimonial({ testimonials }: Props) {
               />
             </div>
           ) : (
-            <div className="mt-8 hidden border-l-2 border-[#0df20d] pl-4 text-sm leading-6 text-[#59685d] lg:block">
+            <div className="mt-8 hidden border-l border-[#0df20d] pl-4 text-sm leading-6 text-[#59685d] lg:block">
               Built through lasting relationships with growers and buyers.
             </div>
           )}

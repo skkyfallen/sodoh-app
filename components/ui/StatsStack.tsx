@@ -43,7 +43,7 @@ export default function StatsStack({ stats: propStats }: Props) {
         className="relative w-full"
         style={{
           height: `${containerHeight}px`,
-          transition: "height 500ms cubic-bezier(0.4,0,0.2,1)",
+          transition: "height 500ms cubic-bezier(0.16,1,0.3,1)",
         }}
       >
         {stats.map((stat, i) => (
@@ -58,7 +58,7 @@ export default function StatsStack({ stats: propStats }: Props) {
               boxShadow: expanded
                 ? "0 4px 20px rgba(0,0,0,0.08)"
                 : "0 6px 24px rgba(0,0,0,0.10)",
-              transition: `transform 450ms cubic-bezier(0.34,1.56,0.64,1) ${
+              transition: `transform 450ms cubic-bezier(0.16,1,0.3,1) ${
                 expanded ? i * 70 : (stats.length - 1 - i) * 70
               }ms, box-shadow 300ms ease`,
             }}
@@ -75,19 +75,15 @@ export default function StatsStack({ stats: propStats }: Props) {
 
             {/* Sub-text — slides open on hover */}
             <div
-              className="px-6 text-slate-500 text-sm leading-relaxed font-medium overflow-hidden border-t border-slate-100"
+              className="grid transition-[grid-template-rows] duration-350 ease-[cubic-bezier(0.16,1,0.3,1)] border-t border-slate-100"
               style={{
-                maxHeight: expanded ? `${CARD_SUB}px` : "0px",
-                paddingTop: expanded ? "10px" : "0px",
-                paddingBottom: expanded ? "14px" : "0px",
-                transition: `max-height 350ms ease ${
-                  expanded ? i * 70 + 180 : 0
-                }ms, padding 350ms ease ${
-                  expanded ? i * 70 + 180 : 0
-                }ms`,
+                gridTemplateRows: expanded ? "1fr" : "0fr",
+                transitionDelay: `${expanded ? i * 70 + 180 : 0}ms`,
               }}
             >
-              {stat.sub}
+              <div className="overflow-hidden px-6 py-3 text-slate-500 text-sm leading-relaxed font-medium">
+                {stat.sub}
+              </div>
             </div>
           </div>
         ))}

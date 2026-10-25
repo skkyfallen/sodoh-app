@@ -98,7 +98,7 @@ export default function Hero({ hero, announcement, stats }: Props) {
             </div>
 
             <AnimateIn variant="fade" delay={120} duration={800}>
-              <figure className="relative min-h-[390px] overflow-hidden rounded-t-[11rem] rounded-b-[0.35rem] bg-[#d6ddcb] sm:min-h-[500px] lg:min-h-[660px]">
+              <figure className="relative min-h-[390px] overflow-hidden rounded-3xl bg-[#d6ddcb] sm:min-h-[500px] lg:min-h-[660px]">
                 <Image
                   src="/images/nigerian-growing-fields.jpg"
                   alt="A sunlit field of crops ready for harvest"

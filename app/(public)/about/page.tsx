@@ -241,7 +241,7 @@ export default async function AboutPage() {
             </AnimateIn>
           </div>
           <AnimateIn variant="fade" delay={100} duration={750}>
-            <figure className="relative min-h-[360px] overflow-hidden rounded-t-[10rem] rounded-b-sm bg-[#526e4d] sm:min-h-[480px] lg:min-h-[600px]">
+            <figure className="relative min-h-[360px] overflow-hidden rounded-3xl bg-[#526e4d] sm:min-h-[480px] lg:min-h-[600px]">
               <Image src="/images/farmers-harvest.jpg" alt="Fresh green vegetables and peppers gathered for market" fill priority sizes="(max-width: 1024px) 100vw, 52vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#102210]/65 via-transparent to-transparent" />
               <figcaption className="absolute bottom-0 left-0 p-6 text-sm font-medium text-white sm:p-8">Rooted here. Growing together.</figcaption>

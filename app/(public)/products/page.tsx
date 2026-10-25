@@ -59,7 +59,7 @@ export default async function ProductsPage() {
             {hero.cta_primary_text && hero.cta_primary_href && <Link href={hero.cta_primary_href} className="mt-9 inline-flex min-h-12 items-center bg-[#016936] px-6 text-sm font-bold text-white transition-colors hover:bg-[#014e29]">{hero.cta_primary_text}<span aria-hidden="true" className="ml-5 text-lg">↗</span></Link>}
           </AnimateIn>
           <AnimateIn variant="fade" delay={100} duration={700}>
-            <figure className="relative min-h-[360px] overflow-hidden rounded-bl-[8rem] rounded-tr-[8rem] bg-[#d2ddcb] sm:min-h-[490px] lg:min-h-[600px]">
+            <figure className="relative min-h-[360px] overflow-hidden rounded-3xl bg-[#d2ddcb] sm:min-h-[490px] lg:min-h-[600px]">
               <Image src="/images/produce-fields.jpg" alt="Fresh vegetables prepared for market" fill priority sizes="(max-width: 1024px) 100vw, 58vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#102210]/65 via-transparent to-transparent" />
               <figcaption className="absolute bottom-0 left-0 p-6 text-sm font-medium text-white sm:p-8">Sourced in Nigeria, prepared for your market.</figcaption>
@@ -89,7 +89,7 @@ export default async function ProductsPage() {
                       </div>
                     ) : (
                       <div className={`flex w-full items-end bg-[#e8ece4] p-5 ${i % 4 === 0 ? "aspect-[1.25/1]" : "aspect-[1.55/1]"}`}>
-                        <p className="border-l-2 border-[#016936] pl-3 text-xs font-semibold leading-5 text-[#526157]">Product photography coming soon</p>
+                        <p className="border-l border-[#016936] pl-3 text-xs font-semibold leading-5 text-[#526157]">Product photography coming soon</p>
                       </div>
                     )}
                     <div className="flex flex-col border-b border-[#d9e1da] pb-5 pt-5 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
