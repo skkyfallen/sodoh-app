@@ -24,6 +24,8 @@ export default function CrudManager({ tableName, fields, initialRows, listColumn
   const [isNew, setIsNew] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const savingRef = useRef(false);
@@ -36,6 +38,7 @@ export default function CrudManager({ tableName, fields, initialRows, listColumn
   const openNew = () => {
     previousFocusRef.current = document.activeElement as HTMLElement | null;
     setSaveError(null);
+    setActionError(null);
     const blank: Record<string, unknown> = { id: "" };
     for (const f of fields) {
       blank[f.key] = f.type === "number" ? 0 : f.type === "checkbox" ? f.key !== "public_reviewed" : "";
@@ -47,6 +50,7 @@ export default function CrudManager({ tableName, fields, initialRows, listColumn
   const openEdit = (row: Record<string, unknown>) => {
     previousFocusRef.current = document.activeElement as HTMLElement | null;
     setSaveError(null);
+    setActionError(null);
     setEditing({ ...row });
     setIsNew(false);
   };
@@ -134,9 +138,16 @@ export default function CrudManager({ tableName, fields, initialRows, listColumn
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this item?")) return;
-    const { error } = await supabase.from(tableName as never).delete().eq("id", id);
-    if (!error) {
+    setActionError(null);
+    setDeletingId(id);
+    try {
+      const { error } = await supabase.from(tableName as never).delete().eq("id", id);
+      if (error) throw error;
       setRows((prev) => prev.filter((r) => (r.id as string) !== id));
+    } catch {
+      setActionError("This item could not be deleted. Check your connection and try again.");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -149,6 +160,7 @@ export default function CrudManager({ tableName, fields, initialRows, listColumn
       >
         <span aria-hidden="true" className="text-lg leading-none">+</span> Add item
       </button>
+      {actionError && <p role="alert" className="mb-4 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{actionError}</p>}
 
       {/* Table */}
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
@@ -178,7 +190,7 @@ export default function CrudManager({ tableName, fields, initialRows, listColumn
                 <td className="px-2 py-3 text-right sm:px-4">
                   <div className="flex flex-wrap justify-end gap-1">
                     <button type="button" onClick={() => openEdit(row)} className="min-h-11 rounded-lg px-2 font-semibold text-[#016936] hover:underline">Edit</button>
-                    <button type="button" onClick={() => handleDelete(row.id as string)} className="min-h-11 rounded-lg px-2 font-semibold text-red-700 hover:underline">Delete</button>
+                    <button type="button" onClick={() => handleDelete(row.id as string)} disabled={deletingId !== null} className="min-h-11 rounded-lg px-2 font-semibold text-red-700 hover:underline disabled:cursor-wait disabled:opacity-60">{deletingId === row.id ? "Deleting…" : "Delete"}</button>
                   </div>
                 </td>
               </tr>

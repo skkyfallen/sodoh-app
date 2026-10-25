@@ -19,11 +19,22 @@ export default function ContentEditor({ pages }: Props) {
   const [activeTab, setActiveTab] = useState("home");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [data, setData] = useState(pages);
+  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState(() =>
+    Object.fromEntries(
+      Object.entries(pages).map(([page, sections]) => [
+        page,
+        Object.fromEntries(Object.entries(sections).map(([section, fields]) => [
+          section,
+          { ...fields, public_reviewed: fields.public_reviewed === true },
+        ])),
+      ])
+    )
+  );
 
   const sections = Object.entries(data[activeTab] ?? {});
 
-  const updateField = (section: string, key: string, value: string) => {
+  const updateField = (section: string, key: string, value: unknown) => {
     setData((prev) => ({
       ...prev,
       [activeTab]: {
@@ -35,18 +46,25 @@ export default function ContentEditor({ pages }: Props) {
       },
     }));
     setSaved(false);
+    setError(null);
   };
 
   const handleSave = async () => {
     setSaving(true);
+    setError(null);
     const supabase = createClient();
 
     for (const [section, content] of Object.entries(data[activeTab])) {
-      await supabase
+      const { error: saveError } = await supabase
         .from("site_content")
         .update({ content: content as unknown as import("@/types/database").Json })
         .eq("page", activeTab)
         .eq("section", section);
+      if (saveError) {
+        setError(`Could not save ${section.replace(/_/g, " ")}. Check your connection and try again.`);
+        setSaving(false);
+        return;
+      }
     }
 
     setSaving(false);
@@ -61,6 +79,7 @@ export default function ContentEditor({ pages }: Props) {
         {Object.keys(pages).map((page) => (
           <button
             key={page}
+            type="button"
             onClick={() => setActiveTab(page)}
             aria-pressed={activeTab === page}
             className={`inline-flex min-h-11 items-center rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
@@ -83,6 +102,7 @@ export default function ContentEditor({ pages }: Props) {
             </h3>
             <div className="flex flex-col gap-4">
               {Object.entries(fields as Record<string, unknown>).map(([key, val]) => {
+                const inputId = `content-${activeTab}-${section}-${key}`.replace(/[^a-z0-9-]/gi, "-");
                 // Skip complex nested arrays (like contact details); render them as JSON
                 const isComplex = typeof val === "object" && val !== null;
                 const strVal = isComplex ? JSON.stringify(val, null, 2) : String(val ?? "");
@@ -90,11 +110,20 @@ export default function ContentEditor({ pages }: Props) {
 
                 return (
                   <div key={key}>
-                    <label className="block text-sm font-semibold text-slate-600 mb-1 capitalize">
+                    <label htmlFor={inputId} className="mb-1 block text-sm font-semibold text-slate-700 capitalize">
                       {key.replace(/_/g, " ")}
                     </label>
-                    {isLong ? (
+                    {typeof val === "boolean" ? (
+                      <input
+                        id={inputId}
+                        type="checkbox"
+                        checked={val}
+                        onChange={(event) => updateField(section, key, event.target.checked)}
+                        className="size-5 accent-[#016936]"
+                      />
+                    ) : isLong ? (
                       <textarea
+                        id={inputId}
                         rows={Math.min(10, strVal.split("\n").length + 1)}
                         value={strVal}
                         onChange={(e) => {
@@ -102,16 +131,17 @@ export default function ContentEditor({ pages }: Props) {
                           if (isComplex) {
                             try { parsed = JSON.parse(e.target.value); } catch { /* keep as string */ }
                           }
-                          updateField(section, key, parsed as string);
+                          updateField(section, key, parsed);
                         }}
-                        className="w-full rounded-sm border border-slate-200 bg-[#f7f8f4] px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#016936]/15 resize-y"
+                        className="w-full resize-y rounded-xl border border-slate-200 bg-[#f7f8f4] px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#016936]/15"
                       />
                     ) : (
                       <input
+                        id={inputId}
                         type="text"
                         value={strVal}
                         onChange={(e) => updateField(section, key, e.target.value)}
-                        className="h-11 w-full rounded-sm border border-slate-200 bg-[#f7f8f4] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#016936]/15"
+                        className="min-h-11 w-full rounded-xl border border-slate-200 bg-[#f7f8f4] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#016936]/15"
                       />
                     )}
                   </div>
@@ -125,15 +155,18 @@ export default function ContentEditor({ pages }: Props) {
       {/* Save */}
       <div className="mt-6 flex items-center gap-3">
         <button
+          type="button"
           onClick={handleSave}
           disabled={saving}
-          className="min-h-11 bg-[#016936] px-6 text-sm font-bold text-white transition-colors hover:bg-[#014e29] disabled:opacity-60"
+          aria-busy={saving}
+          className="min-h-11 rounded-lg bg-[#016936] px-6 text-sm font-semibold text-white transition-colors hover:bg-[#014e29] disabled:cursor-wait disabled:opacity-60"
         >
           {saving ? "Saving…" : "Save Changes"}
         </button>
         {saved && (
-          <span className="text-sm font-semibold text-green-600">✓ Saved successfully</span>
+          <span role="status" className="text-sm font-semibold text-green-700">Saved successfully.</span>
         )}
+        {error && <span role="alert" className="text-sm font-semibold text-red-700">{error}</span>}
       </div>
     </div>
   );

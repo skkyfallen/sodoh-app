@@ -97,16 +97,18 @@ function ImageUploader({ currentUrl, onUploaded }: ImageUploaderProps) {
             <button
               type="button"
               onClick={handleRemove}
-              className="min-h-11 rounded-full border border-red-200 bg-white/95 px-4 text-sm font-semibold text-red-700 shadow-sm transition-colors hover:bg-red-50"
+              disabled={uploading}
+              className="min-h-11 rounded-full border border-red-200 bg-white/95 px-4 text-sm font-semibold text-red-700 shadow-sm transition-colors hover:bg-red-50 disabled:cursor-wait disabled:opacity-60"
             >
               Remove
             </button>
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className="ml-2 min-h-11 rounded-full border border-slate-200 bg-white/95 px-4 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-100"
+              disabled={uploading}
+              className="ml-2 min-h-11 rounded-full border border-slate-200 bg-white/95 px-4 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-100 disabled:cursor-wait disabled:opacity-60"
             >
-              Replace
+              {uploading ? "Uploading…" : "Replace"}
             </button>
           </div>
         </div>
@@ -129,7 +131,8 @@ function ImageUploader({ currentUrl, onUploaded }: ImageUploaderProps) {
         </button>
       )}
 
-      {error && <p className="text-xs text-red-500 font-medium">{error}</p>}
+      {uploading && currentUrl && <p role="status" className="text-sm text-slate-600">Uploading replacement image…</p>}
+      {error && <p role="alert" className="text-sm font-medium text-red-700">{error} You can choose another image and try again.</p>}
 
       <input
         ref={inputRef}
@@ -154,6 +157,8 @@ export default function ProductsManager({ initialProducts }: Props) {
   const [isNew, setIsNew] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [pendingId, setPendingId] = useState<string | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const savingRef = useRef(false);
@@ -165,6 +170,7 @@ export default function ProductsManager({ initialProducts }: Props) {
   const openNew = () => {
     previousFocusRef.current = document.activeElement as HTMLElement | null;
     setSaveError(null);
+    setActionError(null);
     setEditing({
       ...emptyProduct,
       id: "",
@@ -178,6 +184,7 @@ export default function ProductsManager({ initialProducts }: Props) {
   const openEdit = (p: Product) => {
     previousFocusRef.current = document.activeElement as HTMLElement | null;
     setSaveError(null);
+    setActionError(null);
     setEditing({ ...p });
     setIsNew(false);
   };
@@ -268,19 +275,36 @@ export default function ProductsManager({ initialProducts }: Props) {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this product?")) return;
-    const { error } = await supabase.from("products").delete().eq("id", id);
-    if (!error) setProducts((prev) => prev.filter((p) => p.id !== id));
+    setActionError(null);
+    setPendingId(id);
+    try {
+      const { error } = await supabase.from("products").delete().eq("id", id);
+      if (error) throw error;
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+    } catch {
+      setActionError("This product could not be deleted. Check your connection and try again.");
+    } finally {
+      setPendingId(null);
+    }
   };
 
   const handleToggle = async (id: string, current: boolean) => {
-    const { error } = await supabase
-      .from("products")
-      .update({ is_active: !current })
-      .eq("id", id);
-    if (!error)
+    setActionError(null);
+    setPendingId(id);
+    try {
+      const { error } = await supabase
+        .from("products")
+        .update({ is_active: !current })
+        .eq("id", id);
+      if (error) throw error;
       setProducts((prev) =>
         prev.map((p) => (p.id === id ? { ...p, is_active: !current } : p))
       );
+    } catch {
+      setActionError("This product could not be updated. Check your connection and try again.");
+    } finally {
+      setPendingId(null);
+    }
   };
 
   const field = (key: keyof Product, label: string, type: "text" | "number" = "text") => (
@@ -310,6 +334,7 @@ export default function ProductsManager({ initialProducts }: Props) {
       >
         <span aria-hidden="true" className="text-lg leading-none">+</span> Add product
       </button>
+      {actionError && <p role="alert" className="mb-4 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{actionError}</p>}
 
       {/* Table */}
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
@@ -334,20 +359,21 @@ export default function ProductsManager({ initialProducts }: Props) {
                   <button
                     type="button"
                     onClick={() => handleToggle(p.id, p.is_active)}
+                    disabled={pendingId !== null}
                     aria-pressed={p.is_active}
                     aria-label={`${p.is_active ? "Hide" : "Show"} ${p.title}`}
                     className={`min-h-11 rounded-full px-3 text-xs font-semibold ${
                     p.is_active ? "bg-[#e4f0da] text-[#145c34]" : "bg-slate-100 text-slate-700"
                     }`}
                   >
-                    {p.is_active ? "Active" : "Hidden"}
+                    {pendingId === p.id ? "Updating…" : p.is_active ? "Active" : "Hidden"}
                   </button>
                 </td>
                 <td className="break-words px-2 py-3 text-xs font-semibold text-slate-700 sm:px-4">{p.public_reviewed ? "Approved" : "Needs review"}</td>
                 <td className="px-1 py-3 text-right sm:px-3">
                   <div className="flex flex-wrap justify-end gap-0.5">
-                    <button type="button" onClick={() => openEdit(p)} className="min-h-11 rounded-lg px-1.5 font-semibold text-[#016936] hover:underline">Edit</button>
-                    <button type="button" onClick={() => handleDelete(p.id)} className="min-h-11 rounded-lg px-1.5 font-semibold text-red-700 hover:underline">Delete</button>
+                    <button type="button" onClick={() => openEdit(p)} disabled={pendingId !== null} className="min-h-11 rounded-lg px-1.5 font-semibold text-[#016936] hover:underline disabled:opacity-60">Edit</button>
+                    <button type="button" onClick={() => handleDelete(p.id)} disabled={pendingId !== null} className="min-h-11 rounded-lg px-1.5 font-semibold text-red-700 hover:underline disabled:opacity-60">{pendingId === p.id ? "Deleting…" : "Delete"}</button>
                   </div>
                 </td>
               </tr>

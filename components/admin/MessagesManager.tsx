@@ -18,14 +18,18 @@ export default function MessagesManager({ initialMessages }: Props) {
   const [messages, setMessages] = useState(initialMessages);
   const [selected, setSelected] = useState<ContactSubmission | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [pendingId, setPendingId] = useState<string | null>(null);
   const supabase = createClient();
 
   const updateStatus = async (id: string, status: "new" | "read" | "archived") => {
-    const { error } = await supabase
-      .from("contact_submissions")
-      .update({ status })
-      .eq("id", id);
-    if (!error) {
+    setActionError(null);
+    setPendingId(id);
+    try {
+      const { error } = await supabase
+        .from("contact_submissions")
+        .update({ status })
+        .eq("id", id);
+      if (error) throw error;
       setActionError(null);
       setMessages((prev) =>
         prev.map((m) => (m.id === id ? { ...m, status } : m))
@@ -33,17 +37,28 @@ export default function MessagesManager({ initialMessages }: Props) {
       if (selected?.id === id) {
         setSelected((prev) => (prev ? { ...prev, status } : prev));
       }
-    } else setActionError(`Could not update this message. ${error.message}`);
+    } catch {
+      setActionError("This message could not be updated. Check your connection and try again.");
+    } finally {
+      setPendingId(null);
+    }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this message?")) return;
-    const { error } = await supabase.from("contact_submissions").delete().eq("id", id);
-    if (!error) {
+    setActionError(null);
+    setPendingId(id);
+    try {
+      const { error } = await supabase.from("contact_submissions").delete().eq("id", id);
+      if (error) throw error;
       setActionError(null);
       setMessages((prev) => prev.filter((m) => m.id !== id));
       if (selected?.id === id) setSelected(null);
-    } else setActionError(`Could not delete this message. ${error.message}`);
+    } catch {
+      setActionError("This message could not be deleted. Check your connection and try again.");
+    } finally {
+      setPendingId(null);
+    }
   };
 
   return (
@@ -56,8 +71,10 @@ export default function MessagesManager({ initialMessages }: Props) {
               key={m.id}
               type="button"
               aria-pressed={selected?.id === m.id}
+              disabled={pendingId !== null}
               onClick={() => {
                 setSelected(m);
+                setActionError(null);
                 if (m.status === "new") updateStatus(m.id, "read");
               }}
           className={`w-full text-left px-5 py-4 transition-colors hover:bg-slate-50 ${
@@ -81,8 +98,8 @@ export default function MessagesManager({ initialMessages }: Props) {
             </button>
           ))}
           {messages.length === 0 && (
-            <div className="px-5 py-12 text-center text-slate-400 text-sm">
-              No messages yet.
+            <div className="px-5 py-12 text-center text-sm leading-6 text-slate-600">
+              No messages yet. New contact form messages will appear here.
             </div>
           )}
         </div>
@@ -121,6 +138,7 @@ export default function MessagesManager({ initialMessages }: Props) {
                 <button
                   type="button"
                   onClick={() => updateStatus(selected.id, "new")}
+                  disabled={pendingId !== null}
                   className="min-h-11 rounded-lg bg-green-50 px-4 text-sm font-semibold text-green-800 transition-colors hover:bg-green-100"
                 >
                   Mark New
@@ -130,6 +148,7 @@ export default function MessagesManager({ initialMessages }: Props) {
                 <button
                   type="button"
                   onClick={() => updateStatus(selected.id, "read")}
+                  disabled={pendingId !== null}
                   className="min-h-11 rounded-lg bg-blue-50 px-4 text-sm font-semibold text-blue-800 transition-colors hover:bg-blue-100"
                 >
                   Mark Read
@@ -139,6 +158,7 @@ export default function MessagesManager({ initialMessages }: Props) {
                 <button
                   type="button"
                   onClick={() => updateStatus(selected.id, "archived")}
+                  disabled={pendingId !== null}
                   className="min-h-11 rounded-lg bg-slate-100 px-4 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-200"
                 >
                   Archive
@@ -147,11 +167,13 @@ export default function MessagesManager({ initialMessages }: Props) {
               <button
                 type="button"
                 onClick={() => handleDelete(selected.id)}
+                disabled={pendingId !== null}
                 className="min-h-11 rounded-lg bg-red-50 px-4 text-sm font-semibold text-red-800 transition-colors hover:bg-red-100"
               >
-                Delete
+                {pendingId === selected.id ? "Updating…" : "Delete"}
               </button>
             </div>
+            {pendingId === selected.id && <p role="status" className="mt-3 text-sm text-slate-600">Updating message…</p>}
             {actionError && <p role="alert" className="mt-4 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{actionError}</p>}
           </div>
         ) : (
