@@ -63,7 +63,7 @@ export default function ContentEditor({ pages }: Props) {
             key={page}
             onClick={() => setActiveTab(page)}
             aria-pressed={activeTab === page}
-            className={`px-4 py-2 text-sm font-bold transition-colors ${
+            className={`inline-flex min-h-11 items-center rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
               activeTab === page
                 ? "bg-[#016936] text-white"
                 : "bg-white text-slate-600 hover:bg-[#eaf0e8]"

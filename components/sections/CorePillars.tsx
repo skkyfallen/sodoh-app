@@ -1,49 +1,41 @@
 import AnimateIn from "@/components/ui/AnimateIn";
-import { MdSpa, MdVerified, MdHandshake } from "react-icons/md";
 import type { Pillar } from "@/types/content";
-import type { IconType } from "react-icons";
-
-const iconMap: Record<string, IconType> = { MdSpa, MdVerified, MdHandshake };
 
 type Props = { pillars: Pillar[] };
 
 export default function CorePillars({ pillars }: Props) {
+  const reviewedPillars = pillars.filter((pillar) => pillar.public_reviewed);
+  const content = reviewedPillars.length ? reviewedPillars : [
+    { id: "browse", title: "Browse products", description: "See the agricultural products currently listed in the catalogue." },
+    { id: "enquire", title: "Send an enquiry", description: "Use a product request or contact form to share what you need." },
+    { id: "discuss", title: "Discuss the details", description: "Talk with our team about your requirements and the next step." },
+  ];
+
   return (
-    <section id="products" className="bg-white px-5 py-20 sm:px-8 md:px-12 md:py-28 lg:px-16">
-      <div className="mx-auto grid max-w-[1320px] gap-14 lg:grid-cols-[0.75fr_1.25fr] lg:gap-24">
-        <AnimateIn variant="fade-up" className="max-w-md">
-          <p className="mb-6 text-xs font-bold uppercase tracking-[0.2em] text-[#016936]">Our promise</p>
-          <h2 className="max-w-[10ch] font-semibold text-[clamp(2.5rem,4.5vw,4.5rem)] leading-[1.02] tracking-[-0.05em] text-[#17241d]">
-            Quality, at every step.
+    <section id="how-we-work" className="bg-[var(--surface)] px-5 py-16 sm:px-8 md:px-12 md:py-24 lg:px-16">
+      <div className="mx-auto grid max-w-[1320px] gap-10 lg:grid-cols-[0.75fr_1.25fr] lg:gap-20">
+        <AnimateIn className="max-w-md">
+          <h2 className="display-font max-w-[12ch] text-[clamp(2.4rem,4.2vw,4rem)] font-semibold leading-[1.04] tracking-[-0.045em] text-[var(--ink)] [text-wrap:balance]">
+            Sourcing starts with a clear conversation.
           </h2>
-          <p className="mt-6 max-w-sm text-base leading-7 text-[#59685d]">
-            Trust is built long before a shipment leaves the farm. We keep the same standards from the first seed to the final delivery.
+          <p className="mt-5 max-w-[40ch] text-base leading-7 text-[var(--body)]">
+            Explore the catalogue, then tell our team what you need. Product and supply details can be discussed before you place an order.
           </p>
-          <div className="mt-9 h-px w-20 bg-[#0df20d]" />
         </AnimateIn>
 
-        <div className="border-t border-[#d9e1da]">
-          {pillars.map((pillar, i) => {
-            const Icon = iconMap[pillar.icon ?? ""] ?? MdSpa;
-            return (
-              <AnimateIn key={pillar.step} variant="fade-up" delay={i * 70} duration={550}>
-                <article className="group grid grid-cols-[3.5rem_1fr] gap-4 border-b border-[#d9e1da] py-7 sm:grid-cols-[4rem_1fr_auto] sm:items-start sm:gap-6 sm:py-8">
-                  <span className="pt-1 font-mono text-xs font-semibold tracking-wider text-[#688171]">{pillar.step}</span>
-                  <div>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                      <h3 className="display-font text-xl font-semibold tracking-tight text-[#17241d] sm:text-2xl">{pillar.title}</h3>
-                      {pillar.tag && <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#016936]">{pillar.tag}</span>}
-                    </div>
-                    <p className="mt-2 max-w-xl text-sm leading-6 text-[#59685d] sm:text-base sm:leading-7">{pillar.description}</p>
-                  </div>
-                  <span className="hidden size-11 items-center justify-center rounded-full border border-[#d9e1da] text-[#016936] transition-colors group-hover:border-[#016936] group-hover:bg-[#016936] group-hover:text-white sm:flex" aria-hidden="true">
-                    <Icon className="text-xl" />
-                  </span>
-                </article>
-              </AnimateIn>
-            );
-          })}
-          {pillars.length === 0 && <p className="py-8 text-sm text-[#59685d]">Our quality standards are being updated. Please check back soon.</p>}
+        <div className="border-t border-[var(--border)]">
+          {content.map((pillar) => (
+            <AnimateIn key={pillar.id}>
+              <article className="grid gap-2 border-b border-[var(--border)] py-6 sm:grid-cols-[minmax(10rem,0.65fr)_1fr] sm:gap-8 sm:py-7">
+                <h3 className="display-font text-xl font-semibold tracking-[-0.025em] text-[var(--ink)] sm:text-2xl">
+                  {pillar.title}
+                </h3>
+                <p className="max-w-[62ch] text-sm leading-6 text-[var(--body)] sm:text-base sm:leading-7">
+                  {pillar.description}
+                </p>
+              </article>
+            </AnimateIn>
+          ))}
         </div>
       </div>
     </section>

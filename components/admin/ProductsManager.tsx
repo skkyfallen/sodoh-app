@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import type { Tables } from "@/types/database";
+import { MdCloudUpload, MdClose } from "react-icons/md";
 
 type Product = Tables<"products">;
 
@@ -23,6 +24,7 @@ const emptyProduct: Omit<Product, "id" | "created_at" | "updated_at"> = {
   icon: "MdEco",
   display_order: 0,
   is_active: true,
+  public_reviewed: false,
 };
 
 // ─── Image uploader ──────────────────────────────────────────────────────────
@@ -89,20 +91,20 @@ function ImageUploader({ currentUrl, onUploaded }: ImageUploaderProps) {
       <label className="block text-sm font-semibold text-slate-700">Product image</label>
 
       {currentUrl ? (
-        <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
+        <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
           <Image src={currentUrl} alt="Product preview" fill className="object-cover" sizes="(max-width: 768px) 100vw, 500px" />
           <div className="absolute inset-0 flex items-end justify-end p-2">
             <button
               type="button"
               onClick={handleRemove}
-              className="bg-white/90 hover:bg-red-50 text-red-600 border border-red-200 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors shadow-sm"
+              className="min-h-11 rounded-full border border-red-200 bg-white/95 px-4 text-sm font-semibold text-red-700 shadow-sm transition-colors hover:bg-red-50"
             >
               Remove
             </button>
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className="ml-2 bg-white/90 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors shadow-sm"
+              className="ml-2 min-h-11 rounded-full border border-slate-200 bg-white/95 px-4 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-100"
             >
               Replace
             </button>
@@ -113,15 +115,13 @@ function ImageUploader({ currentUrl, onUploaded }: ImageUploaderProps) {
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="flex flex-col items-center justify-center w-full aspect-video rounded-xl border-2 border-dashed border-slate-300 hover:border-[#016936] hover:bg-[#016936]/5 transition-colors text-slate-500 hover:text-[#016936] disabled:opacity-60"
+          className="flex w-full aspect-video flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 text-slate-600 transition-colors hover:border-[#016936] hover:bg-[#016936]/5 hover:text-[#016936] disabled:opacity-60"
         >
           {uploading ? (
             <span className="text-sm font-semibold">Uploading…</span>
           ) : (
             <>
-              <svg className="w-8 h-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-              </svg>
+              <MdCloudUpload aria-hidden="true" className="mb-2 text-3xl" />
               <span className="text-sm font-semibold">Click to upload image</span>
               <span className="text-xs mt-1">PNG, JPG, WEBP — max 50 MB</span>
             </>
@@ -153,10 +153,18 @@ export default function ProductsManager({ initialProducts }: Props) {
   const [editing, setEditing] = useState<Product | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+  const savingRef = useRef(false);
+  const dialogOpen = editing !== null;
+  savingRef.current = saving;
 
   const supabase = createClient();
 
   const openNew = () => {
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
+    setSaveError(null);
     setEditing({
       ...emptyProduct,
       id: "",
@@ -168,18 +176,62 @@ export default function ProductsManager({ initialProducts }: Props) {
   };
 
   const openEdit = (p: Product) => {
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
+    setSaveError(null);
     setEditing({ ...p });
     setIsNew(false);
   };
 
   const close = () => {
+    if (savingRef.current) return;
     setEditing(null);
     setIsNew(false);
   };
 
+  useEffect(() => {
+    if (!dialogOpen) {
+      previousFocusRef.current?.focus();
+      return;
+    }
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    dialogRef.current?.querySelector<HTMLElement>("input:not([type=checkbox]), textarea, button")?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        close();
+      }
+      if (event.key !== "Tab" || !dialogRef.current) return;
+      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      ));
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+    };
+    // The dialog lifecycle is intentionally tied to its open/closed state.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dialogOpen]);
+
   const handleSave = async () => {
     if (!editing) return;
+    if (!editing.title.trim() || !editing.slug.trim()) {
+      setSaveError("Add a product name and slug before saving.");
+      return;
+    }
     setSaving(true);
+    setSaveError(null);
 
     if (isNew) {
       const { id: _id, created_at: _c, updated_at: _u, ...rest } = editing;
@@ -189,7 +241,12 @@ export default function ProductsManager({ initialProducts }: Props) {
         .insert(rest as never)
         .select()
         .single();
-      if (!error && data) setProducts((prev) => [...prev, data as Product]);
+      if (error || !data) {
+        setSaveError(error?.message ?? "The product could not be saved. Please try again.");
+        setSaving(false);
+        return;
+      }
+      setProducts((prev) => [...prev, data as Product]);
     } else {
       const { created_at: _c, updated_at: _u, ...rest } = editing;
       void _c; void _u;
@@ -197,10 +254,12 @@ export default function ProductsManager({ initialProducts }: Props) {
         .from("products")
         .update(rest)
         .eq("id", editing.id);
-      if (!error)
-        setProducts((prev) =>
-          prev.map((p) => (p.id === editing.id ? { ...p, ...rest } : p))
-        );
+      if (error) {
+        setSaveError(`Could not update this product. ${error.message} Please try again.`);
+        setSaving(false);
+        return;
+      }
+      setProducts((prev) => prev.map((p) => (p.id === editing.id ? { ...p, ...rest } : p)));
     }
 
     setSaving(false);
@@ -226,16 +285,18 @@ export default function ProductsManager({ initialProducts }: Props) {
 
   const field = (key: keyof Product, label: string, type: "text" | "number" = "text") => (
     <div key={key}>
-      <label className="block text-sm font-semibold text-slate-600 mb-1">{label}</label>
+      <label htmlFor={`product-field-${key}`} className="mb-1 block text-sm font-semibold text-slate-700">{label}</label>
       <input
+        id={`product-field-${key}`}
         type={type}
         value={String(editing?.[key] ?? "")}
+        required={key === "title" || key === "slug"}
         onChange={(e) =>
           setEditing((prev) =>
             prev ? { ...prev, [key]: type === "number" ? Number(e.target.value) : e.target.value } : prev
           )
         }
-        className="w-full h-10 rounded-lg border border-slate-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#016936]"
+        className="min-h-11 w-full rounded-xl border border-slate-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#016936]"
       />
     </div>
   );
@@ -243,53 +304,57 @@ export default function ProductsManager({ initialProducts }: Props) {
   return (
     <div>
       <button
+        type="button"
         onClick={openNew}
-        className="mb-6 inline-flex min-h-11 items-center gap-3 bg-[#016936] px-5 text-sm font-bold text-white transition-colors hover:bg-[#014e29]"
+        className="mb-6 inline-flex min-h-11 items-center gap-3 rounded-lg bg-[#016936] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#014e29]"
       >
         <span aria-hidden="true" className="text-lg leading-none">+</span> Add product
       </button>
 
       {/* Table */}
-      <div className="overflow-x-auto border border-slate-200 bg-white">
-        <table className="w-full text-sm">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+        <table className="w-full table-fixed text-sm">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50">
-              <th className="text-left px-4 py-3 font-bold text-slate-600">Order</th>
-              <th className="text-left px-4 py-3 font-bold text-slate-600">Title</th>
-              <th className="text-left px-4 py-3 font-bold text-slate-600">Region</th>
-              <th className="text-left px-4 py-3 font-bold text-slate-600">Active</th>
-              <th className="text-right px-4 py-3 font-bold text-slate-600">Actions</th>
+              <th className="px-2 py-3 text-left text-xs font-semibold text-slate-700 sm:px-4 sm:text-sm">Order</th>
+              <th className="px-2 py-3 text-left text-xs font-semibold text-slate-700 sm:px-4 sm:text-sm">Product</th>
+              <th className="px-2 py-3 text-left text-xs font-semibold text-slate-700 sm:px-4 sm:text-sm">Region</th>
+              <th className="px-2 py-3 text-left text-xs font-semibold text-slate-700 sm:px-4 sm:text-sm">Active</th>
+              <th className="px-2 py-3 text-left text-xs font-semibold text-slate-700 sm:px-4 sm:text-sm">Review</th>
+              <th className="px-2 py-3 text-right text-xs font-semibold text-slate-700 sm:px-4 sm:text-sm">Actions</th>
             </tr>
           </thead>
           <tbody>
             {products.map((p) => (
               <tr key={p.id} className="border-b border-slate-100 transition-colors hover:bg-slate-50">
-                <td className="px-4 py-3 font-mono text-slate-500">{p.display_order}</td>
-                <td className="px-4 py-3 font-semibold text-slate-900">{p.title}</td>
-                <td className="px-4 py-3 text-slate-600">{p.region}</td>
-                <td className="px-4 py-3">
+                <td className="px-2 py-3 tabular-nums text-slate-500 sm:px-4">{p.display_order}</td>
+                <td className="break-words px-2 py-3 font-semibold text-slate-900 sm:px-4">{p.title}</td>
+                <td className="break-words px-2 py-3 text-slate-600 sm:px-4">{p.region}</td>
+                <td className="px-2 py-3 sm:px-4">
                   <button
+                    type="button"
                     onClick={() => handleToggle(p.id, p.is_active)}
-                    className={`text-xs font-bold px-2 py-1 rounded-full ${
+                    aria-pressed={p.is_active}
+                    aria-label={`${p.is_active ? "Hide" : "Show"} ${p.title}`}
+                    className={`min-h-11 rounded-full px-3 text-xs font-semibold ${
                     p.is_active ? "bg-[#e4f0da] text-[#145c34]" : "bg-slate-100 text-slate-700"
                     }`}
                   >
                     {p.is_active ? "Active" : "Hidden"}
                   </button>
                 </td>
-                <td className="px-4 py-3 text-right">
-                  <button onClick={() => openEdit(p)} className="mr-3 font-semibold text-[#016936] hover:underline">
-                    Edit
-                  </button>
-                  <button onClick={() => handleDelete(p.id)} className="font-semibold text-red-700 hover:underline">
-                    Delete
-                  </button>
+                <td className="break-words px-2 py-3 text-xs font-semibold text-slate-700 sm:px-4">{p.public_reviewed ? "Approved" : "Needs review"}</td>
+                <td className="px-1 py-3 text-right sm:px-3">
+                  <div className="flex flex-wrap justify-end gap-0.5">
+                    <button type="button" onClick={() => openEdit(p)} className="min-h-11 rounded-lg px-1.5 font-semibold text-[#016936] hover:underline">Edit</button>
+                    <button type="button" onClick={() => handleDelete(p.id)} className="min-h-11 rounded-lg px-1.5 font-semibold text-red-700 hover:underline">Delete</button>
+                  </div>
                 </td>
               </tr>
             ))}
             {products.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-slate-400">No products yet.</td>
+                <td colSpan={6} className="px-4 py-8 text-center text-slate-500">No products yet. Add a product to start building the catalogue.</td>
               </tr>
             )}
           </tbody>
@@ -298,13 +363,18 @@ export default function ProductsManager({ initialProducts }: Props) {
 
       {/* Modal */}
       {editing && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto border border-[#dce4dc] bg-[#f8f8f2] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.22)]">
-            <h2 className="display-font mb-6 text-2xl font-semibold text-slate-900">
-              {isNew ? "Add Product" : "Edit Product"}
-            </h2>
+        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-5" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}>
+          <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="product-editor-title" className="max-h-[94dvh] w-full max-w-lg overflow-y-auto rounded-t-2xl border border-[#dce4dc] bg-[var(--admin-page)] p-5 shadow-[0_24px_72px_rgba(0,0,0,0.25)] sm:max-h-[90vh] sm:rounded-2xl sm:p-6">
+            <div className="mb-6 flex items-start justify-between gap-4">
+              <h2 id="product-editor-title" className="display-font text-2xl font-semibold text-slate-900">
+                {isNew ? "Add product" : "Edit product"}
+              </h2>
+              <button type="button" onClick={close} disabled={saving} aria-label="Close product editor" className="flex size-11 shrink-0 items-center justify-center rounded-full border border-slate-300 text-xl text-slate-700 transition-colors hover:bg-white disabled:opacity-50">
+                <MdClose aria-hidden="true" />
+              </button>
+            </div>
 
-            <div className="flex flex-col gap-4">
+            <form onSubmit={(event) => { event.preventDefault(); void handleSave(); }} className="flex flex-col gap-4">
               {field("title", "Title")}
               {field("slug", "Slug")}
               {field("region", "Region")}
@@ -320,34 +390,46 @@ export default function ProductsManager({ initialProducts }: Props) {
               {field("image_alt", "Image Alt Text")}
 
               <div>
-                <label className="block text-sm font-semibold text-slate-600 mb-1">Description</label>
+                <label htmlFor="product-description" className="mb-1 block text-sm font-semibold text-slate-700">Description</label>
                 <textarea
+                  id="product-description"
                   rows={3}
                   value={editing.description ?? ""}
                   onChange={(e) => setEditing((prev) => prev ? { ...prev, description: e.target.value } : prev)}
-                  className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#016936] resize-y"
+                  className="w-full resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#016936]"
                 />
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <input
+                  id="product-active"
                   type="checkbox"
                   checked={editing.is_active}
                   onChange={(e) => setEditing((prev) => prev ? { ...prev, is_active: e.target.checked } : prev)}
                   className="size-4 accent-[#016936]"
                 />
-                <label className="text-sm font-semibold text-slate-600">Active</label>
+                <label htmlFor="product-active" className="text-sm font-semibold text-slate-700">Show on the public site</label>
               </div>
-            </div>
+              <div className="flex items-start gap-3">
+                <input
+                  id="product-reviewed"
+                  type="checkbox"
+                  checked={editing.public_reviewed}
+                  onChange={(event) => setEditing((prev) => prev ? { ...prev, public_reviewed: event.target.checked } : prev)}
+                  className="mt-1 size-5 accent-[#016936]"
+                />
+                <div>
+                  <label htmlFor="product-reviewed" className="text-sm font-semibold text-slate-700">Reviewed for public display</label>
+                  <p className="mt-1 text-xs leading-5 text-slate-600">Only approved products appear in the public catalogue.</p>
+                </div>
+              </div>
+              {saveError && <p role="alert" className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{saveError}</p>}
 
-            <div className="flex justify-end gap-3 mt-6">
-              <button onClick={close} className="h-10 px-5 rounded-lg bg-slate-100 text-slate-600 font-bold text-sm hover:bg-slate-200 transition-colors">
-                Cancel
-              </button>
-              <button onClick={handleSave} disabled={saving} className="h-10 px-5 rounded-lg bg-[#016936] text-white font-bold text-sm hover:bg-[#015a2d] disabled:opacity-60 transition-colors">
-                {saving ? "Saving…" : "Save"}
-              </button>
-            </div>
+              <div className="mt-2 flex flex-col-reverse justify-end gap-3 border-t border-slate-200 pt-4 sm:flex-row">
+                <button type="button" onClick={close} disabled={saving} className="min-h-11 rounded-lg bg-slate-100 px-5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-200 disabled:opacity-50">Cancel</button>
+                <button type="submit" disabled={saving} aria-busy={saving} className="min-h-11 rounded-lg bg-[#016936] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#015a2d] disabled:cursor-wait disabled:opacity-60">{saving ? "Saving…" : "Save product"}</button>
+              </div>
+            </form>
           </div>
         </div>
       )}

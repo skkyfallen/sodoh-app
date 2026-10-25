@@ -1,12 +1,14 @@
 "use client";
 
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useId, useRef, useState } from "react";
 import type { FormEvent } from "react";
+import { MdClose } from "react-icons/md";
 import type { Product } from "@/types/content";
 
 type Props = { product: Product };
 
-const fieldClass = "h-12 w-full border border-[#cbd5cb] bg-white px-4 text-sm text-[#17241d] placeholder:text-[#87938a] transition-colors focus:border-[#016936] focus:outline-none focus:ring-2 focus:ring-[#016936]/15";
+const fieldClass = "min-h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 text-base text-[var(--ink)] placeholder:text-[var(--muted)] transition-colors focus:border-[var(--brand)] focus:outline-none focus:ring-2 focus:ring-[var(--brand)]/20";
 
 export default function ProductRequestButton({ product }: Props) {
   const [open, setOpen] = useState(false);
@@ -21,6 +23,9 @@ export default function ProductRequestButton({ product }: Props) {
   const dialogId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const submittingRef = useRef(false);
+  const reduceMotion = useReducedMotion();
+  submittingRef.current = submitting;
 
   const reset = () => {
     setQuantity("1");
@@ -33,33 +38,27 @@ export default function ProductRequestButton({ product }: Props) {
   };
 
   const close = () => {
+    if (submitting) return;
     setOpen(false);
-    if (success) reset();
+    reset();
   };
 
   useEffect(() => {
     if (!open) return;
-    const previousFocus = document.activeElement as HTMLElement | null;
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    dialogRef.current?.querySelector<HTMLElement>("button, input, textarea")?.focus();
+    dialogRef.current?.querySelector<HTMLElement>("input:not([disabled]), textarea:not([disabled])")?.focus();
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        if (success) {
-          setQuantity("1");
-          setName("");
-          setEmail("");
-          setPhone("");
-          setMessage("");
-          setError(null);
-          setSuccess(false);
-        }
-        setOpen(false);
+        event.preventDefault();
+        if (!submittingRef.current) close();
         return;
       }
       if (event.key !== "Tab" || !dialogRef.current) return;
-      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>("button:not([disabled]), input:not([disabled]), textarea:not([disabled]), a[href]"));
+      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
+      ));
       if (!focusable.length) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
@@ -71,13 +70,16 @@ export default function ProductRequestButton({ product }: Props) {
         first.focus();
       }
     };
+
     document.addEventListener("keydown", onKeyDown);
     return () => {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", onKeyDown);
-      previousFocus?.focus();
+      triggerRef.current?.focus();
     };
-  }, [open, success]);
+    // `close` is intentionally not a dependency: the dialog lifecycle is tied to open state.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -99,7 +101,7 @@ export default function ProductRequestButton({ product }: Props) {
       });
       const data = await response.json();
       if (!response.ok || !data.success) {
-        setError(data.error ?? "Something went wrong. Please try again.");
+        setError(`${data.error ?? "We couldn’t send your request."} Please check your details and try again.`);
       } else {
         setSuccess(true);
       }
@@ -112,65 +114,90 @@ export default function ProductRequestButton({ product }: Props) {
 
   return (
     <>
-      <button ref={triggerRef} type="button" onClick={() => setOpen(true)} className="group inline-flex min-h-11 w-full items-center justify-between border border-[#016936] px-4 text-xs font-bold text-[#016936] transition-colors hover:bg-[#016936] hover:text-white focus-visible:outline-[#016936]">
-        Request a quote <span aria-hidden="true" className="text-base transition-transform group-hover:translate-x-0.5">↗</span>
+      <button ref={triggerRef} type="button" onClick={() => setOpen(true)} className="inline-flex min-h-12 w-full items-center justify-center rounded-full border border-[var(--brand)] px-4 text-sm font-semibold text-[var(--brand)] transition-[background-color,color,transform] duration-200 hover:-translate-y-px hover:bg-[var(--brand)] hover:text-white active:translate-y-0 dark:hover:text-[#062a17]">
+        Request a quote
       </button>
 
-      {open && (
-        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-[#071a10]/65 p-0 backdrop-blur-[2px] sm:items-center sm:p-5" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}>
-          <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={`${dialogId}-title`} aria-describedby={`${dialogId}-description`} className="max-h-[94dvh] w-full max-w-xl overflow-y-auto bg-[#f8f8f2] shadow-[0_28px_90px_rgba(0,0,0,0.3)] sm:max-h-[90vh]">
-            <div className="flex items-start justify-between gap-6 bg-[#123d2a] px-5 py-6 text-white sm:px-8 sm:py-8">
-              <div>
-                <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#b5eb71]">Product enquiry</p>
-                <h2 id={`${dialogId}-title`} className="display-font max-w-[15ch] text-2xl font-medium leading-tight tracking-[-0.03em] sm:text-3xl">Request {product.title}</h2>
-                <p id={`${dialogId}-description`} className="mt-2 text-sm leading-6 text-white/70">Tell us what you need and how to reach you.</p>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            className="fixed inset-0 z-[100] flex items-end justify-center bg-[#071a10]/65 p-0 backdrop-blur-[2px] sm:items-center sm:p-5"
+            initial={reduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.18, ease: [0.16, 1, 0.3, 1] }}
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget && !submittingRef.current) close();
+            }}
+          >
+            <motion.div
+              ref={dialogRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={`${dialogId}-title`}
+              aria-describedby={`${dialogId}-description`}
+              className="max-h-[94dvh] w-full max-w-xl overflow-y-auto rounded-t-3xl bg-[var(--page)] shadow-[0_24px_72px_rgba(0,0,0,0.3)] sm:max-h-[90vh] sm:rounded-3xl"
+              initial={reduceMotion ? false : { opacity: 0, y: 18, scale: 0.985, filter: "blur(6px)" }}
+              animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: 10, scale: 0.99, filter: "blur(4px)" }}
+              transition={{ duration: reduceMotion ? 0 : 0.28, ease: [0.16, 1, 0.3, 1] }}
+              onMouseDown={(event) => event.stopPropagation()}
+            >
+              <div className="flex items-start justify-between gap-6 rounded-t-3xl bg-[#0d2b1c] px-5 py-6 text-white sm:px-8 sm:py-7 sm:rounded-t-3xl">
+                <div>
+                  <h2 id={`${dialogId}-title`} className="display-font max-w-[15ch] text-2xl font-semibold leading-tight tracking-[-0.035em] sm:text-3xl">Request {product.title}</h2>
+                  <p id={`${dialogId}-description`} className="mt-2 text-sm leading-6 text-white/85">Share your requirements and contact details with our team.</p>
+                </div>
+                <button type="button" onClick={close} disabled={submitting} aria-label="Close quote request" className="flex size-11 shrink-0 items-center justify-center rounded-full border border-white/40 text-xl text-white transition-colors hover:bg-white/10 disabled:cursor-wait disabled:opacity-50">
+                  <MdClose aria-hidden="true" />
+                </button>
               </div>
-              <button type="button" onClick={close} aria-label="Close quote request" className="flex size-10 shrink-0 items-center justify-center border border-white/25 text-2xl leading-none text-white transition-colors hover:bg-white/10 focus-visible:outline-white">×</button>
-            </div>
 
-            {success ? (
-              <div className="px-5 py-10 text-center sm:px-8 sm:py-14">
-                <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-[#e4f0da] text-2xl font-bold text-[#016936]" aria-hidden="true">✓</div>
-                <h3 className="display-font mt-5 text-2xl font-semibold text-[#17241d]">Request received</h3>
-                <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[#59685d]">We’ll be in touch about your {quantity} kg of {product.title} shortly.</p>
-                <button type="button" onClick={close} className="mt-7 min-h-11 bg-[#016936] px-7 text-sm font-bold text-white transition-colors hover:bg-[#014e29]">Close</button>
-              </div>
-            ) : (
-              <form onSubmit={submit} className="space-y-5 px-5 py-6 sm:px-8 sm:py-8">
-                <div className="grid gap-5 sm:grid-cols-[0.6fr_1.4fr]">
-                  <div className="flex flex-col gap-2">
-                    <label htmlFor={`${dialogId}-quantity`} className="text-xs font-bold text-[#34463a]">Quantity (kg) <span aria-hidden="true" className="text-red-700">*</span></label>
-                    <input id={`${dialogId}-quantity`} type="number" min="0.5" step="0.5" value={quantity} onChange={(event) => setQuantity(event.target.value)} required className={fieldClass} />
+              {success ? (
+                <div className="px-5 py-10 sm:px-8 sm:py-12">
+                  <div role="status" aria-live="polite">
+                    <h3 className="display-font text-2xl font-semibold text-[var(--ink)]">Request sent</h3>
+                    <p className="mt-3 max-w-[48ch] text-sm leading-6 text-[var(--body)]">Your enquiry for {quantity} kg of {product.title} was sent. Our team will follow up using the contact details you provided.</p>
+                  </div>
+                  <button type="button" onClick={close} className="mt-7 inline-flex min-h-12 items-center justify-center rounded-full bg-[var(--brand)] px-7 text-sm font-semibold text-white transition-colors hover:bg-[var(--brand-hover)] dark:text-[#062a17]">Close</button>
+                </div>
+              ) : (
+                <form onSubmit={submit} className="space-y-5 px-5 py-6 sm:px-8 sm:py-8">
+                  <div className="grid gap-5 sm:grid-cols-[0.6fr_1.4fr]">
+                    <div className="flex flex-col gap-2">
+                      <label htmlFor={`${dialogId}-quantity`} className="text-sm font-semibold text-[var(--ink)]">Quantity (kg) <span className="font-normal text-[var(--muted)]">(required)</span></label>
+                      <input id={`${dialogId}-quantity`} type="number" min="0.5" step="0.5" value={quantity} onChange={(event) => setQuantity(event.target.value)} required className={fieldClass} />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label htmlFor={`${dialogId}-name`} className="text-sm font-semibold text-[var(--ink)]">Full name <span className="font-normal text-[var(--muted)]">(required)</span></label>
+                      <input id={`${dialogId}-name`} type="text" autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} required className={fieldClass} />
+                    </div>
+                  </div>
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <div className="flex flex-col gap-2">
+                      <label htmlFor={`${dialogId}-email`} className="text-sm font-semibold text-[var(--ink)]">Email address <span className="font-normal text-[var(--muted)]">(required)</span></label>
+                      <input id={`${dialogId}-email`} type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required className={fieldClass} />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label htmlFor={`${dialogId}-phone`} className="text-sm font-semibold text-[var(--ink)]">Phone <span className="font-normal text-[var(--muted)]">(optional)</span></label>
+                      <input id={`${dialogId}-phone`} type="tel" autoComplete="tel" value={phone} onChange={(event) => setPhone(event.target.value)} className={fieldClass} />
+                    </div>
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label htmlFor={`${dialogId}-name`} className="text-xs font-bold text-[#34463a]">Full name <span aria-hidden="true" className="text-red-700">*</span></label>
-                    <input id={`${dialogId}-name`} type="text" autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} required className={fieldClass} />
+                    <label htmlFor={`${dialogId}-message`} className="text-sm font-semibold text-[var(--ink)]">Notes <span className="font-normal text-[var(--muted)]">(optional)</span></label>
+                    <textarea id={`${dialogId}-message`} value={message} onChange={(event) => setMessage(event.target.value)} rows={3} className={`${fieldClass} min-h-28 resize-y py-3`} />
                   </div>
-                </div>
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <div className="flex flex-col gap-2">
-                    <label htmlFor={`${dialogId}-email`} className="text-xs font-bold text-[#34463a]">Email address <span aria-hidden="true" className="text-red-700">*</span></label>
-                    <input id={`${dialogId}-email`} type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required className={fieldClass} />
+                  {error && <p id={`${dialogId}-error`} role="alert" aria-live="assertive" className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold leading-6 text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-100">{error}</p>}
+                  <div className="flex flex-col-reverse gap-3 border-t border-[var(--border)] pt-5 sm:flex-row sm:justify-end">
+                    <button type="button" onClick={close} disabled={submitting} className="inline-flex min-h-12 items-center justify-center rounded-full px-5 text-sm font-semibold text-[var(--body)] transition-colors hover:bg-[var(--surface-muted)] disabled:cursor-wait disabled:opacity-60">Cancel</button>
+                    <button type="submit" disabled={submitting} aria-busy={submitting} className="inline-flex min-h-12 items-center justify-center rounded-full bg-[var(--brand)] px-6 text-sm font-semibold text-white transition-colors hover:bg-[var(--brand-hover)] disabled:cursor-wait disabled:opacity-60 dark:text-[#062a17]">{submitting ? "Sending request…" : "Send quote request"}</button>
                   </div>
-                  <div className="flex flex-col gap-2">
-                    <label htmlFor={`${dialogId}-phone`} className="text-xs font-bold text-[#34463a]">Phone <span className="font-normal text-[#718076]">(optional)</span></label>
-                    <input id={`${dialogId}-phone`} type="tel" autoComplete="tel" value={phone} onChange={(event) => setPhone(event.target.value)} className={fieldClass} />
-                  </div>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label htmlFor={`${dialogId}-message`} className="text-xs font-bold text-[#34463a]">Notes <span className="font-normal text-[#718076]">(optional)</span></label>
-                  <textarea id={`${dialogId}-message`} value={message} onChange={(event) => setMessage(event.target.value)} rows={3} className="w-full resize-y border border-[#cbd5cb] bg-white px-4 py-3 text-sm text-[#17241d] transition-colors focus:border-[#016936] focus:outline-none focus:ring-2 focus:ring-[#016936]/15" />
-                </div>
-                {error && <p role="alert" className="border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">{error}</p>}
-                <div className="flex flex-col-reverse gap-3 border-t border-[#d9e1da] pt-5 sm:flex-row sm:justify-end">
-                  <button type="button" onClick={close} className="min-h-11 px-5 text-sm font-bold text-[#526157] transition-colors hover:bg-[#e9eee7]">Cancel</button>
-                  <button type="submit" disabled={submitting} className="min-h-11 bg-[#016936] px-6 text-sm font-bold text-white transition-colors hover:bg-[#014e29] disabled:cursor-wait disabled:opacity-60">{submitting ? "Sending…" : "Send quote request"}</button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
+                </form>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

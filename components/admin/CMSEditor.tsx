@@ -97,6 +97,7 @@ const URL_FIELDS = new Set([
    ──────────────────────────────────────────── */
 
 function formatFieldLabel(key: string): string {
+  if (key === "public_reviewed") return "Reviewed for public display";
   return key
     .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
@@ -115,10 +116,12 @@ function getSectionDescription(page: string, section: string): string {
    ──────────────────────────────────────────── */
 
 function FieldInput({
+  inputId,
   fieldKey,
   value,
   onChange,
 }: {
+  inputId: string;
   fieldKey: string;
   value: unknown;
   onChange: (val: unknown) => void;
@@ -129,11 +132,24 @@ function FieldInput({
   const isUrl = URL_FIELDS.has(fieldKey);
 
   const baseClasses =
-    "w-full rounded-sm border border-slate-200 bg-[#f7f8f4] px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#016936]/15 focus:border-[#016936] focus:bg-white transition-colors";
+    "w-full rounded-xl border border-slate-200 bg-[#f7f8f4] px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#016936]/15 focus:border-[#016936] focus:bg-white transition-colors";
+
+  if (typeof value === "boolean") {
+    return (
+      <input
+        id={inputId}
+        type="checkbox"
+        checked={value}
+        onChange={(event) => onChange(event.target.checked)}
+        className="size-5 accent-[#016936]"
+      />
+    );
+  }
 
   if (isLong) {
     return (
       <textarea
+        id={inputId}
         rows={Math.min(12, strVal.split("\n").length + 1)}
         value={strVal}
         onChange={(e) => {
@@ -150,6 +166,7 @@ function FieldInput({
 
   return (
     <input
+      id={inputId}
       type={isUrl ? "url" : "text"}
       value={strVal}
       onChange={(e) => onChange(e.target.value)}
@@ -182,6 +199,7 @@ function SectionCard({
   const [open, setOpen] = useState(false);
   const fieldEntries = Object.entries(fields);
   const description = getSectionDescription(page, section);
+  const panelId = `cms-section-${page}-${section}`.replace(/[^a-z0-9-]/gi, "-");
 
   return (
     <div className="border-y border-slate-200 bg-white">
@@ -189,14 +207,11 @@ function SectionCard({
       <button
         type="button"
         onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        aria-controls={panelId}
         className="w-full flex items-center justify-between px-4 py-5 text-left transition-colors hover:bg-slate-50 sm:px-5"
       >
         <div className="flex items-center gap-3 min-w-0">
-            <div className="size-8 bg-[#eaf0e8] flex items-center justify-center shrink-0">
-            <span className="text-xs font-black text-[#016936] uppercase">
-              {section.slice(0, 2)}
-            </span>
-          </div>
           <div className="min-w-0">
             <h4 className="text-sm font-bold text-slate-900 truncate">
               {formatSectionLabel(page, section)}
@@ -219,17 +234,18 @@ function SectionCard({
       </button>
 
       {/* Body */}
-      {open && (
-        <div className="border-t border-slate-100 bg-[#fbfcf9] px-4 py-5 space-y-5 sm:px-6">
+      <div id={panelId} hidden={!open} className="border-t border-slate-100 bg-[#fbfcf9] px-4 py-5 space-y-5 sm:px-6">
+        {open && <>
           {fieldEntries.map(([key, val]) => (
             <div key={key}>
-              <label className="flex items-center gap-1.5 text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">
+              <label htmlFor={`${panelId}-${key}`} className="flex items-center gap-1.5 text-sm font-semibold text-slate-700 mb-1.5">
                 {formatFieldLabel(key)}
                 {URL_FIELDS.has(key) && (
                   <MdOpenInNew className="text-slate-400 text-xs" />
                 )}
               </label>
               <FieldInput
+                inputId={`${panelId}-${key}`}
                 fieldKey={key}
                 value={val}
                 onChange={(v) => onFieldChange(key, v)}
@@ -243,7 +259,7 @@ function SectionCard({
               type="button"
               onClick={onSave}
               disabled={saving}
-              className="inline-flex min-h-10 items-center gap-2 bg-[#016936] px-4 text-xs font-bold text-white transition-colors hover:bg-[#014e29] disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#016936] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#014e29] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? (
                 <>
@@ -258,14 +274,14 @@ function SectionCard({
               )}
             </button>
             {saved && (
-              <span className="inline-flex items-center gap-1 text-xs font-bold text-green-600">
+              <span role="status" className="inline-flex items-center gap-1 text-sm font-semibold text-green-700">
                 <MdCheck className="text-sm" />
                 Saved
               </span>
             )}
           </div>
-        </div>
-      )}
+        </>}
+      </div>
     </div>
   );
 }
@@ -292,6 +308,7 @@ function PageGroup({
   const config = PAGE_CONFIG[page];
   const Icon = config?.icon ?? MdHome;
   const [collapsed, setCollapsed] = useState(false);
+  const panelId = `cms-page-${page}`;
 
   // All sections that exist in data for this page
   const sectionKeys = Object.keys(data);
@@ -302,18 +319,18 @@ function PageGroup({
       <button
         type="button"
         onClick={() => setCollapsed(!collapsed)}
+        aria-expanded={!collapsed}
+        aria-controls={panelId}
         className="w-full flex items-center justify-between border-b border-[#dce4dc] py-5 text-left"
       >
         <div className="flex items-center gap-3">
-          <div className="size-10 bg-[#016936] flex items-center justify-center shrink-0">
-            <Icon className="text-xl text-white" />
-          </div>
+          <Icon aria-hidden="true" className="shrink-0 text-xl text-[#016936]" />
           <div>
-            <h3 className="text-lg font-black text-slate-900">
+            <h3 className="text-lg font-semibold text-slate-900">
               {config?.label ?? formatFieldLabel(page)}
             </h3>
-            <p className="text-xs text-slate-500">
-              {sectionKeys.length} section{sectionKeys.length !== 1 ? "s" : ""} · {config?.href ?? `/${page}`}
+            <p className="text-sm text-slate-500">
+              {sectionKeys.length} editable section{sectionKeys.length !== 1 ? "s" : ""}
             </p>
           </div>
         </div>
@@ -327,8 +344,8 @@ function PageGroup({
       </button>
 
       {/* Sections */}
-      {!collapsed && (
-        <div className="space-y-3 pl-0 md:pl-13">
+      <div id={panelId} hidden={collapsed} className="space-y-3 pl-0 md:pl-10">
+        {!collapsed && <>
           {sectionKeys.map((section) => (
             <SectionCard
               key={section}
@@ -341,8 +358,8 @@ function PageGroup({
               saved={savedState[section] ?? false}
             />
           ))}
-        </div>
-      )}
+        </>}
+      </div>
     </div>
   );
 }
@@ -352,7 +369,22 @@ function PageGroup({
    ──────────────────────────────────────────── */
 
 export default function CMSEditor({ pages }: Props) {
-  const [data, setData] = useState<PagesData>(pages);
+  const [data, setData] = useState<PagesData>(() =>
+    Object.fromEntries(
+      Object.entries(pages).map(([page, sections]) => [
+        page,
+        Object.fromEntries(
+          Object.entries(sections).map(([section, fields]) => [
+            section,
+            {
+              ...fields,
+              public_reviewed: fields.public_reviewed === true,
+            },
+          ])
+        ),
+      ])
+    )
+  );
   const [saving, setSaving] = useState<Record<string, Record<string, boolean>>>({});
   const [saved, setSaved] = useState<Record<string, Record<string, boolean>>>({});
 

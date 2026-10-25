@@ -2,301 +2,182 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import AnimateIn from "@/components/ui/AnimateIn";
-import {
-  MdEco,
-  MdVerified,
-  MdHandshake,
-  MdPublic,
-} from "react-icons/md";
-import type { IconType } from "react-icons";
-import { getPageContent, getStats } from "@/lib/data";
+import { getPageContent } from "@/lib/data";
 import type { HeroContent } from "@/types/content";
 
-
-
-/**
- * Revalidate the About page at most once per minute.
- * Data is served from cache; a background fetch updates it
- * on the next request after the TTL expires.
- */
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "About Us — Sodoh Nigeria Limited",
-  description:
-    "Learn the story behind Sodoh Nigeria Limited — our mission, vision, history, and commitment to sustainable Nigerian agriculture.",
+  title: "About Sodoh Nigeria",
+  description: "Learn about Sodoh Nigeria Limited and how to enquire about agricultural products and partnerships.",
   openGraph: {
-    title: "About Us — Sodoh Nigeria Limited",
-    description:
-      "Discover how Sodoh Nigeria Limited is cultivating Nigeria's agricultural future through sustainability, quality, and community.",
+    title: "About Sodoh Nigeria",
+    description: "Learn about Sodoh Nigeria Limited and how to get in touch.",
     type: "website",
   },
 };
 
-const iconMap: Record<string, IconType> = {
-  MdEco,
-  MdVerified,
-  MdHandshake,
-  MdPublic,
-};
-
-/* ── default fallbacks (used if Supabase rows are missing) ── */
 const DEFAULT_HERO: HeroContent = {
-  badge: "Our Story",
-  title: "Grown in Nigeria. Trusted Worldwide.",
-  highlight_word: "Nigeria",
-  subtitle:
-    "Sodoh Nigeria Limited is a leading agricultural enterprise committed to sustainable farming, premium produce, and empowering the communities behind every harvest.",
-  cta_primary_text: "Explore Our Products",
+  title: "About Sodoh Nigeria",
+  subtitle: "Sodoh Nigeria Limited is an agricultural company. Explore the product catalogue and contact our team to discuss what you are looking for.",
+  cta_primary_text: "View products",
   cta_primary_href: "/products",
-  cta_secondary_text: "Get in Touch",
+  cta_secondary_text: "Contact us",
   cta_secondary_href: "/contact",
 };
 
 const DEFAULT_OPERATIONS = {
-  heading: "What We Do",
-  body: "Sodoh Nigeria Limited operates across the full agricultural value chain — from farm partnerships and sustainable cultivation, through modern processing and quality control, to cold-chain logistics and international export. We work directly with over 500 smallholder farmers across 12 Nigerian states, providing technical support, fair pricing, and market access they would otherwise lack. Our processing facilities in Abuja ensure every crop meets rigorous international standards before export. We supply premium produce — cassava, yam, maize, ginger, cocoa, and palm oil — to wholesale distributors, food manufacturers, and retailers across Europe, Asia, and beyond. Beyond commerce, we're committed to building agricultural communities: investing in farmer education, environmental stewardship, and economic inclusion at every step.",
-};
-
-const DEFAULT_TIMELINE = {
-  heading: "Our Journey",
-  milestones: [
-    {
-      year: "2015",
-      title: "Founded",
-      description:
-        "Sodoh Nigeria Limited is established with a bold mission to modernise Nigerian agriculture and connect local produce to global markets.",
-    },
-    {
-      year: "2017",
-      title: "First Export Contract",
-      description:
-        "Achieved our first international export milestone, supplying premium cassava and yam to European distribution partners.",
-    },
-    {
-      year: "2019",
-      title: "Farm Expansion",
-      description:
-        "Expanded operations across three new states, entering formal partnerships with over 500 smallholder farmers.",
-    },
-    {
-      year: "2022",
-      title: "Sustainability Certified",
-      description:
-        "Received organic and sustainable farming certification across our core product lines after a comprehensive audit.",
-    },
-    {
-      year: "2024",
-      title: "Regional Leader",
-      description:
-        "Recognised as one of Nigeria's leading agricultural export companies, with active operations spanning 12 states.",
-    },
-  ],
+  heading: "A place to begin",
+  body: "Browse the products currently listed on our site, then contact our team with questions about availability, volumes, or partnership enquiries. Our team can discuss the details with you before you make a decision.",
 };
 
 const DEFAULT_VALUES = {
-  heading: "What We Stand For",
+  heading: "How to work with us",
   items: [
-    {
-      icon: "MdEco",
-      title: "Sustainability",
-      description:
-        "Every decision considers its long-term impact on the land and the people who depend on it for their livelihoods.",
-    },
-    {
-      icon: "MdVerified",
-      title: "Quality Assurance",
-      description:
-        "Rigorous grading and processing standards ensure every product meets — and exceeds — international benchmarks.",
-    },
-    {
-      icon: "MdHandshake",
-      title: "Community First",
-      description:
-        "We invest in the farmers and rural communities that form the backbone of our supply chain and our story.",
-    },
-    {
-      icon: "MdPublic",
-      title: "Global Reach",
-      description:
-        "Connecting Nigerian agricultural excellence to markets across Europe, Asia, and the Americas.",
-    },
+    { title: "Browse products", description: "See the agricultural products currently listed in our catalogue." },
+    { title: "Share your needs", description: "Tell our team which products, volumes, or partnership details you want to discuss." },
+    { title: "Talk through the details", description: "Ask questions about the listed product and agree on next steps directly with our team." },
   ],
 };
 
 const DEFAULT_CTA = {
-  heading: "Ready to work with us?",
-  subtitle:
-    "Whether you're a buyer, importer, or community partner — we'd love to hear from you.",
-  cta_text: "Contact Our Team",
+  heading: "Have a question for our team?",
+  subtitle: "Get in touch about a product or partnership enquiry.",
+  cta_text: "Contact us",
   cta_href: "/contact",
 };
 
-const DEFAULT_PEOPLE = {
-  heading: "Meet the Team",
-  members: [
-    {
-      name: "Emmanuel Odoh",
-      role: "Founder & Chief Executive Officer",
-      bio: "Emmanuel founded Sodoh Nigeria Limited with a vision to modernise Nigerian agriculture and connect homegrown produce to global markets. He brings over a decade of experience in agribusiness and supply chain management.",
-    },
-    {
-      name: "Adaeze Okonkwo",
-      role: "Director of Operations",
-      bio: "Adaeze oversees farm partnerships, logistics, and quality control across all 12 states of operation. Her background in agricultural science ensures every product meets rigorous international standards.",
-    },
-    {
-      name: "Tunde Balogun",
-      role: "Head of Export & Trade",
-      bio: "Tunde leads Sodoh's international trade relationships, managing export contracts across Europe and Asia. He holds an MBA in International Trade and has closed over ₦2.5B in export deals.",
-    },
-  ],
-};
+type Milestone = { year: string; title: string; description: string };
+type Person = { name: string; role: string; bio: string };
 
-/* ── helpers ── */
-function parseArray<T>(val: unknown, fallback: T[]): T[] {
-  if (Array.isArray(val)) return val as T[];
+function parseObj<T extends Record<string, unknown>>(value: unknown, fallback: T): T {
+  if (value && typeof value === "object" && !Array.isArray(value)) return value as T;
   return fallback;
 }
 
-function parseObj<T extends Record<string, unknown>>(
-  val: unknown,
-  fallback: T
-): T {
-  if (val && typeof val === "object" && !Array.isArray(val)) return val as T;
-  return fallback;
+function parseArray<T>(value: unknown, fallback: T[]): T[] {
+  return Array.isArray(value) ? value as T[] : fallback;
 }
 
 export default async function AboutPage() {
-  const [content, stats] = await Promise.all([
-    getPageContent("about"),
-    getStats(),
-  ]);
+  const content = await getPageContent("about");
+  const heroContent = parseObj(content.hero, DEFAULT_HERO as Record<string, unknown>) as HeroContent & { public_reviewed?: boolean };
+  const hero = heroContent.public_reviewed
+    ? { ...DEFAULT_HERO, ...heroContent, title: heroContent.title || DEFAULT_HERO.title }
+    : DEFAULT_HERO;
 
-  /* ── Content guards: fall back to defaults if DB rows are missing/malformed ── */
-  const hero = parseObj(content.hero, DEFAULT_HERO as Record<string, unknown>) as HeroContent;
-  // Ensure hero.title is always a non-empty string
-  if (!hero.title) hero.title = DEFAULT_HERO.title;
-
-  const operations = parseObj(content.operations, DEFAULT_OPERATIONS as Record<string, unknown>) as typeof DEFAULT_OPERATIONS;
-  if (!operations.heading) operations.heading = DEFAULT_OPERATIONS.heading;
-  if (!operations.body) operations.body = DEFAULT_OPERATIONS.body;
-  const timelineRaw = parseObj(content.timeline, DEFAULT_TIMELINE as Record<string, unknown>);
-  const timelineHeading = (timelineRaw.heading as string) ?? DEFAULT_TIMELINE.heading;
-  const milestones = parseArray(
-    timelineRaw.milestones,
-    DEFAULT_TIMELINE.milestones
-  ) as typeof DEFAULT_TIMELINE.milestones;
-  const valuesRaw = parseObj(content.values, DEFAULT_VALUES as Record<string, unknown>);
-  const valuesHeading = (valuesRaw.heading as string) ?? DEFAULT_VALUES.heading;
-  const valueItems = parseArray(
-    valuesRaw.items,
-    DEFAULT_VALUES.items
-  ) as typeof DEFAULT_VALUES.items;
-  const ctaBanner = parseObj(content.cta_banner, DEFAULT_CTA as Record<string, unknown>) as typeof DEFAULT_CTA;
-  const peopleRaw = parseObj(content.people, DEFAULT_PEOPLE as Record<string, unknown>);
-  const peopleHeading = (peopleRaw.heading as string) ?? DEFAULT_PEOPLE.heading;
-  const members = parseArray(
-    peopleRaw.members,
-    DEFAULT_PEOPLE.members
-  ) as typeof DEFAULT_PEOPLE.members;
-
-  /** Render title with optional highlighted word */
-  const renderTitle = () => {
-    const word = hero.highlight_word;
-    if (!word || !hero.title?.includes(word)) return <>{hero.title}</>;
-    const idx = hero.title.indexOf(word);
-    const before = hero.title.slice(0, idx);
-    const after = hero.title.slice(idx + word.length);
-    return (
-      <>
-        {before}
-        <span className="text-[#a9dd73]">{word}</span>
-        {after}
-      </>
-    );
-  };
-
-  const bodyParagraphs = operations.body.split("\n\n").filter(Boolean);
-  const sentences = bodyParagraphs.length === 1 && operations.body.length > 400
-    ? operations.body.match(/[^.!?]+[.!?]+/g)?.map((sentence) => sentence.trim()) ?? bodyParagraphs
+  const operationsContent = parseObj(content.operations, DEFAULT_OPERATIONS as Record<string, unknown>) as typeof DEFAULT_OPERATIONS & { public_reviewed?: boolean };
+  const operations = operationsContent.public_reviewed ? operationsContent : DEFAULT_OPERATIONS;
+  const valuesContent = parseObj(content.values, DEFAULT_VALUES as Record<string, unknown>) as Record<string, unknown> & { public_reviewed?: boolean };
+  const values = valuesContent.public_reviewed ? valuesContent : DEFAULT_VALUES;
+  const valuesHeading = typeof values.heading === "string" ? values.heading : DEFAULT_VALUES.heading;
+  const valueItems = parseArray(values.items, DEFAULT_VALUES.items) as typeof DEFAULT_VALUES.items;
+  const ctaContent = parseObj(content.cta_banner, DEFAULT_CTA as Record<string, unknown>) as typeof DEFAULT_CTA & { public_reviewed?: boolean };
+  const cta = ctaContent.public_reviewed ? ctaContent : DEFAULT_CTA;
+  const timelineContent = parseObj(content.timeline, { heading: "Our journey", milestones: [] } as Record<string, unknown> & { public_reviewed?: boolean });
+  const milestones = timelineContent.public_reviewed
+    ? parseArray(timelineContent.milestones, [] as Milestone[]).filter((item) => item.year && item.title && item.description)
     : [];
-  const paragraphs = sentences.length > 2
-    ? [sentences.slice(0, Math.ceil(sentences.length / 2)).join(" "), sentences.slice(Math.ceil(sentences.length / 2)).join(" ")]
-    : bodyParagraphs;
+  const peopleContent = parseObj(content.people, { heading: "Our team", members: [] } as Record<string, unknown> & { public_reviewed?: boolean });
+  const people = peopleContent.public_reviewed
+    ? parseArray(peopleContent.members, [] as Person[]).filter((person) => person.name && person.role && person.bio)
+    : [];
+  const operationsHeading = typeof operations.heading === "string" ? operations.heading : DEFAULT_OPERATIONS.heading;
+  const paragraphs = typeof operations.body === "string" ? operations.body.split("\n\n").filter(Boolean) : [DEFAULT_OPERATIONS.body];
+  const ctaHeading = typeof cta.heading === "string" ? cta.heading : DEFAULT_CTA.heading;
+  const ctaSubtitle = typeof cta.subtitle === "string" ? cta.subtitle : DEFAULT_CTA.subtitle;
+  const ctaText = typeof cta.cta_text === "string" ? cta.cta_text : DEFAULT_CTA.cta_text;
 
   return (
     <>
-      <section className="bg-[#123d2a] px-5 py-12 text-white sm:px-8 md:px-12 md:py-20 lg:px-16">
-        <div className="mx-auto grid max-w-[1440px] items-center gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-          <div className="py-4 lg:py-10">
-            <AnimateIn variant="fade-up">
-              {hero.badge && <p className="mb-7 text-xs font-bold uppercase tracking-[0.2em] text-[#b5eb71]">{hero.badge}</p>}
-              <h1 className="display-font max-w-[12ch] text-[clamp(2.9rem,5.8vw,5.7rem)] font-medium leading-[0.98] tracking-[-0.055em]">{renderTitle()}</h1>
-              {hero.subtitle && <p className="mt-7 max-w-lg text-base leading-7 text-white/75 md:text-lg md:leading-8">{hero.subtitle}</p>}
-              <div className="mt-9 flex flex-wrap gap-3">
-                {hero.cta_primary_text && hero.cta_primary_href && <Link href={hero.cta_primary_href} className="inline-flex min-h-12 items-center bg-[#0df20d] px-6 text-sm font-bold text-[#102210] transition-colors hover:bg-[#c8f6c8] focus-visible:outline-white">{hero.cta_primary_text}<span aria-hidden="true" className="ml-5 text-lg">↗</span></Link>}
-                {hero.cta_secondary_text && hero.cta_secondary_href && <Link href={hero.cta_secondary_href} className="inline-flex min-h-12 items-center border border-white/35 px-6 text-sm font-bold text-white transition-colors hover:border-white focus-visible:outline-white">{hero.cta_secondary_text}</Link>}
-              </div>
-            </AnimateIn>
-          </div>
-          <AnimateIn variant="fade" delay={100} duration={750}>
-            <figure className="relative min-h-[360px] overflow-hidden rounded-3xl bg-[#526e4d] sm:min-h-[480px] lg:min-h-[600px]">
-              <Image src="/images/farmers-harvest.jpg" alt="Fresh green vegetables and peppers gathered for market" fill priority sizes="(max-width: 1024px) 100vw, 52vw" className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#102210]/65 via-transparent to-transparent" />
-              <figcaption className="absolute bottom-0 left-0 p-6 text-sm font-medium text-white sm:p-8">Rooted here. Growing together.</figcaption>
-            </figure>
-          </AnimateIn>
-        </div>
-        {stats.length > 0 && <div className="mx-auto mt-12 grid max-w-[1440px] grid-cols-2 gap-y-5 border-t border-white/20 pt-6 sm:grid-cols-3 sm:gap-8">{stats.slice(0, 3).map((stat) => <div key={stat.label} className="flex items-baseline gap-3"><span className="display-font text-2xl font-semibold text-[#d6f28c]">{stat.value}</span><span className="text-xs leading-5 text-white/70">{stat.label}</span></div>)}</div>}
-      </section>
-
-      <section className="bg-[#f7f7ef] px-5 py-20 sm:px-8 md:px-12 md:py-28 lg:px-16">
-        <div className="mx-auto grid max-w-[1320px] gap-10 lg:grid-cols-[0.6fr_1.4fr] lg:gap-24">
-          <AnimateIn variant="fade-up"><p className="text-xs font-bold uppercase tracking-[0.2em] text-[#016936]">The way we work</p><h2 className="display-font mt-5 max-w-[10ch] text-4xl font-medium leading-[1.05] tracking-[-0.04em] text-[#17241d] md:text-5xl">{operations.heading}</h2></AnimateIn>
-          <AnimateIn variant="fade-up" delay={80}>
-            <div className="max-w-3xl space-y-6 border-l border-[#b9c8b9] pl-6 md:pl-10">
-              {paragraphs.map((paragraph, i) => <p key={i} className={`${i === 0 ? "text-xl leading-8 text-[#263b2e] md:text-2xl md:leading-9" : "text-base leading-7 text-[#59685d]"}`}>{paragraph}</p>)}
+      <section className="bg-[var(--surface-soft)] px-5 py-10 sm:px-8 md:px-12 md:py-16 lg:px-16">
+        <div className="mx-auto grid max-w-[1440px] items-center gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+          <AnimateIn>
+            <h1 className="display-font max-w-[13ch] text-[clamp(2.8rem,5vw,5rem)] font-semibold leading-[1.02] tracking-[-0.045em] text-[var(--ink)] [text-wrap:balance]">{hero.title}</h1>
+            {hero.subtitle && <p className="mt-6 max-w-[58ch] text-base leading-7 text-[var(--body)] md:text-lg md:leading-8">{hero.subtitle}</p>}
+            <div className="mt-8 flex flex-wrap gap-3">
+              {hero.cta_primary_text && hero.cta_primary_href && <Link href={hero.cta_primary_href} className="inline-flex min-h-12 items-center justify-center rounded-full bg-[var(--brand)] px-6 text-sm font-semibold text-white transition-colors hover:bg-[var(--brand-hover)] dark:text-[#062a17]">{hero.cta_primary_text}</Link>}
+              {hero.cta_secondary_text && hero.cta_secondary_href && <Link href={hero.cta_secondary_href} className="inline-flex min-h-12 items-center justify-center rounded-full border border-[var(--border)] px-6 text-sm font-semibold text-[var(--ink)] transition-colors hover:bg-[var(--surface)]">{hero.cta_secondary_text}</Link>}
             </div>
           </AnimateIn>
+          <figure className="relative min-h-[320px] overflow-hidden rounded-[24px_72px_24px_24px] bg-[var(--surface-muted)] sm:min-h-[460px] lg:min-h-[560px]">
+            <Image src="/images/produce-fields.jpg" alt="Fresh produce arranged for market" fill priority sizes="(max-width: 1024px) 100vw, 55vw" className="object-cover" />
+            <figcaption className="absolute bottom-0 left-0 bg-[#092418]/65 px-4 py-3 text-sm text-white backdrop-blur-sm">Representative agricultural photography</figcaption>
+          </figure>
         </div>
       </section>
 
-      <section className="bg-white px-5 py-20 sm:px-8 md:px-12 md:py-28 lg:px-16">
-        <div className="mx-auto max-w-[1320px]">
-          <div className="mb-10 flex flex-col justify-between gap-4 border-b border-[#d9e1da] pb-7 sm:flex-row sm:items-end">
-            <div><p className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-[#016936]">Milestones</p><h2 className="display-font text-4xl font-medium tracking-[-0.04em] text-[#17241d] md:text-5xl">{timelineHeading}</h2></div>
-            <p className="max-w-xs text-sm leading-6 text-[#59685d]">A growing story shaped by people, places, and opportunity.</p>
-          </div>
-          <div className="divide-y divide-[#d9e1da]">
-            {milestones.map((milestone, i) => <AnimateIn key={milestone.year} variant="fade-up" delay={i * 45} duration={450}><article className="grid gap-3 py-7 sm:grid-cols-[8rem_0.75fr_1.25fr] sm:gap-8 md:py-9"><p className="display-font text-3xl font-medium tracking-[-0.04em] text-[#016936]">{milestone.year}</p><h3 className="text-lg font-semibold text-[#17241d] md:text-xl">{milestone.title}</h3><p className="max-w-2xl text-sm leading-6 text-[#59685d] md:text-base md:leading-7">{milestone.description}</p></article></AnimateIn>)}
+      <section className="bg-[var(--surface)] px-5 py-16 sm:px-8 md:px-12 md:py-24 lg:px-16">
+        <div className="mx-auto grid max-w-[1320px] gap-8 lg:grid-cols-[0.65fr_1.35fr] lg:gap-20">
+          <AnimateIn>
+            <h2 className="display-font max-w-[12ch] text-4xl font-semibold leading-[1.05] tracking-[-0.04em] text-[var(--ink)] md:text-5xl [text-wrap:balance]">{operationsHeading}</h2>
+          </AnimateIn>
+          <div className="max-w-[70ch] space-y-5">
+            {paragraphs.map((paragraph, index) => <p key={index} className="text-base leading-7 text-[var(--body)] md:text-lg md:leading-8">{paragraph}</p>)}
           </div>
         </div>
       </section>
 
-      <section className="bg-[#eaf0e8] px-5 py-20 sm:px-8 md:px-12 md:py-28 lg:px-16">
-        <div className="mx-auto grid max-w-[1320px] gap-12 lg:grid-cols-[0.7fr_1.3fr] lg:gap-20">
-          <AnimateIn variant="fade-up"><p className="mb-5 text-xs font-bold uppercase tracking-[0.2em] text-[#016936]">Our principles</p><h2 className="display-font max-w-[9ch] text-4xl font-medium leading-[1.05] tracking-[-0.04em] text-[#17241d] md:text-5xl">{valuesHeading}</h2></AnimateIn>
+      {milestones.length > 0 && (
+        <section className="bg-[var(--surface)] px-5 py-16 sm:px-8 md:px-12 md:py-24 lg:px-16">
+          <div className="mx-auto max-w-[1320px]">
+            <h2 className="display-font mb-8 max-w-[14ch] text-4xl font-semibold leading-[1.05] tracking-[-0.04em] text-[var(--ink)] md:text-5xl [text-wrap:balance]">{typeof timelineContent.heading === "string" ? timelineContent.heading : "Our journey"}</h2>
+            <div className="divide-y divide-[var(--border)] border-y border-[var(--border)]">
+              {milestones.map((milestone) => (
+                <article key={`${milestone.year}-${milestone.title}`} className="grid gap-2 py-5 sm:grid-cols-[7rem_0.7fr_1.3fr] sm:gap-8 sm:py-6">
+                  <p className="display-font text-2xl font-semibold tracking-[-0.03em] text-[var(--brand)]">{milestone.year}</p>
+                  <h3 className="text-base font-semibold text-[var(--ink)]">{milestone.title}</h3>
+                  <p className="max-w-[64ch] text-sm leading-6 text-[var(--body)]">{milestone.description}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="bg-[var(--surface-muted)] px-5 py-16 sm:px-8 md:px-12 md:py-24 lg:px-16">
+        <div className="mx-auto grid max-w-[1320px] gap-9 lg:grid-cols-[0.65fr_1.35fr] lg:gap-20">
+          <AnimateIn>
+            <h2 className="display-font max-w-[11ch] text-4xl font-semibold leading-[1.05] tracking-[-0.04em] text-[var(--ink)] md:text-5xl [text-wrap:balance]">{valuesHeading}</h2>
+          </AnimateIn>
           <div className="grid gap-x-10 sm:grid-cols-2">
-            {valueItems.map((item, i) => {
-              const Icon = iconMap[item.icon] ?? MdEco;
-              return <AnimateIn key={item.title} variant="fade-up" delay={i * 55} duration={450}><article className="border-t border-[#bdcbbd] py-6"><div className="flex items-center justify-between gap-4"><span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#75877a]">0{i + 1}</span><Icon aria-hidden="true" className="text-xl text-[#016936]" /></div><h3 className="display-font mt-6 text-xl font-semibold tracking-tight text-[#17241d]">{item.title}</h3><p className="mt-2 text-sm leading-6 text-[#59685d]">{item.description}</p></article></AnimateIn>;
-            })}
+            {valueItems.map((item) => (
+              <article key={item.title} className="border-t border-[var(--border)] py-5 sm:py-6">
+                <h3 className="display-font text-xl font-semibold tracking-[-0.025em] text-[var(--ink)]">{item.title}</h3>
+                <p className="mt-2 max-w-[42ch] text-sm leading-6 text-[var(--body)]">{item.description}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-white px-5 py-20 sm:px-8 md:px-12 md:py-28 lg:px-16">
-        <div className="mx-auto grid max-w-[1320px] gap-10 lg:grid-cols-[0.7fr_1.3fr] lg:gap-20">
-          <AnimateIn variant="fade-up"><p className="mb-5 text-xs font-bold uppercase tracking-[0.2em] text-[#016936]">The people behind the work</p><h2 className="display-font max-w-[9ch] text-4xl font-medium leading-[1.05] tracking-[-0.04em] text-[#17241d] md:text-5xl">{peopleHeading}</h2><p className="mt-5 max-w-sm text-sm leading-6 text-[#59685d]">A team focused on building strong partnerships and reliable supply.</p></AnimateIn>
-          <div className="divide-y divide-[#d9e1da] border-t border-[#d9e1da]">
-            {members.map((person, i) => <AnimateIn key={person.name} variant="fade-up" delay={i * 55} duration={450}><article className="grid gap-3 py-6 sm:grid-cols-[0.7fr_1.3fr] sm:gap-8"><div><h3 className="text-lg font-semibold text-[#17241d]">{person.name}</h3><p className="mt-1 text-[10px] font-bold uppercase tracking-[0.15em] text-[#016936]">{person.role}</p></div><p className="text-sm leading-6 text-[#59685d]">{person.bio}</p></article></AnimateIn>)}
+      {people.length > 0 && (
+        <section className="bg-[var(--surface)] px-5 py-16 sm:px-8 md:px-12 md:py-24 lg:px-16">
+          <div className="mx-auto grid max-w-[1320px] gap-8 lg:grid-cols-[0.65fr_1.35fr] lg:gap-20">
+            <h2 className="display-font max-w-[11ch] text-4xl font-semibold leading-[1.05] tracking-[-0.04em] text-[var(--ink)] md:text-5xl [text-wrap:balance]">{typeof peopleContent.heading === "string" ? peopleContent.heading : "Our team"}</h2>
+            <div className="divide-y divide-[var(--border)] border-y border-[var(--border)]">
+              {people.map((person) => (
+                <article key={person.name} className="grid gap-2 py-5 sm:grid-cols-[0.7fr_1.3fr] sm:gap-8 sm:py-6">
+                  <div>
+                    <h3 className="text-base font-semibold text-[var(--ink)]">{person.name}</h3>
+                    <p className="mt-1 text-sm leading-5 text-[var(--muted)]">{person.role}</p>
+                  </div>
+                  <p className="max-w-[64ch] text-sm leading-6 text-[var(--body)]">{person.bio}</p>
+                </article>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      <section className="bg-[#123d2a] px-5 py-16 text-white sm:px-8 md:px-12 md:py-20 lg:px-16">
-        <AnimateIn variant="fade-up"><div className="mx-auto flex max-w-[1320px] flex-col items-start justify-between gap-8 sm:flex-row sm:items-end"><div><p className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-[#b5eb71]">Let’s grow something good</p><h2 className="display-font max-w-[14ch] text-3xl font-medium leading-tight tracking-[-0.04em] md:text-5xl">{ctaBanner.heading}</h2><p className="mt-4 max-w-xl text-sm leading-6 text-white/70 md:text-base">{ctaBanner.subtitle}</p></div><Link href={ctaBanner.cta_href ?? "/contact"} className="inline-flex min-h-12 shrink-0 items-center bg-[#0df20d] px-6 text-sm font-bold text-[#102210] transition-colors hover:bg-[#c8f6c8] focus-visible:outline-white">{ctaBanner.cta_text}<span aria-hidden="true" className="ml-5 text-lg">↗</span></Link></div></AnimateIn>
+      <section className="bg-[#0d2b1c] px-5 py-14 text-white sm:px-8 md:px-12 md:py-16 lg:px-16">
+        <div className="mx-auto flex max-w-[1320px] flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+          <div>
+            <h2 className="display-font max-w-[16ch] text-3xl font-semibold leading-tight tracking-[-0.04em] sm:text-4xl [text-wrap:balance]">{ctaHeading}</h2>
+            {ctaSubtitle && <p className="mt-3 max-w-[58ch] text-sm leading-6 text-white/85">{ctaSubtitle}</p>}
+          </div>
+          <Link href={cta.cta_href ?? "/contact"} className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-full bg-[#a7f3d0] px-6 text-sm font-semibold text-[#064e3b] transition-transform hover:-translate-y-px active:translate-y-0">{ctaText}</Link>
+        </div>
       </section>
     </>
   );

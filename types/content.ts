@@ -50,6 +50,7 @@ export type Product = {
   icon: string | null;
   display_order: number;
   is_active: boolean;
+  public_reviewed: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -61,6 +62,7 @@ export type Stat = {
   label: string;
   sub: string | null;
   display_order: number;
+  public_reviewed: boolean;
 };
 
 /* ── Pillars ── */
@@ -72,6 +74,7 @@ export type Pillar = {
   description: string | null;
   icon: string | null;
   display_order: number;
+  public_reviewed: boolean;
 };
 
 /* ── FAQ ── */
@@ -81,6 +84,7 @@ export type FAQ = {
   answer: string;
   display_order: number;
   is_active: boolean;
+  public_reviewed: boolean;
 };
 
 /* ── Testimonial ── */
@@ -92,6 +96,7 @@ export type Testimonial = {
   author_image: string | null;
   is_active: boolean;
   display_order: number;
+  public_reviewed: boolean;
 };
 
 /* ── Contact submissions ── */

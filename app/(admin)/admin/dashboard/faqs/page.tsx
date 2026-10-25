@@ -7,6 +7,7 @@ const fields: FieldDef[] = [
   { key: "answer",        label: "Answer",         type: "textarea" },
   { key: "display_order", label: "Display Order",  type: "number" },
   { key: "is_active",     label: "Active",         type: "checkbox" },
+  { key: "public_reviewed", label: "Reviewed for public display", type: "checkbox" },
 ];
 
 export default async function FAQsPage() {
@@ -16,14 +17,14 @@ export default async function FAQsPage() {
     <>
       <h1 className="text-2xl font-black text-slate-900 mb-2">FAQs</h1>
       <p className="text-slate-500 text-sm mb-8">
-        Frequently asked questions on the contact page.
+        Manage answers shown on the contact page. Only active, reviewed answers appear publicly.
       </p>
 
       <CrudManager
         tableName="faqs"
         fields={fields}
         initialRows={faqs as unknown as Record<string, unknown>[]}
-        listColumns={["question", "display_order", "is_active"]}
+        listColumns={["question", "is_active", "public_reviewed"]}
       />
     </>
   );

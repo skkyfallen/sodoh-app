@@ -13,7 +13,7 @@ export default async function ProductsPage() {
     <>
       <h1 className="text-2xl font-black text-slate-900 mb-2">Products</h1>
       <p className="text-slate-500 text-sm mb-8">
-        Manage agricultural products shown on the public site.
+        Manage the catalogue. A product appears publicly when it is active and marked reviewed.
       </p>
 
       <ProductsManager initialProducts={(products ?? []) as Product[]} />

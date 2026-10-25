@@ -17,8 +17,7 @@ export default async function ContentPage() {
           Site Content
         </h1>
         <p className="text-sm text-slate-500">
-          Edit text, links, and structured content across every public page.
-          Changes go live within 60 seconds.
+          Edit copy, links, and structured content across the public site. Mark a section reviewed only after its claims are checked.
         </p>
       </div>
 

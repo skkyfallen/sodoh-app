@@ -7,6 +7,7 @@ const fields: FieldDef[] = [
   { key: "label",         label: "Label" },
   { key: "sub",           label: "Sub-text",       type: "text" },
   { key: "display_order", label: "Display Order",  type: "number" },
+  { key: "public_reviewed", label: "Reviewed for public display", type: "checkbox" },
 ];
 
 export default async function StatsPage() {
@@ -16,14 +17,14 @@ export default async function StatsPage() {
     <>
       <h1 className="text-2xl font-black text-slate-900 mb-2">Stats</h1>
       <p className="text-slate-500 text-sm mb-8">
-        Manage the stat counters shown in hero sections and the stats band.
+        Add only metrics you can substantiate. A metric appears publicly after it is marked reviewed.
       </p>
 
       <CrudManager
         tableName="stats"
         fields={fields}
         initialRows={stats as unknown as Record<string, unknown>[]}
-        listColumns={["value", "label", "display_order"]}
+        listColumns={["value", "label", "public_reviewed", "display_order"]}
       />
     </>
   );

@@ -9,6 +9,7 @@ const fields: FieldDef[] = [
   { key: "description",   label: "Description",    type: "textarea" },
   { key: "icon",          label: "Icon (e.g. MdSpa)" },
   { key: "display_order", label: "Display Order",  type: "number" },
+  { key: "public_reviewed", label: "Reviewed for public display", type: "checkbox" },
 ];
 
 export default async function PillarsPage() {
@@ -18,14 +19,14 @@ export default async function PillarsPage() {
     <>
       <h1 className="text-2xl font-black text-slate-900 mb-2">Pillars</h1>
       <p className="text-slate-500 text-sm mb-8">
-        Quality Guarantee section items.
+        Manage the sourcing steps shown on the homepage. Unreviewed items stay out of the public view.
       </p>
 
       <CrudManager
         tableName="pillars"
         fields={fields}
         initialRows={pillars as unknown as Record<string, unknown>[]}
-        listColumns={["step", "title", "tag", "display_order"]}
+        listColumns={["title", "tag", "public_reviewed", "display_order"]}
       />
     </>
   );

@@ -52,6 +52,7 @@ export type Database = {
           id: string
           is_active: boolean
           question: string
+          public_reviewed: boolean
           updated_at: string
         }
         Insert: {
@@ -61,6 +62,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           question: string
+          public_reviewed?: boolean
           updated_at?: string
         }
         Update: {
@@ -70,6 +72,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           question?: string
+          public_reviewed?: boolean
           updated_at?: string
         }
         Relationships: []
@@ -81,6 +84,7 @@ export type Database = {
           display_order: number
           icon: string | null
           id: string
+          public_reviewed: boolean
           step: string
           tag: string | null
           title: string
@@ -92,6 +96,7 @@ export type Database = {
           display_order?: number
           icon?: string | null
           id?: string
+          public_reviewed?: boolean
           step: string
           tag?: string | null
           title: string
@@ -103,6 +108,7 @@ export type Database = {
           display_order?: number
           icon?: string | null
           id?: string
+          public_reviewed?: boolean
           step?: string
           tag?: string | null
           title?: string
@@ -170,6 +176,7 @@ export type Database = {
           image_alt: string | null
           image_url: string | null
           is_active: boolean
+          public_reviewed: boolean
           region: string | null
           slug: string
           title: string
@@ -184,6 +191,7 @@ export type Database = {
           image_alt?: string | null
           image_url?: string | null
           is_active?: boolean
+          public_reviewed?: boolean
           region?: string | null
           slug: string
           title: string
@@ -198,6 +206,7 @@ export type Database = {
           image_alt?: string | null
           image_url?: string | null
           is_active?: boolean
+          public_reviewed?: boolean
           region?: string | null
           slug?: string
           title?: string
@@ -259,6 +268,7 @@ export type Database = {
           display_order: number
           id: string
           label: string
+          public_reviewed: boolean
           sub: string | null
           updated_at: string
           value: string
@@ -268,6 +278,7 @@ export type Database = {
           display_order?: number
           id?: string
           label: string
+          public_reviewed?: boolean
           sub?: string | null
           updated_at?: string
           value: string
@@ -277,6 +288,7 @@ export type Database = {
           display_order?: number
           id?: string
           label?: string
+          public_reviewed?: boolean
           sub?: string | null
           updated_at?: string
           value?: string
@@ -292,6 +304,7 @@ export type Database = {
           display_order: number
           id: string
           is_active: boolean
+          public_reviewed: boolean
           quote: string
           updated_at: string
         }
@@ -303,6 +316,7 @@ export type Database = {
           display_order?: number
           id?: string
           is_active?: boolean
+          public_reviewed?: boolean
           quote: string
           updated_at?: string
         }
@@ -314,6 +328,7 @@ export type Database = {
           display_order?: number
           id?: string
           is_active?: boolean
+          public_reviewed?: boolean
           quote?: string
           updated_at?: string
         }

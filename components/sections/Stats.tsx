@@ -3,23 +3,25 @@ import type { Stat } from "@/types/content";
 
 type Props = { stats: Stat[] };
 
+/** Render only metrics supplied by the content source; never fill missing proof with demo figures. */
 export default function Stats({ stats }: Props) {
   if (!stats.length) return null;
 
   return (
-    <section aria-label="Sodoh Nigeria in numbers" className="relative overflow-hidden bg-[#123d2a] px-5 py-16 text-white sm:px-8 md:px-12 md:py-20 lg:px-16">
-      <div aria-hidden="true" className="absolute inset-y-0 right-0 hidden w-[34%] border-l border-white/10 lg:block" />
-      <div className="relative mx-auto grid max-w-[1320px] gap-10 lg:grid-cols-[0.7fr_1.3fr] lg:items-center lg:gap-16">
-        <AnimateIn variant="fade-up">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#b5eb71]">The work in numbers</p>
-          <p className="display-font mt-4 max-w-[12ch] text-3xl font-medium leading-tight tracking-[-0.03em] sm:text-4xl">A stronger harvest begins together.</p>
+    <section aria-label="Sodoh Nigeria in numbers" className="bg-[#0d2b1c] px-5 py-14 text-white sm:px-8 md:px-12 md:py-16 lg:px-16">
+      <div className="mx-auto grid max-w-[1320px] gap-8 md:grid-cols-[0.75fr_1.25fr] md:items-center md:gap-12">
+        <AnimateIn>
+          <h2 className="display-font max-w-[14ch] text-3xl font-semibold leading-tight tracking-[-0.04em] sm:text-4xl">
+            Sodoh, at a glance
+          </h2>
         </AnimateIn>
-        <div className="grid grid-cols-2 gap-x-6 gap-y-8 border-t border-white/20 pt-7 sm:grid-cols-3 lg:border-t-0 lg:pt-0">
-          {stats.map((stat, i) => (
-            <AnimateIn key={stat.label} variant="fade-up" delay={i * 70} duration={500}>
+        <div className="grid grid-cols-2 gap-x-6 gap-y-7 border-t border-white/25 pt-6 sm:grid-cols-3 md:border-t-0 md:pt-0">
+          {stats.map((stat) => (
+            <AnimateIn key={stat.id}>
               <div className="min-w-0">
-                <span className="display-font text-4xl font-medium tracking-[-0.04em] text-[#d6f28c] sm:text-5xl">{stat.value}</span>
-                <p className="mt-2 max-w-[16ch] text-xs font-semibold leading-5 text-white/80 sm:text-sm">{stat.label}</p>
+                <span className="display-font text-3xl font-semibold tracking-[-0.04em] text-[#a7f3d0] sm:text-4xl">{stat.value}</span>
+                <p className="mt-2 text-sm font-semibold leading-5 text-white">{stat.label}</p>
+                {stat.sub && <p className="mt-1 max-w-[25ch] text-sm leading-5 text-white/80">{stat.sub}</p>}
               </div>
             </AnimateIn>
           ))}
