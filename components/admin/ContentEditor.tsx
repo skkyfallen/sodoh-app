@@ -57,15 +57,16 @@ export default function ContentEditor({ pages }: Props) {
   return (
     <div>
       {/* Tabs */}
-      <div className="flex gap-2 mb-6">
+      <div className="mb-7 flex flex-wrap gap-2 border-b border-[#dce4dc] pb-4" role="group" aria-label="Site pages">
         {Object.keys(pages).map((page) => (
           <button
             key={page}
             onClick={() => setActiveTab(page)}
-            className={`px-4 py-2 rounded-lg text-sm font-bold transition-colors ${
+            aria-pressed={activeTab === page}
+            className={`px-4 py-2 text-sm font-bold transition-colors ${
               activeTab === page
                 ? "bg-[#016936] text-white"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                : "bg-white text-slate-600 hover:bg-[#eaf0e8]"
             }`}
           >
             {PAGE_LABELS[page] ?? page}
@@ -76,7 +77,7 @@ export default function ContentEditor({ pages }: Props) {
       {/* Sections */}
       <div className="flex flex-col gap-6">
         {sections.map(([section, fields]) => (
-          <div key={section} className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+          <div key={section} className="border-t border-slate-200 bg-white px-5 py-6 sm:px-7">
             <h3 className="text-lg font-bold text-slate-900 capitalize mb-4">
               {section.replace(/_/g, " ")}
             </h3>
@@ -103,14 +104,14 @@ export default function ContentEditor({ pages }: Props) {
                           }
                           updateField(section, key, parsed as string);
                         }}
-                        className="w-full rounded-lg border border-slate-200 px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#016936] resize-y"
+                        className="w-full rounded-sm border border-slate-200 bg-[#f7f8f4] px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#016936]/15 resize-y"
                       />
                     ) : (
                       <input
                         type="text"
                         value={strVal}
                         onChange={(e) => updateField(section, key, e.target.value)}
-                        className="w-full h-10 rounded-lg border border-slate-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#016936]"
+                        className="h-11 w-full rounded-sm border border-slate-200 bg-[#f7f8f4] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#016936]/15"
                       />
                     )}
                   </div>
@@ -126,7 +127,7 @@ export default function ContentEditor({ pages }: Props) {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="h-10 px-6 rounded-lg bg-[#016936] text-white font-bold text-sm hover:bg-[#015a2d] disabled:opacity-60 transition-all"
+          className="min-h-11 bg-[#016936] px-6 text-sm font-bold text-white transition-colors hover:bg-[#014e29] disabled:opacity-60"
         >
           {saving ? "Saving…" : "Save Changes"}
         </button>

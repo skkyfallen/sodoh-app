@@ -50,16 +50,17 @@ export default function ContactForm() {
   };
 
   return (
-    <AnimateIn variant="fade-right" duration={700} threshold={0.1}>
-      <h3 className="text-2xl font-bold mb-6">Send us a Message</h3>
+    <AnimateIn variant="fade-up" duration={550} threshold={0.1}>
+      <p className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-[#016936]">Start a conversation</p>
+      <h3 className="display-font mb-7 text-3xl font-medium tracking-[-0.04em] text-[#17241d] md:text-4xl">Send us a message</h3>
 
       {status === "success" && (
-        <div className="mb-6 rounded-xl bg-[#0df20d]/10 border border-[#0df20d]/30 px-5 py-4 text-sm font-semibold text-[#0ac20a]">
+        <div role="status" className="mb-6 border border-[#a8c6a9] bg-[#edf5eb] px-5 py-4 text-sm font-semibold text-[#145c34]">
           ✓ Your message has been sent! We&apos;ll get back to you within 3–5 business days.
         </div>
       )}
       {status === "error" && (
-        <div className="mb-6 rounded-xl bg-red-50 border border-red-200 px-5 py-4 text-sm font-semibold text-red-600">
+        <div role="alert" className="mb-6 border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700">
           Something went wrong. Please try again or email us directly.
         </div>
       )}
@@ -67,41 +68,41 @@ export default function ContactForm() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         {/* Full Name */}
         <div className="flex flex-col gap-2">
-          <label htmlFor="name" className="text-sm font-semibold text-slate-800">
+          <label htmlFor="contact-name" className="text-sm font-semibold text-[#34463a]">
             Full Name
           </label>
           <input
-            id="name"
+            id="contact-name"
             name="name"
             type="text"
             required
             value={form.name}
             onChange={handleChange}
             placeholder="John Doe"
-            className="w-full rounded-lg border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#0df20d] focus:border-[#0df20d] h-12 px-4 text-sm transition-all"
+            className="h-12 w-full border border-[#cbd5cb] bg-white px-4 text-sm text-[#17241d] transition-colors placeholder:text-[#7a887e] focus:border-[#016936] focus:outline-none focus:ring-2 focus:ring-[#016936]/15"
           />
         </div>
 
         {/* Email */}
         <div className="flex flex-col gap-2">
-          <label htmlFor="email" className="text-sm font-semibold text-slate-800">
+          <label htmlFor="contact-email" className="text-sm font-semibold text-[#34463a]">
             Email Address
           </label>
           <input
-            id="email"
+            id="contact-email"
             name="email"
             type="email"
             required
             value={form.email}
             onChange={handleChange}
             placeholder="john@example.com"
-            className="w-full rounded-lg border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#0df20d] focus:border-[#0df20d] h-12 px-4 text-sm transition-all"
+            className="h-12 w-full border border-[#cbd5cb] bg-white px-4 text-sm text-[#17241d] transition-colors placeholder:text-[#7a887e] focus:border-[#016936] focus:outline-none focus:ring-2 focus:ring-[#016936]/15"
           />
         </div>
 
         {/* Subject */}
         <div className="flex flex-col gap-2">
-          <label htmlFor="subject" className="text-sm font-semibold text-slate-800">
+          <label htmlFor="subject" className="text-sm font-semibold text-[#34463a]">
             Subject
           </label>
           <select
@@ -109,7 +110,7 @@ export default function ContactForm() {
             name="subject"
             value={form.subject}
             onChange={handleChange}
-            className="w-full rounded-lg border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#0df20d] focus:border-[#0df20d] h-12 px-4 text-sm transition-all"
+            className="h-12 w-full border border-[#cbd5cb] bg-white px-4 text-sm text-[#17241d] transition-colors focus:border-[#016936] focus:outline-none focus:ring-2 focus:ring-[#016936]/15"
           >
             {subjects.map((s) => (
               <option key={s}>{s}</option>
@@ -119,25 +120,25 @@ export default function ContactForm() {
 
         {/* Message */}
         <div className="flex flex-col gap-2">
-          <label htmlFor="message" className="text-sm font-semibold text-slate-800">
+          <label htmlFor="contact-message" className="text-sm font-semibold text-[#34463a]">
             Message
           </label>
           <textarea
-            id="message"
+            id="contact-message"
             name="message"
             required
             rows={5}
             value={form.message}
             onChange={handleChange}
             placeholder="How can we help you?"
-            className="w-full rounded-lg border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#0df20d] focus:border-[#0df20d] p-4 text-sm resize-none transition-all"
+            className="w-full resize-y border border-[#cbd5cb] bg-white p-4 text-sm text-[#17241d] transition-colors placeholder:text-[#7a887e] focus:border-[#016936] focus:outline-none focus:ring-2 focus:ring-[#016936]/15"
           />
         </div>
 
         <button
           type="submit"
           disabled={status === "loading"}
-          className="w-full md:w-max px-12 h-12 bg-[#0df20d] text-[#102210] font-bold rounded-lg transition-all hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex min-h-12 w-full items-center justify-center bg-[#016936] px-8 text-sm font-bold text-white transition-colors hover:bg-[#014e29] disabled:cursor-not-allowed disabled:opacity-60 md:w-max"
         >
           {status === "loading" ? "Sending…" : "Send Message"}
         </button>

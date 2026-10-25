@@ -2,15 +2,114 @@
 
 @theme {
   /* Sodoh Nigeria Limited brand colours */
-  --color-primary: #0df20d;
-  --color-primary-dark: #0ac20a;
+  --color-primary: #016936;
+  --color-primary-dark: #014e29;
+  --color-accent: #0df20d;
   --color-bg-light: #f5f8f5;
   --color-bg-dark: #102210;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   background-color: var(--color-bg-light);
-  color: #0f172a;
-  /* font will be set via inline style from root layout (Poppins) */
-  font-family: var(--font-poppins), system-ui, sans-serif;
+  color: #17241d;
+  font-family: var(--font-body), sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display), sans-serif;
+}
+
+.display-font {
+  font-family: var(--font-display), sans-serif;
+}
+
+::selection {
+  color: #fff;
+  background: #016936;
+}
+
+:focus-visible {
+  outline: 3px solid #016936;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  [data-animate-in] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Admin workspace: restrained surfaces and readable controls. */
+.admin-shell {
+  min-height: 100vh;
+  background: #f3f6f2;
+  color: #17241d;
+}
+
+.admin-shell main h1 {
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  color: #17241d;
+}
+
+.admin-shell input:not([type="checkbox"]),
+.admin-shell textarea,
+.admin-shell select {
+  border-color: #d5ded7;
+  background-color: #fff;
+}
+
+.admin-shell main .border-slate-200,
+.admin-shell main .border-slate-100 {
+  border-color: #dce4dc;
+}
+
+.admin-shell main .bg-slate-50 {
+  background-color: #f4f7f3;
+}
+
+.admin-shell main .text-slate-500 {
+  color: #5b6b60;
+}
+
+.admin-shell main .text-slate-400 {
+  color: #657268;
+}
+
+.admin-shell main .text-green-600 {
+  color: #016936;
+}
+
+.admin-shell main .shadow-sm {
+  box-shadow: 0 1px 2px rgb(16 43 32 / 3%);
+}
+
+.admin-shell input:focus,
+.admin-shell textarea:focus,
+.admin-shell select:focus {
+  border-color: #016936;
+  box-shadow: 0 0 0 3px rgb(1 105 54 / 12%);
+}
+
+.admin-shell table thead tr {
+  background: #f4f7f4;
+}
+
+.admin-shell table tbody tr:last-child {
+  border-bottom: 0;
 }

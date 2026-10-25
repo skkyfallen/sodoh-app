@@ -1,44 +1,27 @@
 "use client";
 
-import { useRef, useEffect, useState, type ReactNode, type CSSProperties } from "react";
+import { motion, useReducedMotion } from "motion/react";
+import type { CSSProperties, ReactNode } from "react";
 
 type AnimVariant = "fade-up" | "fade-down" | "fade-left" | "fade-right" | "fade" | "zoom";
 
 interface AnimateInProps {
   children: ReactNode;
   variant?: AnimVariant;
-  delay?: number;          // ms
-  duration?: number;       // ms
+  delay?: number;
+  duration?: number;
   threshold?: number;
   className?: string;
   style?: CSSProperties;
 }
 
-const variants: Record<AnimVariant, { hidden: CSSProperties; visible: CSSProperties }> = {
-  "fade-up": {
-    hidden: { opacity: 0, transform: "translateY(40px)" },
-    visible: { opacity: 1, transform: "translateY(0)" },
-  },
-  "fade-down": {
-    hidden: { opacity: 0, transform: "translateY(-40px)" },
-    visible: { opacity: 1, transform: "translateY(0)" },
-  },
-  "fade-left": {
-    hidden: { opacity: 0, transform: "translateX(-40px)" },
-    visible: { opacity: 1, transform: "translateX(0)" },
-  },
-  "fade-right": {
-    hidden: { opacity: 0, transform: "translateX(40px)" },
-    visible: { opacity: 1, transform: "translateX(0)" },
-  },
-  fade: {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 },
-  },
-  zoom: {
-    hidden: { opacity: 0, transform: "scale(0.85)" },
-    visible: { opacity: 1, transform: "scale(1)" },
-  },
+const variants: Record<AnimVariant, { hidden: Record<string, number>; visible: Record<string, number> }> = {
+  "fade-up": { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0 } },
+  "fade-down": { hidden: { opacity: 0, y: -24 }, visible: { opacity: 1, y: 0 } },
+  "fade-left": { hidden: { opacity: 0, x: -24 }, visible: { opacity: 1, x: 0 } },
+  "fade-right": { hidden: { opacity: 0, x: 24 }, visible: { opacity: 1, x: 0 } },
+  fade: { hidden: { opacity: 0 }, visible: { opacity: 1 } },
+  zoom: { hidden: { opacity: 0, scale: 0.96 }, visible: { opacity: 1, scale: 1 } },
 };
 
 export default function AnimateIn({
@@ -50,40 +33,24 @@ export default function AnimateIn({
   className = "",
   style = {},
 }: AnimateInProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [inView, setInView] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          observer.disconnect();
-        }
-      },
-      { threshold }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [threshold]);
-
-  const { hidden, visible } = variants[variant];
+  const prefersReducedMotion = useReducedMotion();
+  const animation = variants[variant];
 
   return (
-    <div
-      ref={ref}
+    <motion.div
       className={className}
-      style={{
-        ...style,
-        ...(inView ? visible : hidden),
-        transition: `opacity ${duration}ms ease, transform ${duration}ms ease`,
-        transitionDelay: `${delay}ms`,
-        willChange: "opacity, transform",
+      data-animate-in
+      initial={prefersReducedMotion ? false : animation.hidden}
+      whileInView={animation.visible}
+      viewport={{ once: true, amount: threshold }}
+      transition={{
+        duration: prefersReducedMotion ? 0 : duration / 1000,
+        delay: prefersReducedMotion ? 0 : delay / 1000,
+        ease: [0.22, 1, 0.36, 1],
       }}
+      style={style}
     >
       {children}
-    </div>
+    </motion.div>
   );
 }

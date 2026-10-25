@@ -1,94 +1,50 @@
 import AnimateIn from "@/components/ui/AnimateIn";
-import { MdSpa, MdVerified, MdHandshake } from 'react-icons/md';
+import { MdSpa, MdVerified, MdHandshake } from "react-icons/md";
 import type { Pillar } from "@/types/content";
 import type { IconType } from "react-icons";
 
-const iconMap: Record<string, IconType> = {
-  MdSpa,
-  MdVerified,
-  MdHandshake,
-};
+const iconMap: Record<string, IconType> = { MdSpa, MdVerified, MdHandshake };
 
-const indents = ["ml-0", "ml-0 md:ml-10", "ml-0 md:ml-20"];
-
-type Props = {
-  pillars: Pillar[];
-};
+type Props = { pillars: Pillar[] };
 
 export default function CorePillars({ pillars }: Props) {
   return (
-    <section id="products" className="px-6 py-20 md:px-20 bg-white">
-      {/* Heading */}
-      <AnimateIn variant="fade-up" threshold={0.2}>
-        <div className="text-center mb-20 flex flex-col items-center">
-          <AnimateIn variant="zoom" delay={50} duration={600}>
-            <div className="group text-center">
-              <h2 className="text-[#016936] text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4 transform transition-transform hover:scale-105">
-                Quality Guarantee
-              </h2>
-              <div className="mx-auto w-16 h-1 bg-[#016936] rounded-full transition-transform duration-300 transform origin-center group-hover:scale-x-[2.5]" />
-            </div>
-          </AnimateIn>
-        </div>
-      </AnimateIn>
+    <section id="products" className="bg-white px-5 py-20 sm:px-8 md:px-12 md:py-28 lg:px-16">
+      <div className="mx-auto grid max-w-[1320px] gap-14 lg:grid-cols-[0.75fr_1.25fr] lg:gap-24">
+        <AnimateIn variant="fade-up" className="max-w-md">
+          <p className="mb-6 text-xs font-bold uppercase tracking-[0.2em] text-[#016936]">Our promise</p>
+          <h2 className="max-w-[10ch] font-semibold text-[clamp(2.5rem,4.5vw,4.5rem)] leading-[1.02] tracking-[-0.05em] text-[#17241d]">
+            Quality, at every step.
+          </h2>
+          <p className="mt-6 max-w-sm text-base leading-7 text-[#59685d]">
+            Trust is built long before a shipment leaves the farm. We keep the same standards from the first seed to the final delivery.
+          </p>
+          <div className="mt-9 h-px w-20 bg-[#0df20d]" />
+        </AnimateIn>
 
-      {/* Ladder layout */}
-      <div className="relative flex flex-col gap-8 max-w-3xl mx-auto">
-        {/* Vertical connector line */}
-        <div className="absolute left-[27px] top-10 bottom-10 w-[2px] bg-gradient-to-b from-[#016936] via-[#016936]/40 to-transparent hidden md:block" />
-
-        {pillars.map((pillar, i) => (
-          <AnimateIn
-            key={pillar.step}
-            variant="fade-left"
-            delay={i * 180}
-            duration={650}
-            threshold={0.15}
-          >
-            <div className={`group relative flex items-start gap-6 ${indents[i] ?? "ml-0"}`}>
-              {/* Step circle on the line */}
-              <div className="shrink-0 relative z-10 flex items-center justify-center size-14 rounded-full border-2 border-[#016936] bg-white text-[#016936] font-black text-sm tracking-widest shadow-sm transition-all duration-300 group-hover:bg-[#016936] group-hover:text-white group-hover:shadow-lg">
-                {pillar.step}
-              </div>
-
-              {/* Card */}
-              <div className="flex-1 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-7 shadow-sm
-                transition-all duration-300
-                group-hover:border-[#016936]/60
-                group-hover:shadow-[0_8px_40px_rgba(1,105,54,0.12)]
-                group-hover:-translate-y-1
-              ">
-                {/* Icon + tag row */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center justify-center size-14 rounded-2xl bg-[#016936]/8 text-[#016936] transition-transform duration-300 group-hover:scale-110">
-                    {(() => {
-                      const Icon = iconMap[pillar.icon ?? ""] ?? MdSpa;
-                      return <Icon className="text-4xl" />;
-                    })()}
+        <div className="border-t border-[#d9e1da]">
+          {pillars.map((pillar, i) => {
+            const Icon = iconMap[pillar.icon ?? ""] ?? MdSpa;
+            return (
+              <AnimateIn key={pillar.step} variant="fade-up" delay={i * 70} duration={550}>
+                <article className="group grid grid-cols-[3.5rem_1fr] gap-4 border-b border-[#d9e1da] py-7 sm:grid-cols-[4rem_1fr_auto] sm:items-start sm:gap-6 sm:py-8">
+                  <span className="pt-1 font-mono text-xs font-semibold tracking-wider text-[#688171]">{pillar.step}</span>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                      <h3 className="display-font text-xl font-semibold tracking-tight text-[#17241d] sm:text-2xl">{pillar.title}</h3>
+                      {pillar.tag && <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#016936]">{pillar.tag}</span>}
+                    </div>
+                    <p className="mt-2 max-w-xl text-sm leading-6 text-[#59685d] sm:text-base sm:leading-7">{pillar.description}</p>
                   </div>
-                  {pillar.tag && (
-                    <span className="text-xs font-bold uppercase tracking-widest text-[#016936] bg-[#016936]/10 px-3 py-1 rounded-full border border-[#016936]/20">
-                      {pillar.tag}
-                    </span>
-                  )}
-                </div>
-
-                {/* Text */}
-                <div className="flex flex-col gap-1.5">
-                  <h3 className="text-slate-900 text-xl font-extrabold leading-tight tracking-tight">
-                    {pillar.title}
-                  </h3>
-                  <p className="text-slate-500 text-sm leading-relaxed">
-                    {pillar.description}
-                  </p>
-                </div>
-
-                {/* Bottom bar that grows on hover */}
-                <div className="h-0.5 w-0 bg-[#016936] rounded-full transition-all duration-500 group-hover:w-full" />
-              </div>
-            </div>
-          </AnimateIn>
-        ))}
+                  <span className="hidden size-11 items-center justify-center rounded-full border border-[#d9e1da] text-[#016936] transition-colors group-hover:border-[#016936] group-hover:bg-[#016936] group-hover:text-white sm:flex" aria-hidden="true">
+                    <Icon className="text-xl" />
+                  </span>
+                </article>
+              </AnimateIn>
+            );
+          })}
+          {pillars.length === 0 && <p className="py-8 text-sm text-[#59685d]">Our quality standards are being updated. Please check back soon.</p>}
+        </div>
       </div>
     </section>
   );

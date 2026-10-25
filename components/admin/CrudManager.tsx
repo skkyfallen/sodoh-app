@@ -56,7 +56,7 @@ export default function CrudManager({ tableName, fields, initialRows, listColumn
 
     if (isNew) {
       const { data, error } = await supabase
-        .from(tableName)
+        .from(tableName as never)
         .insert(payload as never)
         .select()
         .single();
@@ -65,7 +65,7 @@ export default function CrudManager({ tableName, fields, initialRows, listColumn
       }
     } else {
       const { error } = await supabase
-        .from(tableName)
+        .from(tableName as never)
         .update(payload as never)
         .eq("id", editing.id as string);
       if (!error) {
@@ -83,7 +83,7 @@ export default function CrudManager({ tableName, fields, initialRows, listColumn
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this item?")) return;
-    const { error } = await supabase.from(tableName).delete().eq("id", id);
+    const { error } = await supabase.from(tableName as never).delete().eq("id", id);
     if (!error) {
       setRows((prev) => prev.filter((r) => (r.id as string) !== id));
     }
@@ -93,16 +93,16 @@ export default function CrudManager({ tableName, fields, initialRows, listColumn
     <div>
       <button
         onClick={openNew}
-        className="mb-6 h-10 px-5 rounded-lg bg-[#016936] text-white text-sm font-bold hover:bg-[#015a2d] transition-colors"
+        className="mb-6 inline-flex min-h-11 items-center gap-3 bg-[#016936] px-5 text-sm font-bold text-white transition-colors hover:bg-[#014e29]"
       >
-        + Add Item
+        <span aria-hidden="true" className="text-lg leading-none">+</span> Add item
       </button>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden overflow-x-auto">
+      <div className="overflow-x-auto border border-slate-200 bg-white">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-slate-50 border-b border-slate-200">
+            <tr className="border-b border-slate-200 bg-slate-50">
               {colKeys.map((k) => (
                 <th key={k} className="text-left px-4 py-3 font-bold text-slate-600 capitalize whitespace-nowrap">
                   {k.replace(/_/g, " ")}
@@ -113,7 +113,7 @@ export default function CrudManager({ tableName, fields, initialRows, listColumn
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.id as string} className="border-b border-slate-100 hover:bg-slate-50">
+              <tr key={row.id as string} className="border-b border-slate-100 transition-colors hover:bg-slate-50">
                 {colKeys.map((k) => (
                   <td key={k} className="px-4 py-3 text-slate-700 max-w-xs truncate">
                     {typeof row[k] === "boolean"
@@ -124,10 +124,10 @@ export default function CrudManager({ tableName, fields, initialRows, listColumn
                   </td>
                 ))}
                 <td className="px-4 py-3 text-right whitespace-nowrap">
-                  <button onClick={() => openEdit(row)} className="text-[#016936] font-semibold hover:underline mr-3">
+                  <button onClick={() => openEdit(row)} className="mr-3 font-semibold text-[#016936] hover:underline">
                     Edit
                   </button>
-                  <button onClick={() => handleDelete(row.id as string)} className="text-red-500 font-semibold hover:underline">
+                  <button onClick={() => handleDelete(row.id as string)} className="font-semibold text-red-700 hover:underline">
                     Delete
                   </button>
                 </td>
@@ -147,7 +147,7 @@ export default function CrudManager({ tableName, fields, initialRows, listColumn
       {/* Edit Modal */}
       {editing && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
+          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto border border-[#dce4dc] bg-[#f8f8f2] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.22)]">
             <h2 className="text-xl font-black text-slate-900 mb-6">
               {isNew ? "Add Item" : "Edit Item"}
             </h2>

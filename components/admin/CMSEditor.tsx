@@ -129,7 +129,7 @@ function FieldInput({
   const isUrl = URL_FIELDS.has(fieldKey);
 
   const baseClasses =
-    "w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#016936] focus:border-transparent focus:bg-white transition-all";
+    "w-full rounded-sm border border-slate-200 bg-[#f7f8f4] px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#016936]/15 focus:border-[#016936] focus:bg-white transition-colors";
 
   if (isLong) {
     return (
@@ -184,15 +184,15 @@ function SectionCard({
   const description = getSectionDescription(page, section);
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div className="border-y border-slate-200 bg-white">
       {/* Header — click to toggle */}
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-slate-50 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-5 text-left transition-colors hover:bg-slate-50 sm:px-5"
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="size-8 rounded-lg bg-[#016936]/10 flex items-center justify-center shrink-0">
+            <div className="size-8 bg-[#eaf0e8] flex items-center justify-center shrink-0">
             <span className="text-xs font-black text-[#016936] uppercase">
               {section.slice(0, 2)}
             </span>
@@ -220,7 +220,7 @@ function SectionCard({
 
       {/* Body */}
       {open && (
-        <div className="border-t border-slate-100 px-5 py-5 space-y-5">
+        <div className="border-t border-slate-100 bg-[#fbfcf9] px-4 py-5 space-y-5 sm:px-6">
           {fieldEntries.map(([key, val]) => (
             <div key={key}>
               <label className="flex items-center gap-1.5 text-xs font-bold text-slate-600 uppercase tracking-wide mb-1.5">
@@ -243,7 +243,7 @@ function SectionCard({
               type="button"
               onClick={onSave}
               disabled={saving}
-              className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-[#016936] text-white text-xs font-bold hover:bg-[#015a2d] disabled:opacity-60 disabled:cursor-not-allowed transition-all"
+              className="inline-flex min-h-10 items-center gap-2 bg-[#016936] px-4 text-xs font-bold text-white transition-colors hover:bg-[#014e29] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? (
                 <>
@@ -302,10 +302,10 @@ function PageGroup({
       <button
         type="button"
         onClick={() => setCollapsed(!collapsed)}
-        className="w-full flex items-center justify-between py-3 text-left"
+        className="w-full flex items-center justify-between border-b border-[#dce4dc] py-5 text-left"
       >
         <div className="flex items-center gap-3">
-          <div className="size-10 rounded-xl bg-[#016936] flex items-center justify-center shrink-0">
+          <div className="size-10 bg-[#016936] flex items-center justify-center shrink-0">
             <Icon className="text-xl text-white" />
           </div>
           <div>
