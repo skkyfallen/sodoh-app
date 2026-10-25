@@ -1,50 +1,51 @@
 import AnimateIn from "@/components/ui/AnimateIn";
 import Image from "next/image";
-import { MdFormatQuote } from 'react-icons/md';
+import { MdFormatQuote } from "react-icons/md";
 import type { Testimonial as TestimonialType } from "@/types/content";
 
-type Props = {
-  testimonials: TestimonialType[];
-};
+type Props = { testimonials: TestimonialType[] };
 
 export default function Testimonial({ testimonials }: Props) {
   if (!testimonials.length) return null;
-  const t = testimonials[0]; // show first active testimonial
+  const testimonial = testimonials[0];
 
   return (
-    <section className="px-6 py-24 md:px-20 bg-[#0df20d]/5">
-      <div className="max-w-4xl mx-auto flex flex-col items-center text-center gap-8">
-        <AnimateIn variant="fade" delay={0} duration={700}>
-          <div className="text-[#0df20d] opacity-20">
-            <MdFormatQuote style={{ fontSize: "5rem" }} />
+    <section className="bg-[#f3f2e9] px-5 py-20 sm:px-8 md:px-12 md:py-28 lg:px-16">
+      <div className="mx-auto grid max-w-[1320px] gap-12 lg:grid-cols-[0.42fr_1.58fr] lg:gap-20">
+        <AnimateIn variant="fade-up" className="flex flex-col justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#016936]">A partner’s perspective</p>
+            <MdFormatQuote aria-hidden="true" className="mt-10 text-6xl text-[#016936]/35" />
           </div>
+          {testimonial.author_image ? (
+            <div className="relative mt-8 hidden aspect-[4/5] overflow-hidden bg-[#d8dfd3] lg:block">
+              <Image
+                src={testimonial.author_image}
+                alt={`${testimonial.author_name}${testimonial.author_role ? `, ${testimonial.author_role}` : ""}`}
+                fill
+                sizes="(max-width: 1024px) 0px, 300px"
+                className="object-cover"
+              />
+            </div>
+          ) : (
+            <div className="mt-8 hidden border-l-2 border-[#0df20d] pl-4 text-sm leading-6 text-[#59685d] lg:block">
+              Built through lasting relationships with growers and buyers.
+            </div>
+          )}
         </AnimateIn>
-
-        <AnimateIn variant="fade-up" delay={150} duration={700}>
-          <blockquote className="text-slate-900 text-2xl md:text-3xl font-bold leading-relaxed italic">
-            &ldquo;{t.quote}&rdquo;
+        <AnimateIn variant="fade-up" delay={100} duration={700}>
+          <blockquote className="display-font max-w-4xl text-[clamp(1.9rem,4vw,3.8rem)] font-medium leading-[1.14] tracking-[-0.04em] text-[#17241d]">
+            “{testimonial.quote}”
           </blockquote>
-        </AnimateIn>
-
-        <AnimateIn variant="zoom" delay={350} duration={600}>
-          <div className="flex flex-col items-center gap-2">
-            {t.author_image && (
-              <div className="size-16 rounded-full bg-cover bg-center border-2 border-[#0df20d] relative overflow-hidden">
-                <Image
-                  src={t.author_image}
-                  alt={`${t.author_name}, ${t.author_role ?? ""}`}
-                  width={64}
-                  height={64}
-                  className="object-cover w-full h-full"
-                  priority={false}
-                />
+          <div className="mt-10 flex items-center gap-4 border-t border-[#d4d8cd] pt-6">
+            {testimonial.author_image && (
+              <div className="relative size-12 overflow-hidden rounded-full bg-[#d8dfd3] lg:hidden">
+                <Image src={testimonial.author_image} alt="" fill sizes="48px" className="object-cover" />
               </div>
             )}
             <div>
-              <p className="text-slate-900 font-black text-lg">{t.author_name}</p>
-              {t.author_role && (
-                <p className="text-[#0ac20a] font-bold text-sm">{t.author_role}</p>
-              )}
+              <p className="font-semibold text-[#17241d]">{testimonial.author_name}</p>
+              {testimonial.author_role && <p className="mt-1 text-sm text-[#59685d]">{testimonial.author_role}</p>}
             </div>
           </div>
         </AnimateIn>

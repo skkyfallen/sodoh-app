@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import AnimateIn from "@/components/ui/AnimateIn";
 import {
   MdEco,
   MdVerified,
   MdHandshake,
   MdPublic,
-  MdPerson,
 } from "react-icons/md";
 import type { IconType } from "react-icons";
 import { getPageContent, getStats } from "@/lib/data";
@@ -211,288 +211,92 @@ export default async function AboutPage() {
     return (
       <>
         {before}
-        <span className="relative inline-block">
-          <span className="relative z-10 text-white px-2">{word}</span>
-          <span
-            aria-hidden="true"
-            className="absolute inset-0 bg-[#016936] rounded-md -skew-x-2"
-          />
-        </span>{" "}
+        <span className="text-[#a9dd73]">{word}</span>
         {after}
       </>
     );
   };
 
+  const bodyParagraphs = operations.body.split("\n\n").filter(Boolean);
+  const sentences = bodyParagraphs.length === 1 && operations.body.length > 400
+    ? operations.body.match(/[^.!?]+[.!?]+/g)?.map((sentence) => sentence.trim()) ?? bodyParagraphs
+    : [];
+  const paragraphs = sentences.length > 2
+    ? [sentences.slice(0, Math.ceil(sentences.length / 2)).join(" "), sentences.slice(Math.ceil(sentences.length / 2)).join(" ")]
+    : bodyParagraphs;
+
   return (
     <>
-      {/* ── Hero ── */}
-      <section className="bg-white px-6 pt-20 pb-24 md:px-20 md:pt-28 md:pb-32">
-        <div className="w-full flex flex-col lg:flex-row lg:items-center lg:gap-16">
-          {/* Text column */}
-          <div className="flex-1 flex flex-col items-start">
-            {hero.badge && (
-              <AnimateIn variant="fade-left" delay={80} duration={700}>
-                <div className="border-l-4 border-[#016936] pl-3 mb-8">
-                  <span className="text-[#016936] text-xs font-bold uppercase tracking-widest">
-                    {hero.badge}
-                  </span>
-                </div>
-              </AnimateIn>
-            )}
-
-            <AnimateIn variant="fade-left" delay={200} duration={700}>
-              <h1 className="text-slate-900 text-4xl font-black leading-[1.1] tracking-tight md:text-5xl lg:text-6xl max-w-[90vw] lg:max-w-none">
-                {renderTitle()}
-              </h1>
-            </AnimateIn>
-
-            {hero.subtitle && (
-              <AnimateIn variant="fade-left" delay={360} duration={700}>
-                <p className="text-slate-800 font-semibold text-base md:text-lg leading-relaxed max-w-[95vw] lg:max-w-[60vw] mt-7">
-                  {hero.subtitle}
-                </p>
-              </AnimateIn>
-            )}
-
-            <AnimateIn variant="fade-left" delay={500} duration={700}>
-              <div className="flex flex-col sm:flex-row gap-4 mt-10">
-                {hero.cta_primary_text && hero.cta_primary_href && (
-                  <Link
-                    href={hero.cta_primary_href}
-                    className="flex items-center justify-center rounded-full h-12 px-8 bg-[#016936] text-white text-base font-bold transition-all hover:shadow-lg hover:shadow-[#016936]/30 hover:scale-[1.03]"
-                  >
-                    {hero.cta_primary_text}
-                  </Link>
-                )}
-                {hero.cta_secondary_text && hero.cta_secondary_href && (
-                  <Link
-                    href={hero.cta_secondary_href}
-                    className="flex items-center justify-center rounded-full h-12 px-8 bg-transparent text-slate-900 border border-slate-300 text-base font-bold transition-all hover:bg-slate-100"
-                  >
-                    {hero.cta_secondary_text}
-                  </Link>
-                )}
+      <section className="bg-[#123d2a] px-5 py-12 text-white sm:px-8 md:px-12 md:py-20 lg:px-16">
+        <div className="mx-auto grid max-w-[1440px] items-center gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+          <div className="py-4 lg:py-10">
+            <AnimateIn variant="fade-up">
+              {hero.badge && <p className="mb-7 text-xs font-bold uppercase tracking-[0.2em] text-[#b5eb71]">{hero.badge}</p>}
+              <h1 className="display-font max-w-[12ch] text-[clamp(2.9rem,5.8vw,5.7rem)] font-medium leading-[0.98] tracking-[-0.055em]">{renderTitle()}</h1>
+              {hero.subtitle && <p className="mt-7 max-w-lg text-base leading-7 text-white/75 md:text-lg md:leading-8">{hero.subtitle}</p>}
+              <div className="mt-9 flex flex-wrap gap-3">
+                {hero.cta_primary_text && hero.cta_primary_href && <Link href={hero.cta_primary_href} className="inline-flex min-h-12 items-center bg-[#0df20d] px-6 text-sm font-bold text-[#102210] transition-colors hover:bg-[#c8f6c8] focus-visible:outline-white">{hero.cta_primary_text}<span aria-hidden="true" className="ml-5 text-lg">↗</span></Link>}
+                {hero.cta_secondary_text && hero.cta_secondary_href && <Link href={hero.cta_secondary_href} className="inline-flex min-h-12 items-center border border-white/35 px-6 text-sm font-bold text-white transition-colors hover:border-white focus-visible:outline-white">{hero.cta_secondary_text}</Link>}
               </div>
             </AnimateIn>
           </div>
+          <AnimateIn variant="fade" delay={100} duration={750}>
+            <figure className="relative min-h-[360px] overflow-hidden rounded-t-[10rem] rounded-b-sm bg-[#526e4d] sm:min-h-[480px] lg:min-h-[600px]">
+              <Image src="/images/farmers-harvest.jpg" alt="Fresh green vegetables and peppers gathered for market" fill priority sizes="(max-width: 1024px) 100vw, 52vw" className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#102210]/65 via-transparent to-transparent" />
+              <figcaption className="absolute bottom-0 left-0 p-6 text-sm font-medium text-white sm:p-8">Rooted here. Growing together.</figcaption>
+            </figure>
+          </AnimateIn>
+        </div>
+        {stats.length > 0 && <div className="mx-auto mt-12 grid max-w-[1440px] grid-cols-2 gap-y-5 border-t border-white/20 pt-6 sm:grid-cols-3 sm:gap-8">{stats.slice(0, 3).map((stat) => <div key={stat.label} className="flex items-baseline gap-3"><span className="display-font text-2xl font-semibold text-[#d6f28c]">{stat.value}</span><span className="text-xs leading-5 text-white/70">{stat.label}</span></div>)}</div>}
+      </section>
 
-          {/* Stats column */}
-          <div className="mt-16 lg:mt-0 grid grid-cols-1 gap-5 w-full lg:w-[340px] shrink-0">
-            {stats.map((stat, i) => (
-              <AnimateIn
-                key={stat.label}
-                variant="fade-left"
-                delay={300 + i * 120}
-                duration={650}
-              >
-                <div className="flex items-center gap-5 rounded-2xl border border-slate-200 bg-white px-6 py-5 shadow-sm hover:shadow-md transition-shadow">
-                  <span className="text-3xl font-black text-[#016936] leading-none">
-                    {stat.value}
-                  </span>
-                  <span className="text-slate-600 text-sm font-semibold leading-snug">
-                    {stat.label}
-                  </span>
-                </div>
-              </AnimateIn>
-            ))}
+      <section className="bg-[#f7f7ef] px-5 py-20 sm:px-8 md:px-12 md:py-28 lg:px-16">
+        <div className="mx-auto grid max-w-[1320px] gap-10 lg:grid-cols-[0.6fr_1.4fr] lg:gap-24">
+          <AnimateIn variant="fade-up"><p className="text-xs font-bold uppercase tracking-[0.2em] text-[#016936]">The way we work</p><h2 className="display-font mt-5 max-w-[10ch] text-4xl font-medium leading-[1.05] tracking-[-0.04em] text-[#17241d] md:text-5xl">{operations.heading}</h2></AnimateIn>
+          <AnimateIn variant="fade-up" delay={80}>
+            <div className="max-w-3xl space-y-6 border-l border-[#b9c8b9] pl-6 md:pl-10">
+              {paragraphs.map((paragraph, i) => <p key={i} className={`${i === 0 ? "text-xl leading-8 text-[#263b2e] md:text-2xl md:leading-9" : "text-base leading-7 text-[#59685d]"}`}>{paragraph}</p>)}
+            </div>
+          </AnimateIn>
+        </div>
+      </section>
+
+      <section className="bg-white px-5 py-20 sm:px-8 md:px-12 md:py-28 lg:px-16">
+        <div className="mx-auto max-w-[1320px]">
+          <div className="mb-10 flex flex-col justify-between gap-4 border-b border-[#d9e1da] pb-7 sm:flex-row sm:items-end">
+            <div><p className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-[#016936]">Milestones</p><h2 className="display-font text-4xl font-medium tracking-[-0.04em] text-[#17241d] md:text-5xl">{timelineHeading}</h2></div>
+            <p className="max-w-xs text-sm leading-6 text-[#59685d]">A growing story shaped by people, places, and opportunity.</p>
+          </div>
+          <div className="divide-y divide-[#d9e1da]">
+            {milestones.map((milestone, i) => <AnimateIn key={milestone.year} variant="fade-up" delay={i * 45} duration={450}><article className="grid gap-3 py-7 sm:grid-cols-[8rem_0.75fr_1.25fr] sm:gap-8 md:py-9"><p className="display-font text-3xl font-medium tracking-[-0.04em] text-[#016936]">{milestone.year}</p><h3 className="text-lg font-semibold text-[#17241d] md:text-xl">{milestone.title}</h3><p className="max-w-2xl text-sm leading-6 text-[#59685d] md:text-base md:leading-7">{milestone.description}</p></article></AnimateIn>)}
           </div>
         </div>
       </section>
 
-      {/* ── What We Do ── */}
-      <section className="px-6 md:px-20 py-20 bg-slate-50">
-        <AnimateIn variant="fade-up" threshold={0.15}>
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-[#016936] text-4xl md:text-5xl font-extrabold tracking-tight mb-6">
-              {operations.heading}
-            </h2>
-            <div className="w-16 h-1 bg-[#0df20d] rounded-full mb-8" />
-            <p className="text-slate-700 text-base md:text-lg leading-relaxed font-medium space-y-6">
-              {operations.body?.split('\n\n').map((para, i) => (
-                <span key={i}>
-                  {para}
-                  {i < (operations.body?.split('\n\n').length ?? 1) - 1 && <><br /><br /></>}
-                </span>
-              )) || operations.body}
-            </p>
+      <section className="bg-[#eaf0e8] px-5 py-20 sm:px-8 md:px-12 md:py-28 lg:px-16">
+        <div className="mx-auto grid max-w-[1320px] gap-12 lg:grid-cols-[0.7fr_1.3fr] lg:gap-20">
+          <AnimateIn variant="fade-up"><p className="mb-5 text-xs font-bold uppercase tracking-[0.2em] text-[#016936]">Our principles</p><h2 className="display-font max-w-[9ch] text-4xl font-medium leading-[1.05] tracking-[-0.04em] text-[#17241d] md:text-5xl">{valuesHeading}</h2></AnimateIn>
+          <div className="grid gap-x-10 sm:grid-cols-2">
+            {valueItems.map((item, i) => {
+              const Icon = iconMap[item.icon] ?? MdEco;
+              return <AnimateIn key={item.title} variant="fade-up" delay={i * 55} duration={450}><article className="border-t border-[#bdcbbd] py-6"><div className="flex items-center justify-between gap-4"><span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#75877a]">0{i + 1}</span><Icon aria-hidden="true" className="text-xl text-[#016936]" /></div><h3 className="display-font mt-6 text-xl font-semibold tracking-tight text-[#17241d]">{item.title}</h3><p className="mt-2 text-sm leading-6 text-[#59685d]">{item.description}</p></article></AnimateIn>;
+            })}
           </div>
-        </AnimateIn>
-      </section>
-
-      {/* ── Our Journey / Timeline (ladder) ── */}
-      <section className="px-6 md:px-20 py-20 bg-white">
-        <AnimateIn variant="fade-up" threshold={0.15}>
-          <div className="text-center mb-16 flex flex-col items-center">
-            <AnimateIn variant="zoom" delay={50} duration={600}>
-              <div className="group text-center">
-                <h2 className="text-[#016936] text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4 transform transition-transform hover:scale-105">
-                  {timelineHeading}
-                </h2>
-                <div className="mx-auto w-16 h-1 bg-[#016936] rounded-full transition-transform duration-300 transform origin-center group-hover:scale-x-[2.5]" />
-              </div>
-            </AnimateIn>
-          </div>
-        </AnimateIn>
-
-        <div className="relative flex flex-col gap-8 max-w-3xl mx-auto">
-          {/* Vertical connector line */}
-          <div className="absolute left-[27px] top-10 bottom-10 w-[2px] bg-gradient-to-b from-[#016936] via-[#016936]/40 to-transparent hidden md:block" />
-
-          {milestones.map((milestone, i) => {
-            const indentClass = ["ml-0", "ml-0 md:ml-10", "ml-0 md:ml-20"][i % 3] ?? "ml-0";
-            return (
-              <AnimateIn
-                key={milestone.year}
-                variant="fade-left"
-                delay={i * 180}
-                duration={650}
-                threshold={0.15}
-              >
-                <div className={`group relative flex items-start gap-6 ${indentClass}`}>
-                  {/* Year bubble */}
-                  <div className="shrink-0 relative z-10 flex items-center justify-center size-14 rounded-full border-2 border-[#016936] bg-white text-[#016936] font-black text-[11px] tracking-widest shadow-sm transition-all duration-300 group-hover:bg-[#016936] group-hover:text-white group-hover:shadow-lg leading-tight text-center">
-                    {milestone.year}
-                  </div>
-
-                  {/* Card */}
-                  <div className="flex-1 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-7 shadow-sm
-                    transition-all duration-300
-                    group-hover:border-[#016936]/60
-                    group-hover:shadow-[0_8px_40px_rgba(1,105,54,0.12)]
-                    group-hover:-translate-y-1
-                  ">
-                    {/* Tag row */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold uppercase tracking-widest text-[#016936] bg-[#016936]/10 px-3 py-1 rounded-full border border-[#016936]/20">
-                        {milestone.year}
-                      </span>
-                    </div>
-
-                    {/* Text */}
-                    <div className="flex flex-col gap-1.5">
-                      <h3 className="text-slate-900 text-xl font-extrabold leading-tight tracking-tight">
-                        {milestone.title}
-                      </h3>
-                      <p className="text-slate-500 text-sm leading-relaxed">
-                        {milestone.description}
-                      </p>
-                    </div>
-
-                    {/* Bottom bar that grows on hover */}
-                    <div className="h-0.5 w-0 bg-[#016936] rounded-full transition-all duration-500 group-hover:w-full" />
-                  </div>
-                </div>
-              </AnimateIn>
-            );
-          })}
         </div>
       </section>
 
-      {/* ── Core Values ── */}
-      <section className="px-6 md:px-20 py-20 bg-slate-50">
-        <AnimateIn variant="fade-up" threshold={0.15}>
-          <div className="mb-12">
-            <h2 className="text-slate-900 text-3xl font-black tracking-tight md:text-4xl mb-4">
-              {valuesHeading}
-            </h2>
-            <div className="w-20 h-1 bg-[#0df20d] rounded-full" />
+      <section className="bg-white px-5 py-20 sm:px-8 md:px-12 md:py-28 lg:px-16">
+        <div className="mx-auto grid max-w-[1320px] gap-10 lg:grid-cols-[0.7fr_1.3fr] lg:gap-20">
+          <AnimateIn variant="fade-up"><p className="mb-5 text-xs font-bold uppercase tracking-[0.2em] text-[#016936]">The people behind the work</p><h2 className="display-font max-w-[9ch] text-4xl font-medium leading-[1.05] tracking-[-0.04em] text-[#17241d] md:text-5xl">{peopleHeading}</h2><p className="mt-5 max-w-sm text-sm leading-6 text-[#59685d]">A team focused on building strong partnerships and reliable supply.</p></AnimateIn>
+          <div className="divide-y divide-[#d9e1da] border-t border-[#d9e1da]">
+            {members.map((person, i) => <AnimateIn key={person.name} variant="fade-up" delay={i * 55} duration={450}><article className="grid gap-3 py-6 sm:grid-cols-[0.7fr_1.3fr] sm:gap-8"><div><h3 className="text-lg font-semibold text-[#17241d]">{person.name}</h3><p className="mt-1 text-[10px] font-bold uppercase tracking-[0.15em] text-[#016936]">{person.role}</p></div><p className="text-sm leading-6 text-[#59685d]">{person.bio}</p></article></AnimateIn>)}
           </div>
-        </AnimateIn>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {valueItems.map((item, i) => {
-            const Icon = iconMap[item.icon] ?? MdEco;
-            return (
-              <AnimateIn
-                key={item.title}
-                variant="fade-up"
-                delay={i * 110}
-                duration={600}
-                threshold={0.1}
-              >
-                <div className="group flex flex-col gap-4 p-6 rounded-2xl bg-white border border-[#0df20d]/10 hover:border-[#0df20d]/40 hover:shadow-xl hover:-translate-y-1 transition-all h-full">
-                  <div className="flex items-center justify-center size-12 rounded-xl bg-[#0df20d]/10 text-[#0ac20a] transition-transform duration-300 group-hover:scale-110">
-                    <Icon className="text-2xl" />
-                  </div>
-                  <div className="flex flex-col gap-1.5 flex-1">
-                    <h3 className="text-slate-900 text-lg font-extrabold leading-tight">
-                      {item.title}
-                    </h3>
-                    <p className="text-slate-500 text-sm leading-relaxed">
-                      {item.description}
-                    </p>
-                  </div>
-                  <div className="h-0.5 w-0 bg-[#0df20d] rounded-full transition-all duration-500 group-hover:w-full" />
-                </div>
-              </AnimateIn>
-            );
-          })}
         </div>
       </section>
 
-      {/* ── Key People ── */}
-      <section className="px-6 md:px-20 py-20 bg-white">
-        <AnimateIn variant="fade-up" threshold={0.15}>
-          <div className="mb-12">
-            <h2 className="text-slate-900 text-3xl font-black tracking-tight md:text-4xl mb-4">
-              {peopleHeading}
-            </h2>
-            <div className="w-20 h-1 bg-[#0df20d] rounded-full" />
-          </div>
-        </AnimateIn>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {members.map((person, i) => (
-            <AnimateIn
-              key={person.name}
-              variant="fade-up"
-              delay={i * 130}
-              duration={600}
-              threshold={0.1}
-            >
-              <div className="group flex flex-col gap-5 p-6 rounded-2xl bg-white border border-[#0df20d]/10 hover:border-[#0df20d]/40 hover:shadow-xl hover:-translate-y-1 transition-all h-full">
-                {/* Avatar placeholder */}
-                <div className="flex items-center justify-center size-16 rounded-2xl bg-[#016936]/10 text-[#016936] transition-transform duration-300 group-hover:scale-110 shrink-0">
-                  <MdPerson className="text-3xl" />
-                </div>
-
-                <div className="flex flex-col gap-1 flex-1">
-                  <h3 className="text-slate-900 text-lg font-extrabold leading-tight">
-                    {person.name}
-                  </h3>
-                  <p className="text-[#016936] text-xs font-bold uppercase tracking-widest">
-                    {person.role}
-                  </p>
-                  <p className="text-slate-500 text-sm leading-relaxed mt-2">
-                    {person.bio}
-                  </p>
-                </div>
-
-                <div className="h-0.5 w-0 bg-[#0df20d] rounded-full transition-all duration-500 group-hover:w-full" />
-              </div>
-            </AnimateIn>
-          ))}
-        </div>
-      </section>
-
-      {/* ── CTA Banner ── */}
-      <section className="mx-6 md:mx-20 mb-16 mt-4 rounded-2xl bg-[#0df20d]/10 border border-[#0df20d]/20 py-16 px-8 md:px-16">
-        <AnimateIn variant="fade-up" threshold={0.2}>
-          <div className="max-w-2xl mx-auto text-center flex flex-col items-center gap-6">
-            <h2 className="text-slate-900 text-3xl md:text-5xl font-black leading-tight">
-              {ctaBanner.heading}
-            </h2>
-            <p className="text-slate-700 text-base md:text-lg font-medium">
-              {ctaBanner.subtitle}
-            </p>
-            <Link
-              href={ctaBanner.cta_href ?? "/contact"}
-              className="flex items-center justify-center rounded-full h-14 px-10 bg-[#0df20d] text-[#102210] text-lg font-bold shadow-lg hover:shadow-[#0df20d]/30 transition-all hover:scale-105"
-            >
-              {ctaBanner.cta_text}
-            </Link>
-          </div>
-        </AnimateIn>
+      <section className="bg-[#123d2a] px-5 py-16 text-white sm:px-8 md:px-12 md:py-20 lg:px-16">
+        <AnimateIn variant="fade-up"><div className="mx-auto flex max-w-[1320px] flex-col items-start justify-between gap-8 sm:flex-row sm:items-end"><div><p className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-[#b5eb71]">Let’s grow something good</p><h2 className="display-font max-w-[14ch] text-3xl font-medium leading-tight tracking-[-0.04em] md:text-5xl">{ctaBanner.heading}</h2><p className="mt-4 max-w-xl text-sm leading-6 text-white/70 md:text-base">{ctaBanner.subtitle}</p></div><Link href={ctaBanner.cta_href ?? "/contact"} className="inline-flex min-h-12 shrink-0 items-center bg-[#0df20d] px-6 text-sm font-bold text-[#102210] transition-colors hover:bg-[#c8f6c8] focus-visible:outline-white">{ctaBanner.cta_text}<span aria-hidden="true" className="ml-5 text-lg">↗</span></Link></div></AnimateIn>
       </section>
     </>
   );

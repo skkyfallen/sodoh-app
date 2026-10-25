@@ -112,3 +112,29 @@ export type ContactFormData = {
   subject: string;
   message: string;
 };
+
+/* ── Product requests / quote submissions ── */
+export type ProductRequest = {
+  id: string;
+  product_id: string | null;
+  product_title: string;
+  quantity_kg: number;
+  name: string;
+  email: string;
+  phone: string | null;
+  message: string | null;
+  status: "new" | "read" | "archived";
+  created_at: string;
+  updated_at: string;
+};
+
+/** Data sent by the public product request form */
+export type ProductRequestFormData = {
+  product_id: string;
+  product_title: string;
+  quantity_kg: number;
+  name: string;
+  email: string;
+  phone?: string;
+  message?: string;
+};

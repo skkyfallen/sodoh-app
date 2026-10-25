@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
-import { MdLocalFlorist, MdMenu, MdClose } from 'react-icons/md';
+import { useEffect, useState } from "react";
+import { MdMenu, MdClose } from "react-icons/md";
 
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
   { label: "Products", href: "/products" },
-  // contact removed; 'Get in Touch' button handles contact navigation
 ];
 
 export default function Header() {
@@ -18,103 +17,70 @@ export default function Header() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => setMenuOpen(false), [pathname]);
+
   return (
-    <header
-      className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-[#0df20d]/10 backdrop-blur-md"
-      style={{
-        backgroundColor: scrolled ? "rgba(245,248,245,0.97)" : "rgba(245,248,245,0.80)",
-        boxShadow: scrolled ? "0 2px 20px rgba(0,0,0,0.08)" : "none",
-        paddingTop: scrolled ? "12px" : "16px",
-        paddingBottom: scrolled ? "12px" : "16px",
-        paddingLeft: "1.5rem",
-        paddingRight: "1.5rem",
-        transition: "background-color 0.3s ease, box-shadow 0.3s ease, padding-top 0.3s ease, padding-bottom 0.3s ease",
-      }}
-    >
-      {/* Logo */}
-      <Link
-        href="/"
-        className="flex items-center gap-3 shrink-0"
-        style={{ transition: "transform 0.3s ease", transform: scrolled ? "scale(0.95)" : "scale(1)" }}
-      >
-        <div className="size-8 bg-[#0df20d] rounded-lg flex items-center justify-center text-[#102210]">
-          <MdLocalFlorist className="text-base" />
-        </div>
-        <h2 className="text-slate-900 text-xl font-black leading-tight tracking-tight">
-          Sodoh{" "}
-          <span className="text-[#0df20d]">Nigeria Limited</span>
-        </h2>
-      </Link>
-
-      {/* Desktop nav */}
-      <div className="flex flex-1 justify-end gap-8 items-center">
-        <nav className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => {
-            const isActive = pathname === link.href;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`text-sm font-semibold transition-colors pb-1 border-b-2 ${
-                  isActive
-                    ? "text-[#0df20d] border-[#0df20d]"
-                    : "text-slate-700 border-transparent hover:text-[#0df20d] hover:border-[#0df20d]"
-                }`}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <Link
-          href="/contact"
-          className="hidden md:flex min-w-[140px] cursor-pointer items-center justify-center rounded-full h-10 px-5 bg-[#0df20d] text-[#102210] text-sm font-bold transition-transform hover:scale-105 active:scale-95"
-        >
-          Get in Touch
+    <header className={`sticky top-0 z-50 border-b border-[#dfe5dc] transition-shadow duration-300 ${scrolled ? "bg-[#f8f8f2]/95 shadow-[0_8px_26px_rgba(23,36,29,0.06)] backdrop-blur-md" : "bg-[#f8f8f2]"}`}>
+      <div className="mx-auto flex h-[74px] max-w-[1440px] items-center justify-between px-5 sm:px-8 md:px-12 lg:px-16">
+        <Link href="/" className="group flex items-center gap-3" aria-label="Sodoh Nigeria home">
+          <span className="relative flex size-9 items-center justify-center bg-[#016936] text-[11px] font-bold tracking-tight text-white">
+            SN<span aria-hidden="true" className="absolute -bottom-1 -right-1 size-2.5 bg-[#0df20d]" />
+          </span>
+          <span className="leading-tight">
+            <span className="block display-font text-base font-semibold tracking-[-0.03em] text-[#17241d] sm:text-lg">Sodoh</span>
+            <span className="block text-[9px] font-bold uppercase tracking-[0.18em] text-[#607165]">Nigeria Limited</span>
+          </span>
         </Link>
 
-        {/* Mobile hamburger */}
-        <button
-          className="md:hidden flex items-center"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle menu"
-        >
-          {menuOpen ? <MdClose className="text-slate-800" /> : <MdMenu className="text-slate-800" />}
-        </button>
+        <div className="flex items-center gap-7">
+          <nav aria-label="Main navigation" className="hidden items-center gap-8 md:flex">
+            {navLinks.map((link) => {
+              const active = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  aria-current={active ? "page" : undefined}
+                  className={`relative py-2 text-sm font-semibold transition-colors ${active ? "text-[#016936]" : "text-[#49594e] hover:text-[#016936]"}`}
+                >
+                  {link.label}
+                  {active && <span aria-hidden="true" className="absolute -bottom-1 left-0 h-0.5 w-full bg-[#0df20d]" />}
+                </Link>
+              );
+            })}
+          </nav>
+          <Link href="/contact" className="hidden min-h-11 items-center justify-center bg-[#016936] px-5 text-sm font-bold text-white transition-colors hover:bg-[#014e29] md:inline-flex">
+            Talk to our team<span aria-hidden="true" className="ml-3 text-base">↗</span>
+          </Link>
+          <button
+            type="button"
+            className="inline-flex size-11 items-center justify-center border border-[#d5ded5] text-[#17241d] md:hidden"
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-navigation"
+          >
+            {menuOpen ? <MdClose className="text-2xl" /> : <MdMenu className="text-2xl" />}
+          </button>
+        </div>
       </div>
 
-      {/* Mobile menu */}
       {menuOpen && (
-        <div className="absolute top-full left-0 w-full bg-[#f5f8f5] border-b border-[#0df20d]/10 px-6 py-4 flex flex-col gap-4 md:hidden shadow-md">
-          {navLinks.map((link) => {
-            const isActive = pathname === link.href;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMenuOpen(false)}
-                className={`text-sm font-semibold transition-colors ${
-                  isActive ? "text-[#0df20d]" : "text-slate-700 hover:text-[#0df20d]"
-                }`}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
-          <Link
-            href="/contact"
-            onClick={() => setMenuOpen(false)}
-            className="flex items-center justify-center rounded-full h-10 px-5 bg-[#0df20d] text-[#102210] text-sm font-bold w-full"
-          >
-            Get in Touch
-          </Link>
-        </div>
+        <nav id="mobile-navigation" aria-label="Mobile navigation" className="border-t border-[#dfe5dc] bg-[#f8f8f2] px-5 py-5 shadow-lg md:hidden">
+          <div className="mx-auto flex max-w-[1440px] flex-col gap-1 sm:px-3">
+            {navLinks.map((link) => {
+              const active = pathname === link.href;
+              return <Link key={link.href} href={link.href} aria-current={active ? "page" : undefined} className={`px-3 py-3 text-base font-semibold ${active ? "text-[#016936]" : "text-[#49594e]"}`}>{link.label}</Link>;
+            })}
+            <Link href="/contact" className="mt-2 flex min-h-12 items-center justify-center bg-[#016936] px-5 text-sm font-bold text-white">Talk to our team <span aria-hidden="true" className="ml-3">↗</span></Link>
+          </div>
+        </nav>
       )}
     </header>
   );

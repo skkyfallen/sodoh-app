@@ -86,7 +86,7 @@ function ImageUploader({ currentUrl, onUploaded }: ImageUploaderProps) {
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="block text-sm font-semibold text-slate-600">Product Image</label>
+      <label className="block text-sm font-semibold text-slate-700">Product image</label>
 
       {currentUrl ? (
         <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
@@ -244,16 +244,16 @@ export default function ProductsManager({ initialProducts }: Props) {
     <div>
       <button
         onClick={openNew}
-        className="mb-6 h-10 px-5 rounded-lg bg-[#016936] text-white text-sm font-bold hover:bg-[#015a2d] transition-colors"
+        className="mb-6 inline-flex min-h-11 items-center gap-3 bg-[#016936] px-5 text-sm font-bold text-white transition-colors hover:bg-[#014e29]"
       >
-        + Add Product
+        <span aria-hidden="true" className="text-lg leading-none">+</span> Add product
       </button>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="overflow-x-auto border border-slate-200 bg-white">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-slate-50 border-b border-slate-200">
+            <tr className="border-b border-slate-200 bg-slate-50">
               <th className="text-left px-4 py-3 font-bold text-slate-600">Order</th>
               <th className="text-left px-4 py-3 font-bold text-slate-600">Title</th>
               <th className="text-left px-4 py-3 font-bold text-slate-600">Region</th>
@@ -263,7 +263,7 @@ export default function ProductsManager({ initialProducts }: Props) {
           </thead>
           <tbody>
             {products.map((p) => (
-              <tr key={p.id} className="border-b border-slate-100 hover:bg-slate-50">
+              <tr key={p.id} className="border-b border-slate-100 transition-colors hover:bg-slate-50">
                 <td className="px-4 py-3 font-mono text-slate-500">{p.display_order}</td>
                 <td className="px-4 py-3 font-semibold text-slate-900">{p.title}</td>
                 <td className="px-4 py-3 text-slate-600">{p.region}</td>
@@ -271,17 +271,17 @@ export default function ProductsManager({ initialProducts }: Props) {
                   <button
                     onClick={() => handleToggle(p.id, p.is_active)}
                     className={`text-xs font-bold px-2 py-1 rounded-full ${
-                      p.is_active ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-500"
+                    p.is_active ? "bg-[#e4f0da] text-[#145c34]" : "bg-slate-100 text-slate-700"
                     }`}
                   >
                     {p.is_active ? "Active" : "Hidden"}
                   </button>
                 </td>
                 <td className="px-4 py-3 text-right">
-                  <button onClick={() => openEdit(p)} className="text-[#016936] font-semibold hover:underline mr-3">
+                  <button onClick={() => openEdit(p)} className="mr-3 font-semibold text-[#016936] hover:underline">
                     Edit
                   </button>
-                  <button onClick={() => handleDelete(p.id)} className="text-red-500 font-semibold hover:underline">
+                  <button onClick={() => handleDelete(p.id)} className="font-semibold text-red-700 hover:underline">
                     Delete
                   </button>
                 </td>
@@ -299,8 +299,8 @@ export default function ProductsManager({ initialProducts }: Props) {
       {/* Modal */}
       {editing && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
-            <h2 className="text-xl font-black text-slate-900 mb-6">
+          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto border border-[#dce4dc] bg-[#f8f8f2] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.22)]">
+            <h2 className="display-font mb-6 text-2xl font-semibold text-slate-900">
               {isNew ? "Add Product" : "Edit Product"}
             </h2>
 

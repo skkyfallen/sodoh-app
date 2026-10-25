@@ -9,9 +9,9 @@ type Props = {
 };
 
 const statusColors: Record<string, string> = {
-  new: "bg-green-100 text-green-700",
-  read: "bg-blue-100 text-blue-700",
-  archived: "bg-slate-100 text-slate-500",
+  new: "bg-[#e4f0da] text-[#145c34]",
+  read: "bg-[#e8eff6] text-[#244d6d]",
+  archived: "bg-slate-100 text-slate-700",
 };
 
 export default function MessagesManager({ initialMessages }: Props) {
@@ -44,9 +44,9 @@ export default function MessagesManager({ initialMessages }: Props) {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col gap-6 lg:flex-row">
       {/* List */}
-      <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="flex-1 overflow-hidden rounded-sm border border-slate-200 bg-white">
         <div className="max-h-[70vh] overflow-y-auto divide-y divide-slate-100">
           {messages.map((m) => (
             <button
@@ -55,8 +55,8 @@ export default function MessagesManager({ initialMessages }: Props) {
                 setSelected(m);
                 if (m.status === "new") updateStatus(m.id, "read");
               }}
-              className={`w-full text-left px-5 py-4 hover:bg-slate-50 transition-colors ${
-                selected?.id === m.id ? "bg-slate-50" : ""
+          className={`w-full text-left px-5 py-4 transition-colors hover:bg-slate-50 ${
+            selected?.id === m.id ? "bg-[#eaf0e8]" : ""
               }`}
             >
               <div className="flex items-center justify-between mb-1">
@@ -86,7 +86,7 @@ export default function MessagesManager({ initialMessages }: Props) {
       {/* Detail */}
       <div className="flex-1">
         {selected ? (
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+          <div className="rounded-sm border border-slate-200 bg-white p-6">
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h3 className="text-lg font-bold text-slate-900">{selected.name}</h3>
@@ -145,7 +145,7 @@ export default function MessagesManager({ initialMessages }: Props) {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center text-slate-400 text-sm">
+          <div className="rounded-sm border border-slate-200 bg-white p-12 text-center text-slate-500 text-sm">
             Select a message to view details.
           </div>
         )}

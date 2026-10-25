@@ -1,278 +1,485 @@
-/**
- * Supabase Database type definitions.
- * Matches the schema defined in supabase/schema.sql.
- *
- * Regenerate automatically with the Supabase CLI:
- *   npx supabase gen types typescript --project-id <YOUR_PROJECT_ID> > types/database.ts
- */
-export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.1"
+  }
   public: {
     Tables: {
-      /* ── site_content ── */
-      site_content: {
-        Row: {
-          id:         string;
-          page:       string;
-          section:    string;
-          content:    Json;
-          updated_at: string;
-          updated_by: string | null;
-        };
-        Insert: {
-          id?:        string;
-          page:       string;
-          section:    string;
-          content?:   Json;
-          updated_at?: string;
-          updated_by?: string | null;
-        };
-        Update: {
-          id?:        string;
-          page?:      string;
-          section?:   string;
-          content?:   Json;
-          updated_at?: string;
-          updated_by?: string | null;
-        };
-        Relationships: [];
-      };
-
-      /* ── products ── */
-      products: {
-        Row: {
-          id:            string;
-          title:         string;
-          slug:          string;
-          region:        string | null;
-          description:   string | null;
-          image_url:     string | null;
-          image_alt:     string | null;
-          icon:          string | null;
-          display_order: number;
-          is_active:     boolean;
-          created_at:    string;
-          updated_at:    string;
-        };
-        Insert: {
-          id?:           string;
-          title:         string;
-          slug:          string;
-          region?:       string | null;
-          description?:  string | null;
-          image_url?:    string | null;
-          image_alt?:    string | null;
-          icon?:         string | null;
-          display_order?: number;
-          is_active?:    boolean;
-          created_at?:   string;
-          updated_at?:   string;
-        };
-        Update: {
-          id?:           string;
-          title?:        string;
-          slug?:         string;
-          region?:       string | null;
-          description?:  string | null;
-          image_url?:    string | null;
-          image_alt?:    string | null;
-          icon?:         string | null;
-          display_order?: number;
-          is_active?:    boolean;
-          created_at?:   string;
-          updated_at?:   string;
-        };
-        Relationships: [];
-      };
-
-      /* ── stats ── */
-      stats: {
-        Row: {
-          id:            string;
-          value:         string;
-          label:         string;
-          sub:           string | null;
-          display_order: number;
-          created_at:    string;
-          updated_at:    string;
-        };
-        Insert: {
-          id?:           string;
-          value:         string;
-          label:         string;
-          sub?:          string | null;
-          display_order?: number;
-          created_at?:   string;
-          updated_at?:   string;
-        };
-        Update: {
-          id?:           string;
-          value?:        string;
-          label?:        string;
-          sub?:          string | null;
-          display_order?: number;
-          created_at?:   string;
-          updated_at?:   string;
-        };
-        Relationships: [];
-      };
-
-      /* ── pillars ── */
-      pillars: {
-        Row: {
-          id:            string;
-          step:          string;
-          title:         string;
-          tag:           string | null;
-          description:   string | null;
-          icon:          string | null;
-          display_order: number;
-          created_at:    string;
-          updated_at:    string;
-        };
-        Insert: {
-          id?:           string;
-          step:          string;
-          title:         string;
-          tag?:          string | null;
-          description?:  string | null;
-          icon?:         string | null;
-          display_order?: number;
-          created_at?:   string;
-          updated_at?:   string;
-        };
-        Update: {
-          id?:           string;
-          step?:         string;
-          title?:        string;
-          tag?:          string | null;
-          description?:  string | null;
-          icon?:         string | null;
-          display_order?: number;
-          created_at?:   string;
-          updated_at?:   string;
-        };
-        Relationships: [];
-      };
-
-      /* ── faqs ── */
-      faqs: {
-        Row: {
-          id:            string;
-          question:      string;
-          answer:        string;
-          display_order: number;
-          is_active:     boolean;
-          created_at:    string;
-          updated_at:    string;
-        };
-        Insert: {
-          id?:           string;
-          question:      string;
-          answer:        string;
-          display_order?: number;
-          is_active?:    boolean;
-          created_at?:   string;
-          updated_at?:   string;
-        };
-        Update: {
-          id?:           string;
-          question?:     string;
-          answer?:       string;
-          display_order?: number;
-          is_active?:    boolean;
-          created_at?:   string;
-          updated_at?:   string;
-        };
-        Relationships: [];
-      };
-
-      /* ── testimonials ── */
-      testimonials: {
-        Row: {
-          id:            string;
-          quote:         string;
-          author_name:   string;
-          author_role:   string | null;
-          author_image:  string | null;
-          is_active:     boolean;
-          display_order: number;
-          created_at:    string;
-          updated_at:    string;
-        };
-        Insert: {
-          id?:           string;
-          quote:         string;
-          author_name:   string;
-          author_role?:  string | null;
-          author_image?: string | null;
-          is_active?:    boolean;
-          display_order?: number;
-          created_at?:   string;
-          updated_at?:   string;
-        };
-        Update: {
-          id?:           string;
-          quote?:        string;
-          author_name?:  string;
-          author_role?:  string | null;
-          author_image?: string | null;
-          is_active?:    boolean;
-          display_order?: number;
-          created_at?:   string;
-          updated_at?:   string;
-        };
-        Relationships: [];
-      };
-
-      /* ── contact_submissions ── */
       contact_submissions: {
         Row: {
-          id:         string;
-          name:       string;
-          email:      string;
-          subject:    string | null;
-          message:    string;
-          status:     "new" | "read" | "archived";
-          created_at: string;
-        };
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          status: Database["public"]["Enums"]["submission_status"]
+          subject: string | null
+        }
         Insert: {
-          id?:        string;
-          name:       string;
-          email:      string;
-          subject?:   string | null;
-          message:    string;
-          status?:    "new" | "read" | "archived";
-          created_at?: string;
-        };
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          status?: Database["public"]["Enums"]["submission_status"]
+          subject?: string | null
+        }
         Update: {
-          id?:        string;
-          name?:      string;
-          email?:     string;
-          subject?:   string | null;
-          message?:   string;
-          status?:    "new" | "read" | "archived";
-          created_at?: string;
-        };
-        Relationships: [];
-      };
-    };
-    Views: Record<string, never>;
-    Functions: Record<string, never>;
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          status?: Database["public"]["Enums"]["submission_status"]
+          subject?: string | null
+        }
+        Relationships: []
+      }
+      faqs: {
+        Row: {
+          answer: string
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          question: string
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          question: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          question?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pillars: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          icon: string | null
+          id: string
+          step: string
+          tag: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          step: string
+          tag?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          step?: string
+          tag?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      product_requests: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string | null
+          name: string
+          phone: string | null
+          product_id: string | null
+          product_title: string
+          quantity_kg: number
+          status: Database["public"]["Enums"]["submission_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message?: string | null
+          name: string
+          phone?: string | null
+          product_id?: string | null
+          product_title: string
+          quantity_kg: number
+          status?: Database["public"]["Enums"]["submission_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string | null
+          name?: string
+          phone?: string | null
+          product_id?: string | null
+          product_title?: string
+          quantity_kg?: number
+          status?: Database["public"]["Enums"]["submission_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_requests_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          icon: string | null
+          id: string
+          image_alt: string | null
+          image_url: string | null
+          is_active: boolean
+          region: string | null
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          image_alt?: string | null
+          image_url?: string | null
+          is_active?: boolean
+          region?: string | null
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          icon?: string | null
+          id?: string
+          image_alt?: string | null
+          image_url?: string | null
+          is_active?: boolean
+          region?: string | null
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      server_settings: {
+        Row: {
+          created_at: string | null
+          default_volume: number | null
+          dj_role_id: string | null
+          guild_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          default_volume?: number | null
+          dj_role_id?: string | null
+          guild_id: string
+        }
+        Update: {
+          created_at?: string | null
+          default_volume?: number | null
+          dj_role_id?: string | null
+          guild_id?: string
+        }
+        Relationships: []
+      }
+      site_content: {
+        Row: {
+          content: Json
+          id: string
+          page: string
+          section: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          content?: Json
+          id?: string
+          page: string
+          section: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          content?: Json
+          id?: string
+          page?: string
+          section?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      stats: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          label: string
+          sub: string | null
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          label: string
+          sub?: string | null
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          label?: string
+          sub?: string | null
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          author_image: string | null
+          author_name: string
+          author_role: string | null
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          quote: string
+          updated_at: string
+        }
+        Insert: {
+          author_image?: string | null
+          author_name: string
+          author_role?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          quote: string
+          updated_at?: string
+        }
+        Update: {
+          author_image?: string | null
+          author_name?: string
+          author_role?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          quote?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_playlists: {
+        Row: {
+          created_at: string | null
+          discord_user_id: string
+          id: string
+          playlist_name: string
+          tracks: Json
+        }
+        Insert: {
+          created_at?: string | null
+          discord_user_id: string
+          id?: string
+          playlist_name: string
+          tracks?: Json
+        }
+        Update: {
+          created_at?: string | null
+          discord_user_id?: string
+          id?: string
+          playlist_name?: string
+          tracks?: Json
+        }
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      is_admin: { Args: never; Returns: boolean }
+    }
     Enums: {
-      submission_status: "new" | "read" | "archived";
-    };
-    CompositeTypes: Record<string, never>;
-  };
-};
+      submission_status: "new" | "read" | "archived"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
 
-// Convenience helpers
-export type Tables<T extends keyof Database["public"]["Tables"]> =
-  Database["public"]["Tables"][T]["Row"];
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-export type TablesInsert<T extends keyof Database["public"]["Tables"]> =
-  Database["public"]["Tables"][T]["Insert"];
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
-export type TablesUpdate<T extends keyof Database["public"]["Tables"]> =
-  Database["public"]["Tables"][T]["Update"];
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never) = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never) = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      submission_status: ["new", "read", "archived"],
+    },
+  },
+} as const
