@@ -46,6 +46,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .open-next
+.wrangler/
 
 # Supabase CLI local link state
 supabase/.temp/
