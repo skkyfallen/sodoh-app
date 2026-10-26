@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MdCall, MdMail } from "react-icons/md";
 import { email, phone, phoneTel } from "@/lib/site";
+import { BrandMark } from "./BrandMark";
 
 const links = [
   { label: "Our story", href: "/about" },
@@ -14,8 +15,10 @@ export default function Footer() {
       <div className="mx-auto max-w-[1440px]">
         <Link
           href="/"
+          aria-label="Sodoh Nigeria Limited"
           className="block rounded-md leading-none focus-visible:outline-[#a7f3d0]"
         >
+          <BrandMark size={72} variant="bare" className="mb-6" />
           <span className="display-font block text-[clamp(4.5rem,15vw,13rem)] font-bold leading-[0.9] tracking-[-0.05em] text-white">
             Sodoh
           </span>

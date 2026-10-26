@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { MdClose } from "react-icons/md";
+import { BrandMark } from "./BrandMark";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -15,24 +16,31 @@ function Wordmark({ tone = "ink" }: { tone?: "ink" | "paper" }) {
   return (
     <Link
       href="/"
-      className="rounded-md leading-none focus-visible:outline-offset-4"
+      className="flex items-center gap-3 rounded-md focus-visible:outline-offset-4"
       aria-label="Sodoh Nigeria Limited"
     >
-      <span
-        className={cn(
-          "display-font block text-[1.9rem] font-bold leading-none tracking-[-0.05em] sm:text-[2.4rem]",
-          tone === "ink" ? "text-[var(--ink)]" : "text-white"
-        )}
-      >
-        Sodoh
-      </span>
-      <span
-        className={cn(
-          "mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.28em]",
-          tone === "ink" ? "text-[var(--muted)]" : "text-white/60"
-        )}
-      >
-        Nigeria Limited
+      {tone === "paper" ? (
+        <BrandMark size={34} variant="bare" />
+      ) : (
+        <BrandMark size={40} variant="tile" />
+      )}
+      <span className="leading-none">
+        <span
+          className={cn(
+            "display-font block text-[1.9rem] font-bold leading-none tracking-[-0.05em] sm:text-[2.4rem]",
+            tone === "ink" ? "text-[var(--ink)]" : "text-white"
+          )}
+        >
+          Sodoh
+        </span>
+        <span
+          className={cn(
+            "mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.28em]",
+            tone === "ink" ? "text-[var(--muted)]" : "text-white/60"
+          )}
+        >
+          Nigeria Limited
+        </span>
       </span>
     </Link>
   );

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import HeaderMenu from "./HeaderMenu";
+import { BrandMark } from "./BrandMark";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { MdMenu } from "react-icons/md";
@@ -17,23 +18,32 @@ function Wordmark({ tone = "ink" }: { tone?: "ink" | "paper" }) {
   return (
     <Link
       href="/"
-      className="rounded-md leading-none focus-visible:outline-offset-4"
+      aria-label="Sodoh Nigeria Limited"
+      className="group flex items-center gap-3 rounded-md focus-visible:outline-offset-4"
     >
-      <span
-        className={cn(
-          "display-font block text-[1.9rem] font-bold leading-none tracking-[-0.05em] sm:text-[2.4rem]",
-          tone === "ink" ? "text-[var(--ink)]" : "text-white"
-        )}
-      >
-        Sodoh
-      </span>
-      <span
-        className={cn(
-          "mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.28em]",
-          tone === "ink" ? "text-[var(--muted)]" : "text-white/60"
-        )}
-      >
-        Nigeria Limited
+      <BrandMark
+        size={46}
+        variant="tile"
+        priority
+        className="transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-rotate-6 group-hover:scale-[1.04]"
+      />
+      <span className="leading-none">
+        <span
+          className={cn(
+            "display-font block text-[1.9rem] font-bold leading-none tracking-[-0.05em] sm:text-[2.4rem]",
+            tone === "ink" ? "text-[var(--ink)]" : "text-white"
+          )}
+        >
+          Sodoh
+        </span>
+        <span
+          className={cn(
+            "mt-1.5 block text-[10px] font-semibold uppercase tracking-[0.28em]",
+            tone === "ink" ? "text-[var(--muted)]" : "text-white/60"
+          )}
+        >
+          Nigeria Limited
+        </span>
       </span>
     </Link>
   );
@@ -180,10 +190,13 @@ export default function Header() {
         <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-4 px-5 sm:px-8 md:px-12 lg:px-16">
           <Link
             href="/"
-            aria-label="Sodoh"
-            className="display-font text-xl font-bold tracking-[-0.04em] text-[var(--ink)]"
+            aria-label="Sodoh Nigeria Limited"
+            className="flex items-center gap-2.5 rounded-md focus-visible:outline-offset-4"
           >
-            Sodoh
+            <BrandMark size={34} variant="tile" />
+            <span className="display-font text-xl font-bold tracking-[-0.04em] text-[var(--ink)]">
+              Sodoh
+            </span>
           </Link>
           <div className="flex items-center gap-2">
             <nav aria-label="Quick navigation" className="hidden items-center gap-1 md:flex">

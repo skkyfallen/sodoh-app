@@ -131,16 +131,13 @@ summary {
 .hero-copy > *:nth-child(3) { animation-delay: 240ms; }
 .hero-copy > *:nth-child(4) { animation-delay: 320ms; }
 
+/* Text starts fully visible and only drifts up, so the hero LCP paints immediately. */
 @keyframes rise-in {
   from {
-    opacity: 0;
-    transform: translateY(22px);
-    filter: blur(4px);
+    transform: translateY(14px);
   }
   to {
-    opacity: 1;
     transform: translateY(0);
-    filter: blur(0);
   }
 }
 
