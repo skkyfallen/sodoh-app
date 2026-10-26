@@ -131,6 +131,25 @@ summary {
   animation: harvest-reveal var(--duration-hero) var(--ease-out) both;
 }
 
+/* Full-bleed variant: settles square, no rounded crop. */
+.hero-bg {
+  animation: bg-reveal var(--duration-hero) var(--ease-out) both;
+}
+
+@keyframes bg-reveal {
+  from {
+    filter: blur(8px);
+    opacity: 0.7;
+    transform: scale(1.035);
+  }
+
+  to {
+    filter: blur(0);
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .hero-copy > * {
   animation: rise-in 640ms var(--ease-out) both;
 }
@@ -263,6 +282,7 @@ summary {
   }
 
   .hero-photo,
+  .hero-bg,
   .hero-copy > *,
   .page-enter {
     animation: none;
