@@ -10,12 +10,21 @@ import type { HeroContent } from "@/types/content";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "About Sodoh Nigeria",
-  description: "Learn about Sodoh Nigeria Limited and how to enquire about agricultural products and partnerships.",
+  title: { absolute: "About Sodoh Nigeria | Nigerian Agricultural Export Company" },
+  description: "Learn about Sodoh Nigeria Limited, a Nigerian agricultural export company, and browse the products currently listed in our catalogue.",
+  alternates: { canonical: "/about" },
   openGraph: {
-    title: "About Sodoh Nigeria",
-    description: "Learn about Sodoh Nigeria Limited and how to get in touch.",
+    title: "About Sodoh Nigeria | Nigerian Agricultural Export Company",
+    description: "Learn about Sodoh Nigeria Limited, a Nigerian agricultural export company, and browse the products currently listed in our catalogue.",
+    url: "/about",
+    siteName: "Sodoh Nigeria Limited",
+    locale: "en_NG",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About Sodoh Nigeria | Nigerian Agricultural Export Company",
+    description: "Learn about Sodoh Nigeria Limited, a Nigerian agricultural export company, and browse the products currently listed in our catalogue.",
   },
 };
 

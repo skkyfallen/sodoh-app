@@ -15,15 +15,30 @@ import {
   getTestimonials,
 } from "@/lib/data";
 import type { HeroContent, AnnouncementContent } from "@/types/content";
+import OrganizationJsonLd from "@/components/seo/OrganizationJsonLd";
+import { defaultLocale, siteName } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Sodoh Nigeria Limited — Agricultural Produce",
+  title: {
+    absolute: "Nigerian Agricultural Produce Exporter | Sodoh Nigeria Limited",
+  },
   description:
-    "Explore agricultural produce from Sodoh Nigeria Limited and contact our team to discuss your sourcing needs.",
+    "Nigerian agricultural produce for international and local buyers, including sesame, cassava, cocoa, ginger, maize, yam, and palm oil. Request a quote from Sodoh Nigeria Limited in Abuja.",
+  alternates: { canonical: "/" },
   openGraph: {
-    title: "Sodoh Nigeria Limited — Agricultural Produce",
-    description: "Explore agricultural produce from Sodoh Nigeria Limited.",
+    title: "Nigerian Agricultural Produce Exporter | Sodoh Nigeria Limited",
+    description:
+      "Nigerian agricultural produce for international and local buyers, including sesame, cassava, cocoa, ginger, maize, yam, and palm oil. Request a quote from Sodoh Nigeria Limited in Abuja.",
+    url: "/",
+    siteName,
+    locale: defaultLocale,
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Nigerian Agricultural Produce Exporter | Sodoh Nigeria Limited",
+    description:
+      "Nigerian agricultural produce for international and local buyers, including sesame, cassava, cocoa, ginger, maize, yam, and palm oil. Request a quote from Sodoh Nigeria Limited in Abuja.",
   },
 };
 
@@ -55,6 +70,7 @@ export default async function HomePage() {
 
   return (
     <div className="page-enter">
+      <OrganizationJsonLd />
       <Hero hero={hero} announcement={announcement} />
       <HomeIntro />
       <FeaturedProduce products={products.filter((product) => product.public_reviewed)} />

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Sans, Outfit } from "next/font/google";
+import { defaultLocale, siteName, siteUrl } from "@/lib/site";
 import "./globals.css";
 
 const bodyFont = DM_Sans({
@@ -17,14 +18,24 @@ const displayFont = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Sodoh Nigeria Limited",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: siteName,
+    template: "%s | Sodoh Nigeria Limited",
+  },
   description:
-    "Explore agricultural products from Sodoh Nigeria Limited and contact the team about your needs.",
+    "Explore Nigerian agricultural produce from Sodoh Nigeria Limited, with products for local and international buyers. Contact our Abuja team about your sourcing needs.",
   openGraph: {
-    title: "Sodoh Nigeria Limited",
-    description:
-      "Premium agricultural operations and produce across Nigeria.",
+    title: siteName,
+    description: "Explore Nigerian agricultural produce from Sodoh Nigeria Limited and contact our Abuja team.",
+    siteName,
+    locale: defaultLocale,
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteName,
+    description: "Explore Nigerian agricultural produce from Sodoh Nigeria Limited and contact our Abuja team.",
   },
 };
 

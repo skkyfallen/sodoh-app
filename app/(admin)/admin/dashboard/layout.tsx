@@ -4,6 +4,7 @@ import AdminSidebar from "@/components/admin/AdminSidebar";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard — Sodoh Nigeria",
+  robots: { index: false, follow: false },
 };
 
 export default function AdminLayout({

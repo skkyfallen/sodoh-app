@@ -41,8 +41,8 @@
   --surface-muted: #e7ede6;
   --surface-warm: #f4f1e6;
   --ink: #123524;
-  --body: #33493c;
-  --muted: #5d7466;
+  --body: #2f4438;
+  --muted: #586e60;
   --border: #c4ddcc;
   --border-strong: #9cc4aa;
   --brand: #016936;
@@ -118,38 +118,11 @@ summary {
     var(--page);
 }
 
-.rule-line {
-  border-color: var(--border);
-}
-
 .measure {
   max-width: 68ch;
 }
 
-/* ——— hero reveal: the one authored entrance ——— */
-.hero-photo {
-  animation: harvest-reveal var(--duration-hero) var(--ease-out) both;
-}
-
-/* Full-bleed variant: settles square, no rounded crop. */
-.hero-bg {
-  animation: bg-reveal var(--duration-hero) var(--ease-out) both;
-}
-
-@keyframes bg-reveal {
-  from {
-    filter: blur(8px);
-    opacity: 0.7;
-    transform: scale(1.035);
-  }
-
-  to {
-    filter: blur(0);
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
+/* ——— hero-copy reveal: the authored entrance ——— */
 .hero-copy > * {
   animation: rise-in 640ms var(--ease-out) both;
 }
@@ -158,32 +131,55 @@ summary {
 .hero-copy > *:nth-child(3) { animation-delay: 240ms; }
 .hero-copy > *:nth-child(4) { animation-delay: 320ms; }
 
-@keyframes harvest-reveal {
+/* Text starts fully visible and only drifts up, so the hero LCP paints immediately. */
+@keyframes rise-in {
   from {
-    clip-path: inset(4% 0 4% 7% round 48px);
-    filter: blur(8px);
-    opacity: 0.7;
-    transform: scale(1.035);
+    transform: translateY(14px);
   }
   to {
-    clip-path: inset(0 round 24px 72px 24px 24px);
-    filter: blur(0);
-    opacity: 1;
-    transform: scale(1);
+    transform: translateY(0);
   }
 }
 
-@keyframes rise-in {
-  from {
-    opacity: 0;
-    transform: translateY(22px);
-    filter: blur(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-    filter: blur(0);
-  }
+/* Menu animations stay in CSS so motion code is not needed on public pages. */
+.site-menu-open {
+  opacity: 1;
+  transform: translateY(0);
+  animation: site-menu-enter 320ms var(--ease-out) both;
+}
+
+.site-menu-closing {
+  opacity: 0;
+  transform: translateY(24px);
+  animation: site-menu-exit 320ms var(--ease-out) both;
+}
+
+.site-menu-link {
+  animation: site-menu-link-enter 400ms var(--ease-out) both;
+}
+
+@keyframes site-menu-enter {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes site-menu-exit {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(24px); }
+}
+
+@keyframes site-menu-link-enter {
+  from { opacity: 0; transform: translateX(-28px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.contact-status-message {
+  animation: contact-status-enter 240ms var(--ease-out) both;
+}
+
+@keyframes contact-status-enter {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ——— tactile controls ——— */
@@ -216,11 +212,6 @@ summary {
 }
 .media-zoom:hover img {
   transform: scale(1.03);
-}
-
-/* ——— editorial dividers ——— */
-.divider-soft {
-  border-color: var(--border);
 }
 
 /* ——— page transition veil ——— */
@@ -281,9 +272,11 @@ summary {
     transition-duration: 0.01ms !important;
   }
 
-  .hero-photo,
-  .hero-bg,
   .hero-copy > *,
+  .site-menu-open,
+  .site-menu-closing,
+  .site-menu-link,
+  .contact-status-message,
   .page-enter {
     animation: none;
   }

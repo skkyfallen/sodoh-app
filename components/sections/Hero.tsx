@@ -23,15 +23,19 @@ export default function Hero({ hero, announcement }: Props) {
       )}
 
       <section className="relative overflow-hidden bg-[#071a10] px-5 pb-20 pt-16 sm:px-8 md:px-12 md:pb-28 md:pt-20 lg:px-16">
-        <div aria-hidden="true" className="hero-bg absolute inset-0">
-          <Image
-            src="/images/farmers-harvest.jpg"
-            alt="Fresh vegetables arranged for market"
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-center"
-          />
+        <div aria-hidden="true" className="absolute inset-0">
+          <picture className="absolute inset-0">
+            <source type="image/avif" srcSet="/images/farmers-harvest.avif" />
+            <Image
+              src="/images/farmers-harvest.jpg"
+              alt="Fresh vegetables arranged for market"
+              fill
+              loading="eager"
+              fetchPriority="high"
+              sizes="100vw"
+              className="object-cover object-center"
+            />
+          </picture>
         </div>
         <div aria-hidden="true" className="absolute inset-0 bg-[#071a10]/80" />
         <div className="relative mx-auto max-w-[1440px]">

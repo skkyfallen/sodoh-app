@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 
 type Item = {
@@ -12,7 +11,6 @@ type Item = {
 
 export function Accordion({ items, className }: { items: Item[]; className?: string }) {
   const [openId, setOpenId] = React.useState<string | null>(null);
-  const reduceMotion = useReducedMotion();
 
   return (
     <div className={cn("divide-y divide-[var(--border)] border-y border-[var(--border)]", className)}>
@@ -43,25 +41,22 @@ export function Accordion({ items, className }: { items: Item[]; className?: str
                 +
               </span>
             </button>
-            <AnimatePresence initial={false}>
-              {open && (
-                <motion.div
-                  key="panel"
-                  id={`faq-panel-${item.id}`}
-                  role="region"
-                  aria-labelledby={`faq-button-${item.id}`}
-                  initial={reduceMotion ? { opacity: 0 } : { height: 0, opacity: 0 }}
-                  animate={reduceMotion ? { opacity: 1 } : { height: "auto", opacity: 1 }}
-                  exit={reduceMotion ? { opacity: 0 } : { height: 0, opacity: 0 }}
-                  transition={{ duration: reduceMotion ? 0.12 : 0.32, ease: [0.16, 1, 0.3, 1] }}
-                  className="overflow-hidden"
-                >
-                  <p className="max-w-[70ch] pb-6 pr-10 text-sm leading-6 text-[var(--body)] md:text-[15px] md:leading-7">
-                    {item.answer}
-                  </p>
-                </motion.div>
+            <div
+              id={`faq-panel-${item.id}`}
+              role="region"
+              aria-labelledby={`faq-button-${item.id}`}
+              aria-hidden={!open}
+              className={cn(
+                "grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none",
+                open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
               )}
-            </AnimatePresence>
+            >
+              <div className="min-h-0 overflow-hidden">
+                <p className="max-w-[70ch] pb-6 pr-10 text-sm leading-6 text-[var(--body)] md:text-[15px] md:leading-7">
+                  {item.answer}
+                </p>
+              </div>
+            </div>
           </div>
         );
       })}
