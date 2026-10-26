@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { DM_Sans, Outfit } from "next/font/google";
 import "./globals.css";
 
@@ -26,6 +26,12 @@ export const metadata: Metadata = {
       "Premium agricultural operations and produce across Nigeria.",
     type: "website",
   },
+};
+
+// Light-only rendering: tells the browser (including forced-dark modes
+// such as Opera's auto dark mode) to leave the page colors alone.
+export const viewport: Viewport = {
+  colorScheme: "light",
 };
 
 export default function RootLayout({

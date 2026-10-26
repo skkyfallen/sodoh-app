@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getStringField, isRateLimited, isValidEmail, readJsonObject } from "@/lib/api-guard";
 
 const MAX_NAME = 100;
 const MAX_EMAIL = 254;
@@ -12,81 +13,49 @@ const ALLOWED_SUBJECTS = [
   "Press & Media",
 ];
 
-/**
- * Basic email sanity check using a split-based approach rather than a
- * backtracking-prone regex, to avoid ReDoS vulnerability.
- * The check is intentionally permissive — it only verifies that there is
- * exactly one "@" symbol, a non-empty local part, and a domain with at
- * least one dot. Full RFC 5321 validation is left to the database/email
- * provider layer to avoid false rejections of unusual but valid addresses.
- */
-function isValidEmail(email: string): boolean {
-  const atIdx = email.indexOf("@");
-  if (atIdx <= 0 || atIdx !== email.lastIndexOf("@")) return false;
-  const local = email.slice(0, atIdx);
-  const domain = email.slice(atIdx + 1);
-  if (local.length === 0 || domain.length === 0) return false;
-  const dotIdx = domain.lastIndexOf(".");
-  return dotIdx > 0 && dotIdx < domain.length - 1;
-}
-
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { name, email, subject, message } = body;
-
-    if (!name || !email || !message) {
-      return NextResponse.json(
-        { error: "Name, email, and message are required." },
-        { status: 400 }
-      );
+    if (isRateLimited(request, "contact")) {
+      return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
     }
 
-    if (typeof name !== "string" || typeof email !== "string" || typeof message !== "string") {
-      return NextResponse.json({ error: "Invalid field types." }, { status: 400 });
+    const parsed = await readJsonObject(request);
+    if (!parsed.ok) {
+      const error = parsed.status === 413
+        ? "Request body is too large."
+        : parsed.status === 415
+          ? "Content type must be application/json."
+          : "Invalid request.";
+      return NextResponse.json({ error }, { status: parsed.status });
     }
 
-    // Trim inputs early so all subsequent checks operate on the final stored value
-    const trimmedName = name.trim();
-    const trimmedEmail = email.trim();
-    const trimmedMessage = message.trim();
-    const trimmedSubject = typeof subject === "string" ? subject.trim() : null;
+    const name = getStringField(parsed.body, "name", MAX_NAME, true);
+    const email = getStringField(parsed.body, "email", MAX_EMAIL, true);
+    const subject = getStringField(parsed.body, "subject", 100);
+    const message = getStringField(parsed.body, "message", MAX_MESSAGE, true);
 
-    if (trimmedName.length === 0 || trimmedName.length > MAX_NAME) {
-      return NextResponse.json(
-        { error: `Name must be between 1 and ${MAX_NAME} characters.` },
-        { status: 400 }
-      );
-    }
-
-    if (trimmedEmail.length > MAX_EMAIL || !isValidEmail(trimmedEmail)) {
-      return NextResponse.json({ error: "Invalid email address." }, { status: 400 });
-    }
-
-    // Subject must be one of the allowed values (or omitted)
-    if (trimmedSubject !== null && !ALLOWED_SUBJECTS.includes(trimmedSubject)) {
-      return NextResponse.json({ error: "Invalid subject." }, { status: 400 });
-    }
-
-    if (trimmedMessage.length === 0 || trimmedMessage.length > MAX_MESSAGE) {
-      return NextResponse.json(
-        { error: `Message must be between 1 and ${MAX_MESSAGE} characters.` },
-        { status: 400 }
-      );
+    if (
+      !name.valid || !name.value ||
+      !email.valid || !email.value || !isValidEmail(email.value) ||
+      !subject.valid ||
+      (subject.value !== null && !ALLOWED_SUBJECTS.includes(subject.value)) ||
+      !message.valid || !message.value
+    ) {
+      return NextResponse.json({ error: "Invalid request." }, { status: 400 });
     }
 
     const supabase = await createClient();
 
     const { error } = await supabase.from("contact_submissions").insert({
-      name: trimmedName,
-      email: trimmedEmail,
-      subject: trimmedSubject || null,
-      message: trimmedMessage,
+      name: name.value,
+      email: email.value,
+      subject: subject.value,
+      message: message.value,
     });
 
     if (error) {
-      console.error("[POST /api/contact]", error.message);
-      return NextResponse.json({ error: "Failed to save message." }, { status: 500 });
+      console.error("[POST /api/contact] Failed to save contact submission.");
+      return NextResponse.json({ error: "Unable to send your message." }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });

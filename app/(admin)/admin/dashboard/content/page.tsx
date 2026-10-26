@@ -1,13 +1,13 @@
-import { getPageContent } from "@/lib/data";
+import { getAdminPageContent } from "@/lib/data-admin";
 import CMSEditor from "@/components/admin/CMSEditor";
 
 export default async function ContentPage() {
   const [homeContent, aboutContent, productsContent, contactContent] =
     await Promise.all([
-      getPageContent("home"),
-      getPageContent("about"),
-      getPageContent("products"),
-      getPageContent("contact"),
+      getAdminPageContent("home"),
+      getAdminPageContent("about"),
+      getAdminPageContent("products"),
+      getAdminPageContent("contact"),
     ]);
 
   return (

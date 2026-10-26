@@ -1,11 +1,17 @@
 import Link from "next/link";
-import { getProducts, getStats, getPillars, getFAQs, getTestimonials } from "@/lib/data";
-import { getContactSubmissionCounts } from "@/lib/data-admin";
+import {
+  getAdminFAQs,
+  getAdminPillars,
+  getAdminProducts,
+  getAdminStats,
+  getAdminTestimonials,
+  getContactSubmissionCounts,
+} from "@/lib/data-admin";
 import { MdShoppingBag, MdBarChart, MdViewColumn, MdQuestionAnswer, MdStar } from "react-icons/md";
 
 export default async function OverviewPage() {
   const [counts, products, stats, pillars, faqs, testimonials] = await Promise.all([
-    getContactSubmissionCounts(), getProducts(), getStats(), getPillars(), getFAQs(), getTestimonials(),
+    getContactSubmissionCounts(), getAdminProducts(), getAdminStats(), getAdminPillars(), getAdminFAQs(), getAdminTestimonials(),
   ]);
 
   const sections = [
@@ -28,7 +34,7 @@ export default async function OverviewPage() {
           <div className="flex flex-col items-start justify-between gap-7 p-6 sm:p-8 md:p-10">
             <div>
               <h2 id="inbox-heading" className="display-font text-2xl font-semibold tracking-[-0.03em] text-white">Messages to review</h2>
-              <p className="display-font mt-4 text-6xl font-semibold tracking-[-0.05em] text-[#a7f3d0]">{counts.new}</p>
+              <p className="display-font mt-4 text-6xl font-semibold tracking-[-0.05em] text-white">{counts.new}</p>
               <p className="mt-1 text-sm text-white/85">new message{counts.new === 1 ? "" : "s"}</p>
             </div>
             <Link href="/admin/dashboard/messages" className="inline-flex min-h-11 items-center justify-center rounded-full bg-[#d7f6e7] px-5 text-sm font-semibold text-[#064e3b] transition-colors hover:bg-white focus-visible:outline-white">Open messages</Link>

@@ -1,4 +1,4 @@
-import { getPillars } from "@/lib/data";
+import { getAdminPillars } from "@/lib/data-admin";
 import CrudManager from "@/components/admin/CrudManager";
 import type { FieldDef } from "@/components/admin/CrudManager";
 
@@ -13,7 +13,7 @@ const fields: FieldDef[] = [
 ];
 
 export default async function PillarsPage() {
-  const pillars = await getPillars();
+  const pillars = await getAdminPillars();
 
   return (
     <>

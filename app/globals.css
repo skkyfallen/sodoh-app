@@ -1,64 +1,69 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-primary: #016936;
-  --color-primary-dark: #014e29;
+  --color-primary-deep: #014e29;
+  --color-primary-ink: #064e3b;
   --color-accent: #10b981;
-  --color-bg-light: #ecfdf5;
-  --color-bg-dark: #0d1b14;
+  --color-mint: #a7f3d0;
+  --color-field: #ecfdf5;
+  --color-paper: #f6faf6;
+  --color-forest: #0d2b1c;
+  --color-forest-deep: #0d1b14;
+
+  --font-display: "Outfit", "DM Sans", system-ui, sans-serif;
+  --font-body: "DM Sans", system-ui, sans-serif;
+
+  --radius-field-sm: 10px;
+  --radius-field: 12px;
+  --radius-card: 18px;
+  --radius-media: 24px;
+  --radius-crop: 24px 72px 24px 24px;
+
+  --shadow-card: 0 14px 36px rgb(10 66 39 / 8%);
+  --shadow-lift: 0 18px 48px rgb(10 66 39 / 12%);
+  --shadow-dialog: 0 24px 72px rgb(0 0 0 / 30%);
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 160ms;
+  --duration-base: 240ms;
+  --duration-slow: 420ms;
+  --duration-hero: 760ms;
 }
 
 :root {
   color-scheme: light;
-  --page: #ecfdf5;
+  --page: #fbfdfb;
   --surface: #ffffff;
-  --surface-soft: #ecfdf5;
-  --surface-muted: #e8f1f3;
-  --ink: #064e3b;
-  --body: #254b3b;
-  --muted: #506c5c;
-  --border: #a7f3d0;
+  --surface-soft: #f1f6f1;
+  --surface-muted: #e7ede6;
+  --surface-warm: #f4f1e6;
+  --ink: #123524;
+  --body: #33493c;
+  --muted: #5d7466;
+  --border: #c4ddcc;
+  --border-strong: #9cc4aa;
   --brand: #016936;
   --brand-hover: #014e29;
-  --brand-soft: #dff6e9;
+  --brand-soft: #d9f0e2;
   --focus: #016936;
-  --danger: #dc2626;
+  --danger: #b42323;
   --shadow: 0 18px 48px rgb(10 66 39 / 10%);
+  --shadow-card: 0 14px 36px rgb(10 66 39 / 8%);
 
-  --admin-page: #f2f6f3;
+  --admin-page: #eef3ee;
   --admin-surface: #ffffff;
   --admin-ink: #152b20;
-  --admin-muted: #53675b;
-  --admin-border: #d6e0d9;
-  --admin-sidebar: #102b20;
+  --admin-muted: #55685c;
+  --admin-border: #d3ddd5;
+  --admin-sidebar: #0f2a1e;
+  --admin-active: #d9f0e2;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --page: #0d1b14;
-    --surface: #14241b;
-    --surface-soft: #162c20;
-    --surface-muted: #1b3027;
-    --ink: #e6f3eb;
-    --body: #d0e0d6;
-    --muted: #b3c7bb;
-    --border: #365b46;
-    --brand: #27a665;
-    --brand-hover: #35bc7a;
-    --brand-soft: #183d2b;
-    --focus: #75e0a8;
-    --danger: #ff8a80;
-    --shadow: 0 20px 54px rgb(0 0 0 / 28%);
-
-    --admin-page: #101a14;
-    --admin-surface: #17251c;
-    --admin-ink: #e5f1e9;
-    --admin-muted: #b4c6bb;
-    --admin-border: #314a3a;
-    --admin-sidebar: #0a1b12;
-  }
-}
+/* Light-only site: no OS-driven dark tokens. The .dark class is never
+   applied, so dark: variants elsewhere are inert. */
 
 * {
   box-sizing: border-box;
@@ -71,9 +76,11 @@ html {
 body {
   background: var(--page);
   color: var(--ink);
-  font-family: var(--font-body), sans-serif;
+  font-family: var(--font-body), system-ui, sans-serif;
   font-size: 16px;
   line-height: 1.55;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1,
@@ -83,7 +90,7 @@ h4,
 h5,
 h6,
 .display-font {
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-display), system-ui, sans-serif;
 }
 
 button,
@@ -103,18 +110,42 @@ summary {
   outline-offset: 3px;
 }
 
-.hero-photo {
-  animation: harvest-reveal 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+/* ——— signature surfaces ——— */
+.field-paper {
+  background:
+    radial-gradient(120% 90% at 8% 0%, rgb(1 105 54 / 2.5%) 0%, transparent 55%),
+    radial-gradient(100% 80% at 100% 20%, rgb(16 185 129 / 2%) 0%, transparent 50%),
+    var(--page);
 }
+
+.rule-line {
+  border-color: var(--border);
+}
+
+.measure {
+  max-width: 68ch;
+}
+
+/* ——— hero reveal: the one authored entrance ——— */
+.hero-photo {
+  animation: harvest-reveal var(--duration-hero) var(--ease-out) both;
+}
+
+.hero-copy > * {
+  animation: rise-in 640ms var(--ease-out) both;
+}
+.hero-copy > *:nth-child(1) { animation-delay: 40ms; }
+.hero-copy > *:nth-child(2) { animation-delay: 140ms; }
+.hero-copy > *:nth-child(3) { animation-delay: 240ms; }
+.hero-copy > *:nth-child(4) { animation-delay: 320ms; }
 
 @keyframes harvest-reveal {
   from {
     clip-path: inset(4% 0 4% 7% round 48px);
-    filter: blur(7px);
-    opacity: 0.72;
+    filter: blur(8px);
+    opacity: 0.7;
     transform: scale(1.035);
   }
-
   to {
     clip-path: inset(0 round 24px 72px 24px 24px);
     filter: blur(0);
@@ -123,27 +154,66 @@ summary {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+    filter: blur(4px);
   }
-
-  .hero-photo {
-    animation: none;
-  }
-
-  [data-animate-in] {
-    opacity: 1 !important;
-    transform: none !important;
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
   }
 }
 
-/* Admin is a quiet, task-first workspace with the same brand-green actions. */
+/* ——— tactile controls ——— */
+.pressable {
+  transition: transform var(--duration-base) var(--ease-out), background-color var(--duration-base), border-color var(--duration-base), box-shadow var(--duration-base);
+}
+.pressable:hover {
+  transform: translateY(-1px);
+}
+.pressable:active {
+  transform: translateY(0);
+}
+
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.link-arrow svg,
+.link-arrow .arrow {
+  transition: transform var(--duration-base) var(--ease-out);
+}
+.link-arrow:hover svg,
+.link-arrow:hover .arrow {
+  transform: translateX(4px);
+}
+
+.media-zoom img {
+  transition: transform 700ms var(--ease-out);
+}
+.media-zoom:hover img {
+  transform: scale(1.03);
+}
+
+/* ——— editorial dividers ——— */
+.divider-soft {
+  border-color: var(--border);
+}
+
+/* ——— page transition veil ——— */
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.page-enter {
+  animation: page-in 480ms var(--ease-out) both;
+}
+
+/* ——— admin workspace ——— */
 .admin-shell {
   min-height: 100vh;
   background: var(--admin-page);
@@ -164,44 +234,6 @@ summary {
   color: var(--admin-ink);
 }
 
-.admin-shell main .bg-white {
-  background-color: var(--admin-surface);
-}
-
-.admin-shell main .bg-slate-50,
-.admin-shell main .bg-\[\#f7f8f4\] {
-  background-color: var(--admin-page);
-}
-
-.admin-shell main .border-slate-200,
-.admin-shell main .border-slate-100,
-.admin-shell main .border-\[\#dce4dc\] {
-  border-color: var(--admin-border);
-}
-
-.admin-shell main .text-slate-900,
-.admin-shell main .text-slate-800 {
-  color: var(--admin-ink);
-}
-
-.admin-shell main .text-slate-700,
-.admin-shell main .text-slate-600,
-.admin-shell main .text-slate-500 {
-  color: var(--admin-muted);
-}
-
-.admin-shell main .text-slate-400 {
-  color: color-mix(in srgb, var(--admin-muted) 78%, transparent);
-}
-
-.admin-shell main table thead tr {
-  background: var(--admin-page);
-}
-
-.admin-shell main table tbody tr:last-child {
-  border-bottom: 0;
-}
-
 .admin-shell input:not([type="checkbox"]),
 .admin-shell textarea,
 .admin-shell select {
@@ -215,65 +247,30 @@ summary {
   color: var(--admin-muted);
 }
 
-.admin-shell input:focus,
-.admin-shell textarea:focus,
-.admin-shell select:focus {
-  border-color: var(--brand);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 20%, transparent);
-}
-
-.admin-shell main [class*="rounded-sm"],
-.admin-shell main [class*="rounded-xl"] {
-  border-radius: 12px;
-}
-
 .admin-sidebar :focus-visible {
   outline-color: #d7f6e7;
 }
 
-@media (prefers-color-scheme: dark) {
-  .admin-shell main [class*="text-[#016936]"] {
-    color: #7be2a6;
-  }
-
-  .admin-shell main [class*="bg-[#e4f0da]"],
-  .admin-shell main [class*="bg-green-50"] {
-    background-color: #1d3b29;
-  }
-
-  .admin-shell main [class*="text-[#145c34]"],
-  .admin-shell main [class*="text-green-800"] {
-    color: #c3f0d2;
-  }
-
-  .admin-shell main [class*="bg-blue-50"] {
-    background-color: #1c3040;
-  }
-
-  .admin-shell main [class*="text-blue-800"] {
-    color: #c9e6ff;
-  }
-
-  .admin-shell main [class*="bg-red-50"] {
-    background-color: #3b211f;
-  }
-
-  .admin-shell main [class*="text-red-800"] {
-    color: #ffd1cb;
-  }
-
-  .admin-shell main [class*="bg-slate-100"] {
-    background-color: #27372d;
-  }
-}
-
+/* ——— motion access ——— */
 @media (prefers-reduced-motion: reduce) {
-  .admin-shell *,
-  .admin-shell *::before,
-  .admin-shell *::after {
+  *,
+  *::before,
+  *::after {
     scroll-behavior: auto !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .hero-photo,
+  .hero-copy > *,
+  .page-enter {
+    animation: none;
+  }
+
+  [data-animate-in] {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
   }
 }

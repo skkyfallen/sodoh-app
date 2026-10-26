@@ -23,7 +23,10 @@ export async function middleware(request: NextRequest) {
           );
           supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, {
+              ...options,
+              ...(process.env.NODE_ENV === "production" ? { secure: true } : {}),
+            })
           );
         },
       },
@@ -41,6 +44,13 @@ export async function middleware(request: NextRequest) {
     if (!user) {
       const loginUrl = new URL("/admin/login", request.url);
       loginUrl.searchParams.set("redirectTo", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    const { data: isAdmin } = await supabase.rpc("is_admin");
+    if (isAdmin !== true) {
+      const loginUrl = new URL("/admin/login", request.url);
+      loginUrl.searchParams.set("error", "not-authorised");
       return NextResponse.redirect(loginUrl);
     }
   }

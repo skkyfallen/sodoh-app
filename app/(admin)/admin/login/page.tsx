@@ -1,14 +1,19 @@
 "use client";
 
 import { Suspense, useId, useState, type FormEvent } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const errorId = useId();
+  const hasNotAuthorisedError = searchParams.get("error") === "not-authorised";
   const rawRedirect = searchParams.get("redirectTo") ?? "";
   let redirectTo = "/admin/dashboard/overview";
   try {
@@ -23,7 +28,11 @@ function LoginForm() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    hasNotAuthorisedError
+      ? "We couldn’t sign you in. Check your email and password, then try again."
+      : null
+  );
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
@@ -58,7 +67,7 @@ function LoginForm() {
         <div className="mx-auto flex h-[72px] max-w-6xl items-center justify-between px-5 sm:px-8">
           <Link href="/" className="rounded-md leading-tight focus-visible:outline-offset-4" aria-label="Sodoh Nigeria home">
             <span className="display-font block text-xl font-semibold tracking-[-0.04em] text-[var(--admin-ink)]">Sodoh</span>
-            <span className="block text-xs text-[var(--admin-muted)]">Nigeria Limited</span>
+            <span className="block text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--admin-muted)]">Nigeria Limited</span>
           </Link>
           <Link href="/" className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold text-[var(--admin-ink)] underline decoration-[var(--admin-border)] underline-offset-4 transition-colors hover:text-[#016936]">
             View public site
@@ -66,30 +75,45 @@ function LoginForm() {
         </div>
       </header>
 
-      <main className="mx-auto grid min-h-[calc(100dvh-72px)] max-w-6xl content-start items-start gap-8 px-5 py-10 sm:px-8 md:py-16 lg:grid-cols-[1fr_0.82fr] lg:content-center lg:items-center lg:gap-20">
-        <section className="max-w-xl">
-          <h1 className="display-font text-4xl font-semibold leading-[1.05] tracking-[-0.045em] text-[var(--admin-ink)] sm:text-5xl [text-wrap:balance]">
-            Sign in to your workspace
-          </h1>
-          <p className="mt-5 max-w-[50ch] text-base leading-7 text-[var(--admin-muted)]">
-            Manage the Sodoh Nigeria site content, product listings, and enquiries.
-          </p>
+      <main className="mx-auto grid min-h-[calc(100dvh-72px)] max-w-6xl content-start items-stretch gap-8 px-5 py-10 sm:px-8 md:py-16 lg:grid-cols-[1fr_0.9fr] lg:content-center lg:items-center lg:gap-14">
+        <section className="page-enter relative overflow-hidden rounded-[18px] border border-[var(--admin-border)] bg-[#0c2418] text-white">
+          <div className="relative min-h-[260px] sm:min-h-[320px] lg:min-h-[480px]">
+            <Image
+              src="/images/nigerian-growing-fields.jpg"
+              alt="Growing fields in Nigeria"
+              fill
+              priority
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+            />
+            <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[#071a10]/85 via-[#071a10]/25 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
+              <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-[#7be2a6]">Admin workspace</p>
+              <p className="display-font mt-2 max-w-[22ch] text-2xl font-semibold leading-tight tracking-[-0.03em] sm:text-3xl">
+                Keep the catalogue and enquiries current.
+              </p>
+            </div>
+          </div>
         </section>
 
-        <section aria-labelledby="login-heading" className="w-full rounded-2xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 shadow-[0_16px_44px_rgba(10,42,26,0.08)] sm:p-8">
-          <h2 id="login-heading" className="display-font text-2xl font-semibold tracking-[-0.035em] text-[var(--admin-ink)]">Admin sign in</h2>
-          <p className="mt-2 text-sm leading-6 text-[var(--admin-muted)]">Use your staff account to continue.</p>
+        <section aria-labelledby="login-heading" className="page-enter w-full rounded-[18px] border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 shadow-[0_16px_44px_rgba(10,42,26,0.08)] sm:p-8" style={{ animationDelay: "120ms" }}>
+          <h1 id="login-heading" className="display-font text-3xl font-semibold tracking-[-0.035em] text-[var(--admin-ink)] sm:text-4xl">
+            Sign in to your workspace
+          </h1>
+          <p className="mt-2 text-sm leading-6 text-[var(--admin-muted)]">
+            Manage the Sodoh Nigeria site content, product listings, and enquiries. Use your staff account to continue.
+          </p>
 
           {error && (
-            <p id={errorId} role="alert" className="mt-6 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-medium leading-6 text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-100">
+            <p id={errorId} role="alert" className="mt-6 rounded-[12px] border border-red-300 bg-red-50 px-4 py-3 text-sm font-medium leading-6 text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-100">
               {error}
             </p>
           )}
 
           <form onSubmit={handleLogin} className="mt-6 flex flex-col gap-5">
             <div className="flex flex-col gap-2">
-              <label htmlFor="admin-email" className="text-sm font-semibold text-[var(--admin-ink)]">Email address</label>
-              <input
+              <Label htmlFor="admin-email">Email address</Label>
+              <Input
                 id="admin-email"
                 name="email"
                 type="email"
@@ -101,13 +125,14 @@ function LoginForm() {
                 onChange={(event) => { setEmail(event.target.value); setError(null); }}
                 aria-invalid={Boolean(error)}
                 aria-describedby={error ? errorId : undefined}
-                className="min-h-12 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 text-base text-[var(--admin-ink)] aria-[invalid=true]:border-red-600 focus:border-[#016936] focus:outline-none focus:ring-2 focus:ring-[#016936]/20"
+                placeholder="staff@sodoh.com"
+                className="border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-ink)] focus:border-[#016936] focus:ring-[#016936]/20"
               />
             </div>
 
             <div className="flex flex-col gap-2">
-              <label htmlFor="admin-password" className="text-sm font-semibold text-[var(--admin-ink)]">Password</label>
-              <input
+              <Label htmlFor="admin-password">Password</Label>
+              <Input
                 id="admin-password"
                 name="password"
                 type="password"
@@ -117,18 +142,19 @@ function LoginForm() {
                 onChange={(event) => { setPassword(event.target.value); setError(null); }}
                 aria-invalid={Boolean(error)}
                 aria-describedby={error ? errorId : undefined}
-                className="min-h-12 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] px-4 text-base text-[var(--admin-ink)] aria-[invalid=true]:border-red-600 focus:border-[#016936] focus:outline-none focus:ring-2 focus:ring-[#016936]/20"
+                placeholder="••••••••"
+                className="border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-ink)] focus:border-[#016936] focus:ring-[#016936]/20"
               />
             </div>
 
-            <button
+            <Button
               type="submit"
               disabled={loading}
               aria-busy={loading}
-              className="mt-1 inline-flex min-h-12 items-center justify-center rounded-lg bg-[#016936] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#014e29] disabled:cursor-wait disabled:opacity-60"
+              className="mt-1 w-full rounded-[12px]"
             >
-              {loading ? "Signing in…" : "Sign in"}
-            </button>
+              {loading ? "Signing in…" : "Sign in →"}
+            </Button>
           </form>
         </section>
       </main>

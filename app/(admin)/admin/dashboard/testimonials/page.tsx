@@ -1,4 +1,4 @@
-import { getTestimonials } from "@/lib/data";
+import { getAdminTestimonials } from "@/lib/data-admin";
 import CrudManager from "@/components/admin/CrudManager";
 import type { FieldDef } from "@/components/admin/CrudManager";
 
@@ -13,7 +13,7 @@ const fields: FieldDef[] = [
 ];
 
 export default async function TestimonialsPage() {
-  const testimonials = await getTestimonials();
+  const testimonials = await getAdminTestimonials();
 
   return (
     <>

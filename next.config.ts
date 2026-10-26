@@ -1,5 +1,7 @@
 import type { NextConfig } from "next";
 
+const isDev = process.env.NODE_ENV === "development";
+
 const securityHeaders = [
   // Enable DNS prefetching for improved performance
   { key: "X-DNS-Prefetch-Control", value: "on" },
@@ -24,32 +26,41 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      // Next.js requires 'unsafe-eval' in dev; restrict to self + supabase in prod
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      // Next.js requires 'unsafe-eval' in dev; 'unsafe-inline' remains a known CSP gap.
+      `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       // Allow connections to Supabase
       "connect-src 'self' https://*.supabase.co https://*.supabase.io wss://*.supabase.co",
-      "font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com",
-      "frame-src 'none'",
+      "font-src 'self'",
+      "frame-src 'self' https://maps.google.com https://www.google.com",
+      "frame-ancestors 'self'",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
-      // NOTE: 'unsafe-inline' and 'unsafe-eval' are required by Next.js for
-      // its runtime hydration. A nonce-based or hash-based CSP would be
-      // stronger but requires additional Next.js middleware configuration
-      // beyond the scope of this change.
     ].join("; "),
   },
 ];
 
 const nextConfig: NextConfig = {
+  // Dev only: let phones and other devices on the local network load dev assets
+  // (without this, Next blocks the JS bundles and buttons never hydrate).
+  allowedDevOrigins: ["10.0.0.*", "192.168.*.*", "100.65.197.35"],
   async headers() {
     return [
       {
         // Apply security headers to all routes
         source: "/(.*)",
         headers: securityHeaders,
+      },
+      {
+        source: "/images/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=604800",
+          },
+        ],
       },
     ];
   },

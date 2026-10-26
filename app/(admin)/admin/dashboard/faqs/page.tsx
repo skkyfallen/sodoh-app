@@ -1,4 +1,4 @@
-import { getFAQs } from "@/lib/data";
+import { getAdminFAQs } from "@/lib/data-admin";
 import CrudManager from "@/components/admin/CrudManager";
 import type { FieldDef } from "@/components/admin/CrudManager";
 
@@ -11,7 +11,7 @@ const fields: FieldDef[] = [
 ];
 
 export default async function FAQsPage() {
-  const faqs = await getFAQs();
+  const faqs = await getAdminFAQs();
 
   return (
     <>

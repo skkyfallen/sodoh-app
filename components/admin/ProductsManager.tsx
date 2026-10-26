@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import type { Tables } from "@/types/database";
@@ -21,11 +21,28 @@ const emptyProduct: Omit<Product, "id" | "created_at" | "updated_at"> = {
   description: "",
   image_url: "",
   image_alt: "",
-  icon: "MdEco",
+  icon: null,
   display_order: 0,
   is_active: true,
   public_reviewed: false,
 };
+
+// Slug is derived from the title on create so the admin never types it.
+// Public anchors (#product-{slug}) and request lookups depend on it staying unique.
+function uniqueSlug(title: string, taken: string[]): string {
+  const base =
+    title
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "product";
+  const used = new Set(taken.map((s) => s.toLowerCase()));
+  let slug = base;
+  let n = 2;
+  while (used.has(slug)) slug = `${base}-${n++}`;
+  return slug;
+}
 
 // ─── Image uploader ──────────────────────────────────────────────────────────
 
@@ -88,17 +105,17 @@ function ImageUploader({ currentUrl, onUploaded }: ImageUploaderProps) {
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="block text-sm font-semibold text-slate-700">Product image</label>
+      <label className="block text-sm font-semibold text-[var(--admin-ink)]">Product image</label>
 
       {currentUrl ? (
-        <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
-          <Image src={currentUrl} alt="Product preview" fill className="object-cover" sizes="(max-width: 768px) 100vw, 500px" />
+        <div className="relative aspect-video w-full overflow-hidden rounded-[12px] border border-[var(--admin-border)] bg-slate-100">
+          <Image src={(() => { if (currentUrl.startsWith("/") && !currentUrl.startsWith("//") && !currentUrl.includes("\\")) return currentUrl; try { const url = new URL(currentUrl); return url.protocol === "https:" && url.hostname ? currentUrl : "/images/produce-fields.jpg"; } catch { return "/images/produce-fields.jpg"; } })()} alt="Product preview" fill className="object-cover" sizes="(max-width: 768px) 100vw, 500px" />
           <div className="absolute inset-0 flex items-end justify-end p-2">
             <button
               type="button"
               onClick={handleRemove}
               disabled={uploading}
-              className="min-h-11 rounded-full border border-red-200 bg-white/95 px-4 text-sm font-semibold text-red-700 shadow-sm transition-colors hover:bg-red-50 disabled:cursor-wait disabled:opacity-60"
+              className="min-h-11 rounded-full border border-red-200 bg-[var(--admin-surface)]/95 px-4 text-sm font-semibold text-red-700 shadow-sm transition-colors hover:bg-red-50 disabled:cursor-wait disabled:opacity-60"
             >
               Remove
             </button>
@@ -106,7 +123,7 @@ function ImageUploader({ currentUrl, onUploaded }: ImageUploaderProps) {
               type="button"
               onClick={() => inputRef.current?.click()}
               disabled={uploading}
-              className="ml-2 min-h-11 rounded-full border border-slate-200 bg-white/95 px-4 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-100 disabled:cursor-wait disabled:opacity-60"
+              className="ml-2 min-h-11 rounded-full border border-[var(--admin-border)] bg-[var(--admin-surface)]/95 px-4 text-sm font-semibold text-[var(--admin-ink)] shadow-sm transition-colors hover:bg-slate-100 disabled:cursor-wait disabled:opacity-60"
             >
               {uploading ? "Uploading…" : "Replace"}
             </button>
@@ -117,7 +134,7 @@ function ImageUploader({ currentUrl, onUploaded }: ImageUploaderProps) {
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="flex w-full aspect-video flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 text-slate-600 transition-colors hover:border-[#016936] hover:bg-[#016936]/5 hover:text-[#016936] disabled:opacity-60"
+          className="flex w-full aspect-video flex-col items-center justify-center rounded-[12px] border border-dashed border-[var(--admin-border)] text-[var(--admin-muted)] transition-colors hover:border-[#016936] hover:bg-[#016936]/5 hover:text-[#016936] disabled:opacity-60"
         >
           {uploading ? (
             <span className="text-sm font-semibold">Uploading…</span>
@@ -131,7 +148,7 @@ function ImageUploader({ currentUrl, onUploaded }: ImageUploaderProps) {
         </button>
       )}
 
-      {uploading && currentUrl && <p role="status" className="text-sm text-slate-600">Uploading replacement image…</p>}
+      {uploading && currentUrl && <p role="status" className="text-sm text-[var(--admin-muted)]">Uploading replacement image…</p>}
       {error && <p role="alert" className="text-sm font-medium text-red-700">{error} You can choose another image and try again.</p>}
 
       <input
@@ -159,11 +176,22 @@ export default function ProductsManager({ initialProducts }: Props) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [justSaved, setJustSaved] = useState(false);
+  const [savedSnapshot, setSavedSnapshot] = useState<{
+    title: string;
+    is_active: boolean;
+    public_reviewed: boolean;
+  } | null>(null);
+  const [pageNotice, setPageNotice] = useState<string | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const editorHeadingRef = useRef<HTMLHeadingElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const savingRef = useRef(false);
   const dialogOpen = editing !== null;
-  savingRef.current = saving;
+
+  useLayoutEffect(() => {
+    savingRef.current = saving;
+  }, [saving]);
 
   const supabase = createClient();
 
@@ -171,6 +199,9 @@ export default function ProductsManager({ initialProducts }: Props) {
     previousFocusRef.current = document.activeElement as HTMLElement | null;
     setSaveError(null);
     setActionError(null);
+    setPageNotice(null);
+    setJustSaved(false);
+    setSavedSnapshot(null);
     setEditing({
       ...emptyProduct,
       id: "",
@@ -185,14 +216,40 @@ export default function ProductsManager({ initialProducts }: Props) {
     previousFocusRef.current = document.activeElement as HTMLElement | null;
     setSaveError(null);
     setActionError(null);
+    setPageNotice(null);
+    setJustSaved(false);
+    setSavedSnapshot(null);
     setEditing({ ...p });
     setIsNew(false);
   };
 
-  const close = () => {
+  const close = useCallback(() => {
     if (savingRef.current) return;
     setEditing(null);
     setIsNew(false);
+    setJustSaved(false);
+    setSavedSnapshot(null);
+  }, []);
+
+  const backToForm = () => {
+    setJustSaved(false);
+    setSavedSnapshot(null);
+    dialogRef.current?.querySelector<HTMLElement>("input:not([type=checkbox]), textarea, button")?.focus();
+  };
+
+  const addAnother = () => {
+    setSaveError(null);
+    setJustSaved(false);
+    setSavedSnapshot(null);
+    setEditing({
+      ...emptyProduct,
+      id: "",
+      display_order: products.length + 1,
+      created_at: "",
+      updated_at: "",
+    } as Product);
+    setIsNew(true);
+    dialogRef.current?.querySelector<HTMLElement>("input:not([type=checkbox]), textarea, button")?.focus();
   };
 
   useEffect(() => {
@@ -227,14 +284,16 @@ export default function ProductsManager({ initialProducts }: Props) {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", onKeyDown);
     };
-    // The dialog lifecycle is intentionally tied to its open/closed state.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dialogOpen]);
+  }, [dialogOpen, close]);
+
+  useEffect(() => {
+    if (justSaved) editorHeadingRef.current?.focus();
+  }, [justSaved]);
 
   const handleSave = async () => {
     if (!editing) return;
-    if (!editing.title.trim() || !editing.slug.trim()) {
-      setSaveError("Add a product name and slug before saving.");
+    if (!editing.title.trim()) {
+      setSaveError("Add a product name before saving.");
       return;
     }
     setSaving(true);
@@ -243,9 +302,10 @@ export default function ProductsManager({ initialProducts }: Props) {
     if (isNew) {
       const { id: _id, created_at: _c, updated_at: _u, ...rest } = editing;
       void _id; void _c; void _u;
+      const slug = uniqueSlug(rest.title, products.map((p) => p.slug));
       const { data, error } = await supabase
         .from("products")
-        .insert(rest as never)
+        .insert({ ...rest, slug, icon: null } as never)
         .select()
         .single();
       if (error || !data) {
@@ -253,7 +313,14 @@ export default function ProductsManager({ initialProducts }: Props) {
         setSaving(false);
         return;
       }
-      setProducts((prev) => [...prev, data as Product]);
+      const saved = data as Product;
+      setProducts((prev) => [...prev, saved]);
+      setSavedSnapshot({
+        title: saved.title,
+        is_active: saved.is_active ?? true,
+        public_reviewed: saved.public_reviewed ?? false,
+      });
+      setPageNotice(`Product added: ${saved.title}`);
     } else {
       const { created_at: _c, updated_at: _u, ...rest } = editing;
       void _c; void _u;
@@ -267,10 +334,16 @@ export default function ProductsManager({ initialProducts }: Props) {
         return;
       }
       setProducts((prev) => prev.map((p) => (p.id === editing.id ? { ...p, ...rest } : p)));
+      setSavedSnapshot({
+        title: editing.title,
+        is_active: editing.is_active ?? true,
+        public_reviewed: editing.public_reviewed ?? false,
+      });
+      setPageNotice(`Changes saved: ${editing.title}`);
     }
 
     setSaving(false);
-    close();
+    setJustSaved(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -309,7 +382,7 @@ export default function ProductsManager({ initialProducts }: Props) {
 
   const field = (key: keyof Product, label: string, type: "text" | "number" = "text") => (
     <div key={key}>
-      <label htmlFor={`product-field-${key}`} className="mb-1 block text-sm font-semibold text-slate-700">{label}</label>
+      <label htmlFor={`product-field-${key}`} className="mb-1 block text-sm font-semibold text-[var(--admin-ink)]">{label}</label>
       <input
         id={`product-field-${key}`}
         type={type}
@@ -320,7 +393,7 @@ export default function ProductsManager({ initialProducts }: Props) {
             prev ? { ...prev, [key]: type === "number" ? Number(e.target.value) : e.target.value } : prev
           )
         }
-        className="min-h-11 w-full rounded-xl border border-slate-200 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#016936]"
+        className="min-h-11 w-full rounded-[12px] border border-[var(--admin-border)] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#016936]"
       />
     </div>
   );
@@ -330,57 +403,58 @@ export default function ProductsManager({ initialProducts }: Props) {
       <button
         type="button"
         onClick={openNew}
-        className="mb-6 inline-flex min-h-11 items-center gap-3 rounded-lg bg-[#016936] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#014e29]"
+        className="mb-6 inline-flex min-h-11 items-center gap-3 rounded-[10px] bg-[#016936] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#014e29]"
       >
         <span aria-hidden="true" className="text-lg leading-none">+</span> Add product
       </button>
-      {actionError && <p role="alert" className="mb-4 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{actionError}</p>}
+      {pageNotice && <p role="status" className="mb-4 rounded-[12px] border border-[var(--admin-border)] bg-[var(--admin-active)] px-4 py-3 text-sm font-semibold text-[#145c34]">{pageNotice}</p>}
+      {actionError && <p role="alert" className="mb-4 rounded-[12px] border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{actionError}</p>}
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <div className="overflow-hidden rounded-[12px] border border-[var(--admin-border)] bg-[var(--admin-surface)]">
         <table className="w-full table-fixed text-sm">
           <thead>
-            <tr className="border-b border-slate-200 bg-slate-50">
-              <th className="px-2 py-3 text-left text-xs font-semibold text-slate-700 sm:px-4 sm:text-sm">Order</th>
-              <th className="px-2 py-3 text-left text-xs font-semibold text-slate-700 sm:px-4 sm:text-sm">Product</th>
-              <th className="px-2 py-3 text-left text-xs font-semibold text-slate-700 sm:px-4 sm:text-sm">Region</th>
-              <th className="px-2 py-3 text-left text-xs font-semibold text-slate-700 sm:px-4 sm:text-sm">Active</th>
-              <th className="px-2 py-3 text-left text-xs font-semibold text-slate-700 sm:px-4 sm:text-sm">Review</th>
-              <th className="px-2 py-3 text-right text-xs font-semibold text-slate-700 sm:px-4 sm:text-sm">Actions</th>
+            <tr className="border-b border-[var(--admin-border)] bg-[var(--admin-page)]">
+              <th className="px-2 py-3 text-left text-xs font-semibold text-[var(--admin-ink)] sm:px-4 sm:text-sm">Order</th>
+              <th className="px-2 py-3 text-left text-xs font-semibold text-[var(--admin-ink)] sm:px-4 sm:text-sm">Product</th>
+              <th className="px-2 py-3 text-left text-xs font-semibold text-[var(--admin-ink)] sm:px-4 sm:text-sm">Region</th>
+              <th className="px-2 py-3 text-left text-xs font-semibold text-[var(--admin-ink)] sm:px-4 sm:text-sm">Active</th>
+              <th className="px-2 py-3 text-left text-xs font-semibold text-[var(--admin-ink)] sm:px-4 sm:text-sm">Review</th>
+              <th className="px-2 py-3 text-right text-xs font-semibold text-[var(--admin-ink)] sm:px-4 sm:text-sm">Actions</th>
             </tr>
           </thead>
           <tbody>
             {products.map((p) => (
-              <tr key={p.id} className="border-b border-slate-100 transition-colors hover:bg-slate-50">
-                <td className="px-2 py-3 tabular-nums text-slate-500 sm:px-4">{p.display_order}</td>
-                <td className="break-words px-2 py-3 font-semibold text-slate-900 sm:px-4">{p.title}</td>
-                <td className="break-words px-2 py-3 text-slate-600 sm:px-4">{p.region}</td>
+              <tr key={p.id} className="border-b border-[var(--admin-border)] transition-colors hover:bg-[var(--admin-page)]">
+                <td className="px-2 py-3 tabular-nums text-[var(--admin-muted)] sm:px-4">{p.display_order}</td>
+                <td className="break-words px-2 py-3 font-semibold text-[var(--admin-ink)] sm:px-4">{p.title}</td>
+                <td className="break-words px-2 py-3 text-[var(--admin-muted)] sm:px-4">{p.region}</td>
                 <td className="px-2 py-3 sm:px-4">
                   <button
                     type="button"
-                    onClick={() => handleToggle(p.id, p.is_active)}
+                    onClick={() => handleToggle(p.id, p.is_active ?? true)}
                     disabled={pendingId !== null}
-                    aria-pressed={p.is_active}
+                    aria-pressed={p.is_active ?? true}
                     aria-label={`${p.is_active ? "Hide" : "Show"} ${p.title}`}
                     className={`min-h-11 rounded-full px-3 text-xs font-semibold ${
-                    p.is_active ? "bg-[#e4f0da] text-[#145c34]" : "bg-slate-100 text-slate-700"
+                    p.is_active ? "bg-[#e4f0da] text-[#145c34]" : "bg-slate-100 text-[var(--admin-ink)]"
                     }`}
                   >
                     {pendingId === p.id ? "Updating…" : p.is_active ? "Active" : "Hidden"}
                   </button>
                 </td>
-                <td className="break-words px-2 py-3 text-xs font-semibold text-slate-700 sm:px-4">{p.public_reviewed ? "Approved" : "Needs review"}</td>
+                <td className="break-words px-2 py-3 text-xs font-semibold text-[var(--admin-ink)] sm:px-4">{p.public_reviewed ? "Approved" : "Needs review"}</td>
                 <td className="px-1 py-3 text-right sm:px-3">
                   <div className="flex flex-wrap justify-end gap-0.5">
-                    <button type="button" onClick={() => openEdit(p)} disabled={pendingId !== null} className="min-h-11 rounded-lg px-1.5 font-semibold text-[#016936] hover:underline disabled:opacity-60">Edit</button>
-                    <button type="button" onClick={() => handleDelete(p.id)} disabled={pendingId !== null} className="min-h-11 rounded-lg px-1.5 font-semibold text-red-700 hover:underline disabled:opacity-60">{pendingId === p.id ? "Deleting…" : "Delete"}</button>
+                    <button type="button" onClick={() => openEdit(p)} disabled={pendingId !== null} className="min-h-11 rounded-[10px] px-1.5 font-semibold text-[#016936] hover:underline disabled:opacity-60">Edit</button>
+                    <button type="button" onClick={() => handleDelete(p.id)} disabled={pendingId !== null} className="min-h-11 rounded-[10px] px-1.5 font-semibold text-red-700 hover:underline disabled:opacity-60">{pendingId === p.id ? "Deleting…" : "Delete"}</button>
                   </div>
                 </td>
               </tr>
             ))}
             {products.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-slate-500">No products yet. Add a product to start building the catalogue.</td>
+                <td colSpan={6} className="px-4 py-8 text-center text-[var(--admin-muted)]">No products yet. Add a product to start building the catalogue.</td>
               </tr>
             )}
           </tbody>
@@ -390,21 +464,52 @@ export default function ProductsManager({ initialProducts }: Props) {
       {/* Modal */}
       {editing && (
         <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-5" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}>
-          <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="product-editor-title" className="max-h-[94dvh] w-full max-w-lg overflow-y-auto rounded-t-2xl border border-[#dce4dc] bg-[var(--admin-page)] p-5 shadow-[0_24px_72px_rgba(0,0,0,0.25)] sm:max-h-[90vh] sm:rounded-2xl sm:p-6">
+          <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="product-editor-title" className="max-h-[94dvh] w-full max-w-lg overflow-y-auto rounded-t-[12px] border border-[var(--admin-border)] bg-[var(--admin-page)] p-5 shadow-[0_24px_72px_rgba(0,0,0,0.25)] sm:max-h-[90vh] sm:rounded-[12px] sm:p-6">
             <div className="mb-6 flex items-start justify-between gap-4">
-              <h2 id="product-editor-title" className="display-font text-2xl font-semibold text-slate-900">
-                {isNew ? "Add product" : "Edit product"}
+              <h2 id="product-editor-title" ref={editorHeadingRef} tabIndex={-1} className="display-font rounded-[10px] text-2xl font-semibold text-[var(--admin-ink)] focus:outline-none">
+                {justSaved ? (isNew ? "Product added" : "Changes saved") : isNew ? "Add product" : "Edit product"}
               </h2>
-              <button type="button" onClick={close} disabled={saving} aria-label="Close product editor" className="flex size-11 shrink-0 items-center justify-center rounded-full border border-slate-300 text-xl text-slate-700 transition-colors hover:bg-white disabled:opacity-50">
+              <button type="button" onClick={close} disabled={saving} aria-label="Close product editor" className="flex size-11 shrink-0 items-center justify-center rounded-full border border-[var(--admin-border)] text-xl text-[var(--admin-ink)] transition-colors hover:bg-[var(--admin-page)] disabled:opacity-50">
                 <MdClose aria-hidden="true" />
               </button>
             </div>
 
+            {justSaved && savedSnapshot ? (
+              <div role="status" className="flex flex-col gap-4">
+                <p className="text-sm leading-6 text-[var(--admin-muted)]">
+                  {isNew
+                    ? "The product was added to the catalogue list."
+                    : "Your changes were saved."}
+                </p>
+                <div className="rounded-[12px] border border-[var(--admin-border)] bg-[var(--admin-surface)] p-4">
+                  <p className="text-base font-bold text-[var(--admin-ink)]">{savedSnapshot.title}</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <span className={`inline-flex min-h-6 items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${savedSnapshot.is_active ? "bg-[#e4f0da] text-[#145c34]" : "bg-[var(--admin-page)] text-[var(--admin-ink)]"}`}>
+                      {savedSnapshot.is_active ? "Active" : "Hidden"}
+                    </span>
+                    <span className={`inline-flex min-h-6 items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${savedSnapshot.public_reviewed ? "bg-[#e4f0da] text-[#145c34]" : "bg-[var(--admin-page)] text-[var(--admin-ink)]"}`}>
+                      {savedSnapshot.public_reviewed ? "Reviewed" : "Needs review"}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-col-reverse justify-end gap-3 border-t border-[var(--admin-border)] pt-4 sm:flex-row">
+                  {isNew ? (
+                    <>
+                      <button type="button" onClick={close} className="min-h-11 rounded-[10px] px-5 text-sm font-semibold text-[var(--admin-ink)] transition-colors hover:bg-[var(--admin-page)]">Done</button>
+                      <button type="button" onClick={addAnother} className="min-h-11 rounded-[10px] bg-[#016936] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#015a2d]">Add another product</button>
+                    </>
+                  ) : (
+                    <>
+                      <button type="button" onClick={backToForm} className="min-h-11 rounded-[10px] px-5 text-sm font-semibold text-[var(--admin-ink)] transition-colors hover:bg-[var(--admin-page)]">Keep editing</button>
+                      <button type="button" onClick={close} autoFocus className="min-h-11 rounded-[10px] bg-[#016936] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#015a2d]">Done</button>
+                    </>
+                  )}
+                </div>
+              </div>
+            ) : (
             <form onSubmit={(event) => { event.preventDefault(); void handleSave(); }} className="flex flex-col gap-4">
               {field("title", "Title")}
-              {field("slug", "Slug")}
               {field("region", "Region")}
-              {field("icon", "Icon (e.g. MdEco)")}
               {field("display_order", "Display Order", "number")}
 
               {/* Image upload */}
@@ -416,13 +521,13 @@ export default function ProductsManager({ initialProducts }: Props) {
               {field("image_alt", "Image Alt Text")}
 
               <div>
-                <label htmlFor="product-description" className="mb-1 block text-sm font-semibold text-slate-700">Description</label>
+                <label htmlFor="product-description" className="mb-1 block text-sm font-semibold text-[var(--admin-ink)]">Description</label>
                 <textarea
                   id="product-description"
                   rows={3}
                   value={editing.description ?? ""}
                   onChange={(e) => setEditing((prev) => prev ? { ...prev, description: e.target.value } : prev)}
-                  className="w-full resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#016936]"
+                  className="w-full resize-y rounded-[12px] border border-[var(--admin-border)] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#016936]"
                 />
               </div>
 
@@ -430,32 +535,33 @@ export default function ProductsManager({ initialProducts }: Props) {
                 <input
                   id="product-active"
                   type="checkbox"
-                  checked={editing.is_active}
+                  checked={editing.is_active ?? true}
                   onChange={(e) => setEditing((prev) => prev ? { ...prev, is_active: e.target.checked } : prev)}
                   className="size-4 accent-[#016936]"
                 />
-                <label htmlFor="product-active" className="text-sm font-semibold text-slate-700">Show on the public site</label>
+                <label htmlFor="product-active" className="text-sm font-semibold text-[var(--admin-ink)]">Show on the public site</label>
               </div>
               <div className="flex items-start gap-3">
                 <input
                   id="product-reviewed"
                   type="checkbox"
-                  checked={editing.public_reviewed}
+                  checked={editing.public_reviewed ?? false}
                   onChange={(event) => setEditing((prev) => prev ? { ...prev, public_reviewed: event.target.checked } : prev)}
                   className="mt-1 size-5 accent-[#016936]"
                 />
                 <div>
-                  <label htmlFor="product-reviewed" className="text-sm font-semibold text-slate-700">Reviewed for public display</label>
-                  <p className="mt-1 text-xs leading-5 text-slate-600">Only approved products appear in the public catalogue.</p>
+                  <label htmlFor="product-reviewed" className="text-sm font-semibold text-[var(--admin-ink)]">Reviewed for public display</label>
+                  <p className="mt-1 text-xs leading-5 text-[var(--admin-muted)]">Only approved products appear in the public catalogue.</p>
                 </div>
               </div>
-              {saveError && <p role="alert" className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{saveError}</p>}
+              {saveError && <p role="alert" className="rounded-[12px] border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{saveError}</p>}
 
-              <div className="mt-2 flex flex-col-reverse justify-end gap-3 border-t border-slate-200 pt-4 sm:flex-row">
-                <button type="button" onClick={close} disabled={saving} className="min-h-11 rounded-lg bg-slate-100 px-5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-200 disabled:opacity-50">Cancel</button>
-                <button type="submit" disabled={saving} aria-busy={saving} className="min-h-11 rounded-lg bg-[#016936] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#015a2d] disabled:cursor-wait disabled:opacity-60">{saving ? "Saving…" : "Save product"}</button>
+              <div className="mt-2 flex flex-col-reverse justify-end gap-3 border-t border-[var(--admin-border)] pt-4 sm:flex-row">
+                <button type="button" onClick={close} disabled={saving} className="min-h-11 rounded-[10px] bg-[var(--admin-page)] px-5 text-sm font-semibold text-[var(--admin-ink)] transition-colors hover:bg-[var(--admin-active)] disabled:opacity-50">Cancel</button>
+                <button type="submit" disabled={saving} aria-busy={saving} className="min-h-11 rounded-[10px] bg-[#016936] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#015a2d] disabled:cursor-wait disabled:opacity-60">{saving ? "Saving…" : "Save product"}</button>
               </div>
             </form>
+            )}
           </div>
         </div>
       )}

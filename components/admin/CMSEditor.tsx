@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { safeHref } from "@/lib/utils";
 import {
   MdExpandMore,
   MdExpandLess,
@@ -88,9 +89,16 @@ const LONG_FIELDS = new Set([
 
 // Fields that are URLs or hrefs
 const URL_FIELDS = new Set([
-  "cta_primary_href", "cta_secondary_href", "cta_href", "href",
+  "cta_primary_href", "cta_secondary_href", "cta_href", "link_href", "href",
   "image_url", "map_url",
 ]);
+
+const URL_FIELD_ERROR = "Enter a valid URL (/, https:, mailto:, or tel:).";
+
+function isValidUrlField(value: unknown): boolean {
+  if (value == null || (typeof value === "string" && !value.trim())) return true;
+  return typeof value === "string" && safeHref(value, "") !== "";
+}
 
 /* ────────────────────────────────────────────
    Helpers
@@ -119,11 +127,13 @@ function FieldInput({
   inputId,
   fieldKey,
   value,
+  error,
   onChange,
 }: {
   inputId: string;
   fieldKey: string;
   value: unknown;
+  error?: string;
   onChange: (val: unknown) => void;
 }) {
   const isComplex = typeof value === "object" && value !== null;
@@ -138,6 +148,8 @@ function FieldInput({
     return (
       <input
         id={inputId}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? `${inputId}-error` : undefined}
         type="checkbox"
         checked={value}
         onChange={(event) => onChange(event.target.checked)}
@@ -150,6 +162,8 @@ function FieldInput({
     return (
       <textarea
         id={inputId}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? `${inputId}-error` : undefined}
         rows={Math.min(12, strVal.split("\n").length + 1)}
         value={strVal}
         onChange={(e) => {
@@ -167,6 +181,8 @@ function FieldInput({
   return (
     <input
       id={inputId}
+      aria-invalid={error ? true : undefined}
+      aria-describedby={error ? `${inputId}-error` : undefined}
       type={isUrl ? "url" : "text"}
       value={strVal}
       onChange={(e) => onChange(e.target.value)}
@@ -197,6 +213,7 @@ function SectionCard({
   saved: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [urlErrors, setUrlErrors] = useState<Record<string, boolean>>({});
   const fieldEntries = Object.entries(fields);
   const description = getSectionDescription(page, section);
   const panelId = `cms-section-${page}-${section}`.replace(/[^a-z0-9-]/gi, "-");
@@ -248,8 +265,19 @@ function SectionCard({
                 inputId={`${panelId}-${key}`}
                 fieldKey={key}
                 value={val}
-                onChange={(v) => onFieldChange(key, v)}
+                error={urlErrors[key] ? URL_FIELD_ERROR : undefined}
+                onChange={(v) => {
+                  onFieldChange(key, v);
+                  if (URL_FIELDS.has(key)) {
+                    setUrlErrors((prev) => ({ ...prev, [key]: !isValidUrlField(v) }));
+                  }
+                }}
               />
+              {urlErrors[key] && (
+                <p id={`${panelId}-${key}-error`} role="alert" className="mt-1.5 text-xs font-medium text-red-700">
+                  {URL_FIELD_ERROR}
+                </p>
+              )}
             </div>
           ))}
 
@@ -257,7 +285,17 @@ function SectionCard({
           <div className="flex items-center gap-3 pt-2">
             <button
               type="button"
-              onClick={onSave}
+              onClick={() => {
+                const invalidFields = fieldEntries
+                  .filter(([key]) => URL_FIELDS.has(key))
+                  .filter(([, value]) => !isValidUrlField(value));
+                if (invalidFields.length) {
+                  setUrlErrors(Object.fromEntries(invalidFields.map(([key]) => [key, true])));
+                  return;
+                }
+                setUrlErrors({});
+                onSave();
+              }}
               disabled={saving}
               className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#016936] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#014e29] disabled:cursor-not-allowed disabled:opacity-60"
             >
@@ -429,7 +467,7 @@ export default function CMSEditor({ pages }: Props) {
           );
 
         if (error) {
-          console.error(`[CMS] Save failed for ${page}/${section}:`, error.message);
+          console.error("[CMS] Save failed.");
           alert(`Save failed: ${error.message}`);
         } else {
           // Revalidate the public page

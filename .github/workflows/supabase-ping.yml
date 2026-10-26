@@ -1,5 +1,7 @@
 name: Supabase Keep-Alive Ping
 
+permissions: {}
+
 on:
   schedule:
     - cron: "0 8 * * *"
@@ -19,8 +21,6 @@ jobs:
             echo "Error: NEXT_PUBLIC_SUPABASE_URL secret is not set"
             exit 1
           fi
-
-          echo "Pinging $SUPABASE_URL/rest/v1/"
 
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$SUPABASE_URL/rest/v1/")
 

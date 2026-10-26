@@ -46,3 +46,13 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .open-next
+
+# Supabase CLI local link state
+supabase/.temp/
+
+# test and tool output
+/test-results
+/playwright-report
+/blob-report
+/playwright/.cache
+.playwright-mcp/
