@@ -1,15 +1,17 @@
 "use client";
 
 import { useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import type { Product } from "@/types/content";
 import { Button } from "@/components/ui/button";
-import ProductRequestDialog from "./ProductRequestDialog";
+
+const ProductRequestDialog = dynamic(() => import("./ProductRequestDialog"), {
+  loading: () => null,
+});
 
 type Props = { product: Product };
 
-// Static import (no lazy chunk): the dialog must open on the very first tap,
-// even on slow mobile networks. ProductRequestDialog renders nothing while
-// closed, so keeping it mounted preserves its exit transition.
+// Load the dialog and its motion dependency only after a request is made.
 export default function ProductRequestButton({ product }: Props) {
   const [open, setOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);

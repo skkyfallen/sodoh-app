@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { MdMail } from "react-icons/md";
+import { MdCall, MdMail } from "react-icons/md";
+import { email, phone, phoneTel } from "@/lib/site";
 
 const links = [
   { label: "Our story", href: "/about" },
@@ -13,7 +14,6 @@ export default function Footer() {
       <div className="mx-auto max-w-[1440px]">
         <Link
           href="/"
-          aria-label="Sodoh Nigeria home"
           className="block rounded-md leading-none focus-visible:outline-[#a7f3d0]"
         >
           <span className="display-font block text-[clamp(4.5rem,15vw,13rem)] font-bold leading-[0.9] tracking-[-0.05em] text-white">
@@ -58,11 +58,18 @@ export default function Footer() {
             <div className="space-y-3 text-[15px] text-white/80">
               <p>Abuja, Federal Capital Territory, Nigeria</p>
               <a
-                href="mailto:info@sodohnigeria.com"
+                href={`tel:${phoneTel}`}
+                className="inline-flex min-h-11 items-center gap-3 font-semibold text-white transition-colors hover:text-[#7be2a6] focus-visible:rounded-sm focus-visible:outline-[#a7f3d0]"
+              >
+                <MdCall aria-hidden="true" className="text-[#7be2a6]" />
+                {phone}
+              </a>
+              <a
+                href={`mailto:${email}`}
                 className="inline-flex min-h-11 items-center gap-3 font-semibold text-white transition-colors hover:text-[#7be2a6] focus-visible:rounded-sm focus-visible:outline-[#a7f3d0]"
               >
                 <MdMail aria-hidden="true" className="text-[#7be2a6]" />
-                info@sodohnigeria.com
+                {email}
               </a>
             </div>
           </div>

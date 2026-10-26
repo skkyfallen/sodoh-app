@@ -8,14 +8,24 @@ import { ProductLedger } from "@/components/products/ProductLedger";
 import { getPageContent, getProducts } from "@/lib/data";
 import { safeHref } from "@/lib/utils";
 import type { HeroContent } from "@/types/content";
+import { defaultLocale, siteName } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Products — Sodoh Nigeria",
-  description: "Browse agricultural products listed by Sodoh Nigeria Limited and ask the team about supply details.",
+  title: { absolute: "Nigerian Agricultural Products for Export | Sodoh Nigeria" },
+  description: "Explore Nigerian agricultural products listed by Sodoh Nigeria Limited and contact our team about product availability, specifications, and supply requirements.",
+  alternates: { canonical: "/products" },
   openGraph: {
-    title: "Products — Sodoh Nigeria",
-    description: "Browse the Sodoh Nigeria agricultural product catalogue.",
+    title: "Nigerian Agricultural Products for Export | Sodoh Nigeria",
+    description: "Explore Nigerian agricultural products listed by Sodoh Nigeria Limited and contact our team about product availability, specifications, and supply requirements.",
+    url: "/products",
+    siteName,
+    locale: defaultLocale,
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Nigerian Agricultural Products for Export | Sodoh Nigeria",
+    description: "Explore Nigerian agricultural products listed by Sodoh Nigeria Limited and contact our team about product availability, specifications, and supply requirements.",
   },
 };
 

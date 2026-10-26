@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type ChangeEvent, type FormEvent } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -29,7 +28,6 @@ export default function ContactForm() {
     message: "",
   });
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const reduceMotion = useReducedMotion();
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm((previous) => ({ ...previous, [event.target.name]: event.target.value }));
@@ -62,33 +60,25 @@ export default function ContactForm() {
         Tell us what you are looking for and our team will get back to you. Name, email address, and message are required.
       </p>
 
-      <AnimatePresence mode="wait">
-        {status === "success" && (
-          <motion.div
-            key="success"
-            role="status"
-            initial={reduceMotion ? false : { opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="mb-6 rounded-[12px] border border-[var(--border)] bg-[var(--brand-soft)] px-5 py-4 text-sm font-semibold text-[var(--ink)]"
-          >
-            Your message was sent. We’ll be in touch as soon as we can.
-          </motion.div>
-        )}
-        {status === "error" && (
-          <motion.div
-            key="error"
-            role="alert"
-            initial={reduceMotion ? false : { opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="mb-6 rounded-[12px] border border-red-300 bg-red-50 px-5 py-4 text-sm font-semibold text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-100"
-          >
-            We couldn’t send your message. Please try again or email us at{" "}
-            <a className="underline underline-offset-2" href="mailto:info@sodohnigeria.com">info@sodohnigeria.com</a>.
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {status === "success" && (
+        <div
+          key="success"
+          role="status"
+          className="contact-status-message mb-6 rounded-[12px] border border-[var(--border)] bg-[var(--brand-soft)] px-5 py-4 text-sm font-semibold text-[var(--ink)]"
+        >
+          Your message was sent. We’ll be in touch as soon as we can.
+        </div>
+      )}
+      {status === "error" && (
+        <div
+          key="error"
+          role="alert"
+          className="contact-status-message mb-6 rounded-[12px] border border-red-300 bg-red-50 px-5 py-4 text-sm font-semibold text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-100"
+        >
+          We couldn’t send your message. Please try again or email us at{" "}
+          <a className="underline underline-offset-2" href="mailto:info@sodohnigeria.com">info@sodohnigeria.com</a>.
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <div className="grid gap-5 sm:grid-cols-2">

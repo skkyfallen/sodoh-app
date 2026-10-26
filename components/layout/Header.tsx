@@ -4,7 +4,6 @@ import Link from "next/link";
 import HeaderMenu from "./HeaderMenu";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
 import { MdMenu } from "react-icons/md";
 import { cn } from "@/lib/utils";
 
@@ -19,7 +18,6 @@ function Wordmark({ tone = "ink" }: { tone?: "ink" | "paper" }) {
     <Link
       href="/"
       className="rounded-md leading-none focus-visible:outline-offset-4"
-      aria-label="Sodoh Nigeria home"
     >
       <span
         className={cn(
@@ -47,9 +45,6 @@ export default function Header() {
   const pathname = usePathname();
   const pastMastheadRef = useRef(false);
 
-  // Static import (no lazy chunk): the menu must open on the very first tap,
-  // even on slow mobile networks. HeaderMenu renders null while closed and
-  // keeps its own enter/exit transitions.
   const openMenu = () => {
     setMenuOpen(true);
   };
@@ -173,62 +168,60 @@ export default function Header() {
       </div>
 
       {/* Slim bar — appears only after scrolling past the masthead */}
-      <AnimatePresence>
-        {pastMasthead && !menuOpen && (
-          <motion.div
-            initial={{ y: "-100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "-100%" }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-x-0 top-0 z-40 border-b border-[var(--border)] bg-[var(--page)]/95 backdrop-blur-md"
-          >
-            <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-4 px-5 sm:px-8 md:px-12 lg:px-16">
-              <Link
-                href="/"
-                aria-label="Sodoh Nigeria home"
-                className="display-font text-xl font-bold tracking-[-0.04em] text-[var(--ink)]"
-              >
-                Sodoh
-              </Link>
-              <div className="flex items-center gap-2">
-                <nav aria-label="Quick navigation" className="hidden items-center gap-1 md:flex">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      aria-current={pathname === link.href ? "page" : undefined}
-                      className={cn(
-                        "inline-flex min-h-10 items-center rounded-[10px] px-3 text-sm font-semibold transition-colors",
-                        pathname === link.href
-                          ? "bg-[var(--brand)] text-white dark:text-[#062a17]"
-                          : "text-[var(--body)] hover:bg-[var(--surface-soft)]"
-                      )}
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
-                </nav>
-                <Link
-                  href="/contact"
-                  className="inline-flex min-h-10 items-center justify-center rounded-[12px] bg-[#0c2418] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--brand)]"
-                >
-                  Contact us
-                </Link>
-                <button
-                  type="button"
-                  onClick={openMenu}
-                  aria-label="Open navigation menu"
-                  aria-expanded={menuOpen}
-                  aria-haspopup="dialog"
-                  className="inline-flex size-11 items-center justify-center rounded-[12px] border border-[var(--border)] text-[var(--ink)] transition-colors hover:bg-[var(--surface-soft)] md:hidden"
-                >
-                  <MdMenu aria-hidden="true" className="text-xl" />
-                </button>
-              </div>
-            </div>
-          </motion.div>
+      <div
+        aria-hidden={!(pastMasthead && !menuOpen)}
+        className={cn(
+          "fixed inset-x-0 top-0 z-40 border-b border-[var(--border)] bg-[var(--page)]/95 backdrop-blur-md transition-[opacity,transform,visibility] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+          pastMasthead && !menuOpen
+            ? "visible translate-y-0 opacity-100"
+            : "invisible -translate-y-full opacity-0 pointer-events-none"
         )}
-      </AnimatePresence>
+      >
+        <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-4 px-5 sm:px-8 md:px-12 lg:px-16">
+          <Link
+            href="/"
+            aria-label="Sodoh"
+            className="display-font text-xl font-bold tracking-[-0.04em] text-[var(--ink)]"
+          >
+            Sodoh
+          </Link>
+          <div className="flex items-center gap-2">
+            <nav aria-label="Quick navigation" className="hidden items-center gap-1 md:flex">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  aria-current={pathname === link.href ? "page" : undefined}
+                  className={cn(
+                    "inline-flex min-h-10 items-center rounded-[10px] px-3 text-sm font-semibold transition-colors",
+                    pathname === link.href
+                      ? "bg-[var(--brand)] text-white dark:text-[#062a17]"
+                      : "text-[var(--body)] hover:bg-[var(--surface-soft)]"
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+            <Link
+              href="/contact"
+              className="inline-flex min-h-10 items-center justify-center rounded-[12px] bg-[#0c2418] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--brand)]"
+            >
+              Contact us
+            </Link>
+            <button
+              type="button"
+              onClick={openMenu}
+              aria-label="Open navigation menu"
+              aria-expanded={menuOpen}
+              aria-haspopup="dialog"
+              className="inline-flex size-11 items-center justify-center rounded-[12px] border border-[var(--border)] text-[var(--ink)] transition-colors hover:bg-[var(--surface-soft)] md:hidden"
+            >
+              <MdMenu aria-hidden="true" className="text-xl" />
+            </button>
+          </div>
+        </div>
+      </div>
 
       <HeaderMenu
         open={menuOpen}

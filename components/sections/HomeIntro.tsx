@@ -11,13 +11,21 @@ export function HomeIntro() {
   return (
     <section className="relative overflow-hidden bg-[#071a10] px-5 py-20 sm:px-8 md:px-12 md:py-28 lg:px-16">
       <div aria-hidden="true" className="absolute inset-0">
-        <Image
-          src="/images/nigerian-growing-fields.jpg"
-          alt=""
-          fill
-          sizes="100vw"
-          className="object-cover object-center"
-        />
+        <picture className="absolute inset-0">
+          <source
+            media="(max-width: 767px)"
+            srcSet="/images/nigerian-growing-fields-mobile.jpg"
+          />
+          <Image
+            src="/images/nigerian-growing-fields.jpg"
+            alt=""
+            fill
+            sizes="100vw"
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover object-center"
+          />
+        </picture>
       </div>
       <div aria-hidden="true" className="absolute inset-0 bg-[#071a10]/80" />
 

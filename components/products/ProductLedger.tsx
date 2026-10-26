@@ -40,7 +40,7 @@ export function ProductLedger({ products, showRequest = false }: Props) {
                   )}
                 </h3>
                 {product.region && (
-                  <span className="text-sm font-medium text-[var(--muted)]">{product.region}</span>
+                  <span className="text-sm font-medium text-[var(--ink)]">{product.region}</span>
                 )}
               </div>
               {product.description && (
@@ -60,9 +60,10 @@ export function ProductLedger({ products, showRequest = false }: Props) {
                 <span className="media-zoom relative block aspect-[4/3]">
                   <Image
                     src={safeHref(product.image_url, "")}
-                    alt=""
+                    alt={product.image_alt || product.title}
                     fill
                     sizes="200px"
+                    loading="lazy"
                     className="object-cover"
                   />
                 </span>
@@ -79,6 +80,7 @@ export function ProductLedger({ products, showRequest = false }: Props) {
               ) : (
                 <Link
                   href={`/products#product-${product.slug}`}
+                  aria-label={`View ${product.title}`}
                   className="link-arrow inline-flex min-h-11 items-center gap-2 whitespace-nowrap text-[15px] font-semibold text-[var(--brand)] hover:text-[var(--brand-hover)]"
                 >
                   View <span aria-hidden="true" className="arrow">→</span>

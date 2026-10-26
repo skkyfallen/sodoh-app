@@ -164,8 +164,11 @@ function LoginForm() {
 
 export default function AdminLoginPage() {
   return (
-    <Suspense fallback={<div className="admin-shell grid min-h-[100dvh] place-items-center px-5 text-sm text-[var(--admin-muted)]" role="status">Loading sign-in form…</div>}>
-      <LoginForm />
-    </Suspense>
+    <>
+      <meta name="robots" content="noindex, nofollow" />
+      <Suspense fallback={<div className="admin-shell grid min-h-[100dvh] place-items-center px-5 text-sm text-[var(--admin-muted)]" role="status">Loading sign-in form…</div>}>
+        <LoginForm />
+      </Suspense>
+    </>
   );
 }
