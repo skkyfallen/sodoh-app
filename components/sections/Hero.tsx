@@ -22,15 +22,26 @@ export default function Hero({ hero, announcement }: Props) {
         </div>
       )}
 
-      <section className="field-paper overflow-hidden px-5 pb-20 pt-16 sm:px-8 md:px-12 md:pb-28 md:pt-20 lg:px-16">
-        <div className="mx-auto max-w-[1440px]">
+      <section className="relative overflow-hidden bg-[#071a10] px-5 pb-20 pt-16 sm:px-8 md:px-12 md:pb-28 md:pt-20 lg:px-16">
+        <div aria-hidden="true" className="hero-bg absolute inset-0">
+          <Image
+            src="/images/farmers-harvest.jpg"
+            alt="Fresh vegetables arranged for market"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+        </div>
+        <div aria-hidden="true" className="absolute inset-0 bg-[#071a10]/80" />
+        <div className="relative mx-auto max-w-[1440px]">
           <div className="hero-copy">
-            <h1 className="display-font max-w-[20ch] text-[clamp(3.2rem,8.5vw,7.5rem)] font-semibold leading-[0.95] tracking-[-0.05em] text-[var(--ink)] [text-wrap:balance]">
+            <h1 className="display-font max-w-[20ch] text-[clamp(3.2rem,8.5vw,7.5rem)] font-semibold leading-[0.95] tracking-[-0.05em] text-white [text-wrap:balance]">
               {hero.title}
             </h1>
             <div className="mt-10 flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
               {hero.subtitle && (
-                <p className="measure text-base leading-7 text-[var(--body)] md:text-lg md:leading-8">
+                <p className="measure text-base leading-7 text-white/90 md:text-lg md:leading-8">
                   {hero.subtitle}
                 </p>
               )}
@@ -42,33 +53,22 @@ export default function Hero({ hero, announcement }: Props) {
                   </Link>
                 )}
                 {hero.cta_secondary_text && hero.cta_secondary_href && (
-                  <Link href={safeHref(hero.cta_secondary_href, "/contact")} className="pressable inline-flex min-h-12 items-center justify-center rounded-[14px] border border-[var(--border-strong)] bg-[var(--surface)]/60 px-7 text-[15px] font-semibold text-[var(--ink)] hover:border-[var(--brand)] hover:bg-[var(--surface-soft)]">
+                  <Link href={safeHref(hero.cta_secondary_href, "/contact")} className="pressable inline-flex min-h-12 items-center justify-center rounded-[14px] border border-white/40 px-7 text-[15px] font-semibold text-white transition-colors hover:bg-white/10">
                     {hero.cta_secondary_text}
                   </Link>
                 )}
               </div>
             </div>
-            <div className="mt-10 flex items-center gap-4 border-t border-[var(--border)] pt-5 text-[13px] text-[var(--muted)]">
-              <span className="font-semibold text-[var(--ink)]">Direct enquiries</span>
-              <span aria-hidden="true" className="h-4 w-px bg-[var(--border)]" />
+            <div className="mt-10 flex items-center gap-4 border-t border-white/25 pt-5 text-[13px] text-white/75">
+              <span className="font-semibold text-white">Direct enquiries</span>
+              <span aria-hidden="true" className="h-4 w-px bg-white/25" />
               <span>Catalogue-led · No checkout · Team replies</span>
             </div>
           </div>
 
-          <figure className="hero-photo media-zoom relative mt-10 min-h-[300px] overflow-hidden rounded-[24px_72px_24px_24px] bg-[var(--surface-muted)] shadow-[var(--shadow-lift)] sm:min-h-[420px] lg:min-h-[min(62vh,560px)]">
-            <Image
-              src="/images/farmers-harvest.jpg"
-              alt="Fresh vegetables arranged for market"
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover"
-            />
-            <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[#092418]/60 via-transparent to-transparent" />
-            <figcaption className="absolute bottom-4 left-4 max-w-xs rounded-full bg-[#071a10]/70 px-4 py-2 text-[13px] font-medium leading-5 text-white backdrop-blur-sm">
-              Representative agricultural photography
-            </figcaption>
-          </figure>
+          <figcaption className="mt-10 inline-flex max-w-xs rounded-full bg-[#071a10]/70 px-4 py-2 text-[13px] font-medium leading-5 text-white backdrop-blur-sm">
+            Representative agricultural photography
+          </figcaption>
         </div>
       </section>
     </>
