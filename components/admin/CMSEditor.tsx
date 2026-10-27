@@ -126,6 +126,46 @@ const PAGE_CONFIG: Record<string, PageConfig> = {
           REVIEWED_FIELD,
         ],
       },
+      timeline: {
+        label: "Our Journey",
+        description: "Heading and milestones shown on the About page.",
+        fields: [
+          { key: "heading", label: "Section heading" },
+          {
+            key: "milestones",
+            label: "Milestones",
+            type: "array",
+            itemLabel: "Milestone",
+            addLabel: "Add milestone",
+            itemFields: [
+              { key: "year", label: "Year" },
+              { key: "title", label: "Title" },
+              { key: "description", label: "Description", type: "textarea" },
+            ],
+          },
+          REVIEWED_FIELD,
+        ],
+      },
+      people: {
+        label: "Our Team",
+        description: "Heading and team members shown on the About page.",
+        fields: [
+          { key: "heading", label: "Section heading" },
+          {
+            key: "members",
+            label: "Team members",
+            type: "array",
+            itemLabel: "Team member",
+            addLabel: "Add team member",
+            itemFields: [
+              { key: "name", label: "Name" },
+              { key: "role", label: "Role" },
+              { key: "bio", label: "Bio", type: "textarea" },
+            ],
+          },
+          REVIEWED_FIELD,
+        ],
+      },
       cta_banner: {
         label: "Call to Action",
         description: "Heading, supporting text, and button shown at the bottom of the About page.",
