@@ -135,10 +135,10 @@ export default function HeaderMenu({ open, pathname, onClose }: HeaderMenuProps)
         <div className="flex flex-col gap-1 border-t border-white/10 pt-5 text-sm text-white/70 sm:flex-row sm:items-center sm:justify-between">
           <p>Abuja, Federal Capital Territory, Nigeria</p>
           <a
-            href="mailto:info@sodohnigeria.com"
+            href="mailto:info@sodohnigerialtd.com"
             className="font-semibold text-white/85 hover:text-white"
           >
-            info@sodohnigeria.com
+            info@sodohnigerialtd.com
           </a>
         </div>
       </div>

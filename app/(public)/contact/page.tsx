@@ -104,7 +104,7 @@ export default async function ContactPage() {
                       <div>
                         <p className="text-sm font-semibold text-[var(--ink)]">{item.label}</p>
                         {item.label.toLowerCase().includes("email") && item.value.includes("@") ? (
-                          <a href={safeHref(`mailto:${item.value.trim()}`, "mailto:info@sodohnigeria.com")} className="mt-1 inline-block text-sm leading-6 text-[var(--body)] underline decoration-[var(--border-strong)] underline-offset-4 hover:text-[var(--brand)]">{item.value}</a>
+                          <a href={safeHref(`mailto:${item.value.trim()}`, "mailto:info@sodohnigerialtd.com")} className="mt-1 inline-block text-sm leading-6 text-[var(--body)] underline decoration-[var(--border-strong)] underline-offset-4 hover:text-[var(--brand)]">{item.value}</a>
                         ) : item.label.toLowerCase().includes("phone") ? (
                           <a href={safeHref(`tel:${item.value.replace(/[^+\d]/g, "")}`, "/contact")} className="mt-1 inline-block whitespace-pre-line text-sm leading-6 text-[var(--body)] underline decoration-[var(--border-strong)] underline-offset-4 hover:text-[var(--brand)]">{item.value}</a>
                         ) : (

@@ -76,7 +76,7 @@ export default function ContactForm() {
           className="contact-status-message mb-6 rounded-[12px] border border-red-300 bg-red-50 px-5 py-4 text-sm font-semibold text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-100"
         >
           We couldn’t send your message. Please try again or email us at{" "}
-          <a className="underline underline-offset-2" href="mailto:info@sodohnigeria.com">info@sodohnigeria.com</a>.
+          <a className="underline underline-offset-2" href="mailto:info@sodohnigerialtd.com">info@sodohnigerialtd.com</a>.
         </div>
       )}
 
