@@ -109,6 +109,9 @@ export default function CrudManager({ tableName, fields, initialRows, listColumn
     }
 
     if (isNew) {
+      // The database still requires this legacy column, but it is no longer user-editable.
+      if (tableName === "pillars") payload.step = String(rows.length + 1).padStart(2, "0");
+
       const { data, error } = await supabase
         .from(tableName as never)
         .insert(payload as never)
@@ -224,7 +227,7 @@ export default function CrudManager({ tableName, fields, initialRows, listColumn
                 const inputId = `crud-field-${f.key}`;
                 if (f.type === "checkbox") {
                   return (
-                    <div key={f.key} className="flex min-h-11 items-center gap-3">
+                    <div key={f.key} className="flex min-h-11 items-start gap-3">
                       <input
                         id={inputId}
                         type="checkbox"
@@ -232,9 +235,14 @@ export default function CrudManager({ tableName, fields, initialRows, listColumn
                         onChange={(e) =>
                           setEditing((prev) => (prev ? { ...prev, [f.key]: e.target.checked } : prev))
                         }
-                        className="size-4 accent-[#016936]"
+                        className="mt-1 size-4 accent-[#016936]"
                       />
-                      <label htmlFor={inputId} className="text-sm font-semibold text-[var(--admin-ink)]">{f.label}</label>
+                      <div>
+                        <label htmlFor={inputId} className="text-sm font-semibold text-[var(--admin-ink)]">{f.label}</label>
+                        {f.key === "public_reviewed" && (
+                          <p className="mt-1 text-xs leading-5 text-[var(--admin-muted)]">Unreviewed content is hidden from the public site.</p>
+                        )}
+                      </div>
                     </div>
                   );
                 }

@@ -31,12 +31,43 @@ type Props = {
    Config: pages, section labels, field hints
    ──────────────────────────────────────────── */
 
+type CmsFieldType = "text" | "textarea" | "url" | "array";
+
+interface CmsFieldConfig {
+  key: string;
+  label: string;
+  type?: CmsFieldType;
+  itemFields?: Array<{ key: string; label: string; type?: "text" | "textarea" }>;
+  addLabel?: string;
+  itemLabel?: string;
+}
+
+interface SectionConfig {
+  label: string;
+  description: string;
+  fields: CmsFieldConfig[];
+}
+
 interface PageConfig {
   label: string;
   icon: IconType;
   href: string;
-  sections: Record<string, { label: string; description: string }>;
+  sections: Record<string, SectionConfig>;
 }
+
+const REVIEWED_FIELD: CmsFieldConfig = {
+  key: "public_reviewed",
+  label: "Reviewed for public display",
+};
+
+const HERO_FIELDS = {
+  title: { key: "title", label: "Headline" },
+  subtitle: { key: "subtitle", label: "Supporting text", type: "textarea" as const },
+  primaryText: { key: "cta_primary_text", label: "Primary button text" },
+  primaryHref: { key: "cta_primary_href", label: "Primary button link", type: "url" as const },
+  secondaryText: { key: "cta_secondary_text", label: "Secondary button text" },
+  secondaryHref: { key: "cta_secondary_href", label: "Secondary button link", type: "url" as const },
+};
 
 const PAGE_CONFIG: Record<string, PageConfig> = {
   home: {
@@ -44,8 +75,21 @@ const PAGE_CONFIG: Record<string, PageConfig> = {
     icon: MdHome,
     href: "/",
     sections: {
-      hero:         { label: "Hero Banner",      description: "Main headline, subtitle, and call-to-action buttons." },
-      announcement: { label: "Announcement Bar",  description: "Optional banner above the hero." },
+      hero: {
+        label: "Hero Banner",
+        description: "Headline, supporting text, and the two hero buttons.",
+        fields: [HERO_FIELDS.title, HERO_FIELDS.subtitle, HERO_FIELDS.primaryText, HERO_FIELDS.primaryHref, HERO_FIELDS.secondaryText, HERO_FIELDS.secondaryHref, REVIEWED_FIELD],
+      },
+      announcement: {
+        label: "Announcement Bar",
+        description: "Optional message shown above the hero.",
+        fields: [
+          { key: "text", label: "Announcement text", type: "textarea" },
+          { key: "link_text", label: "Link text" },
+          { key: "link_href", label: "Link destination", type: "url" },
+          REVIEWED_FIELD,
+        ],
+      },
     },
   },
   about: {
@@ -53,12 +97,86 @@ const PAGE_CONFIG: Record<string, PageConfig> = {
     icon: MdInfo,
     href: "/about",
     sections: {
-      hero:       { label: "Hero Banner",      description: "Headline, subtitle, and CTAs for the About page." },
-      operations: { label: "What We Do",        description: "Narrative section describing company operations." },
-      timeline:   { label: "Our Journey",       description: "Milestone timeline items." },
-      values:     { label: "Core Values",       description: "Values grid — icon, title, and description for each." },
-      people:     { label: "Meet the Team",     description: "Key people cards — name, role, and bio." },
-      cta_banner: { label: "CTA Banner",        description: "Bottom call-to-action banner." },
+      hero: {
+        label: "Hero Banner",
+        description: "Headline, supporting text, and the two hero buttons.",
+        fields: [HERO_FIELDS.title, HERO_FIELDS.subtitle, HERO_FIELDS.primaryText, HERO_FIELDS.primaryHref, HERO_FIELDS.secondaryText, HERO_FIELDS.secondaryHref, REVIEWED_FIELD],
+      },
+      operations: {
+        label: "What We Do",
+        description: "Section heading and body copy.",
+        fields: [{ key: "heading", label: "Section heading" }, { key: "body", label: "Description", type: "textarea" }, REVIEWED_FIELD],
+      },
+      values: {
+        label: "How to Work With Us",
+        description: "Heading and the value items shown on the About page.",
+        fields: [
+          { key: "heading", label: "Section heading" },
+          {
+            key: "items",
+            label: "Value items",
+            type: "array",
+            itemLabel: "Value",
+            addLabel: "Add value",
+            itemFields: [
+              { key: "title", label: "Value title" },
+              { key: "description", label: "Value description", type: "textarea" },
+            ],
+          },
+          REVIEWED_FIELD,
+        ],
+      },
+      timeline: {
+        label: "Our Journey",
+        description: "Heading and milestones shown on the About page.",
+        fields: [
+          { key: "heading", label: "Section heading" },
+          {
+            key: "milestones",
+            label: "Milestones",
+            type: "array",
+            itemLabel: "Milestone",
+            addLabel: "Add milestone",
+            itemFields: [
+              { key: "year", label: "Year" },
+              { key: "title", label: "Title" },
+              { key: "description", label: "Description", type: "textarea" },
+            ],
+          },
+          REVIEWED_FIELD,
+        ],
+      },
+      people: {
+        label: "Our Team",
+        description: "Heading and team members shown on the About page.",
+        fields: [
+          { key: "heading", label: "Section heading" },
+          {
+            key: "members",
+            label: "Team members",
+            type: "array",
+            itemLabel: "Team member",
+            addLabel: "Add team member",
+            itemFields: [
+              { key: "name", label: "Name" },
+              { key: "role", label: "Role" },
+              { key: "bio", label: "Bio", type: "textarea" },
+            ],
+          },
+          REVIEWED_FIELD,
+        ],
+      },
+      cta_banner: {
+        label: "Call to Action",
+        description: "Heading, supporting text, and button shown at the bottom of the About page.",
+        fields: [
+          { key: "heading", label: "Heading" },
+          { key: "subtitle", label: "Supporting text", type: "textarea" },
+          { key: "cta_text", label: "Button text" },
+          { key: "cta_href", label: "Button link", type: "url" },
+          REVIEWED_FIELD,
+        ],
+      },
     },
   },
   products: {
@@ -66,9 +184,26 @@ const PAGE_CONFIG: Record<string, PageConfig> = {
     icon: MdShoppingBag,
     href: "/products",
     sections: {
-      hero:         { label: "Hero Banner",      description: "Headline and subtitle for the Products page." },
-      grid_heading: { label: "Grid Heading",     description: "Heading above the products grid." },
-      cta_banner:   { label: "CTA Banner",       description: "Bottom call-to-action banner." },
+      hero: {
+        label: "Hero Banner",
+        description: "Headline, supporting text, and the primary button.",
+        fields: [HERO_FIELDS.title, HERO_FIELDS.subtitle, HERO_FIELDS.primaryText, HERO_FIELDS.primaryHref, REVIEWED_FIELD],
+      },
+      grid_heading: {
+        label: "Product Grid Heading",
+        description: "Heading above the product catalogue.",
+        fields: [{ key: "heading", label: "Heading" }],
+      },
+      cta_banner: {
+        label: "Call to Action",
+        description: "Heading and button shown below the catalogue.",
+        fields: [
+          { key: "heading", label: "Heading" },
+          { key: "cta_text", label: "Button text" },
+          { key: "cta_href", label: "Button link", type: "url" },
+          REVIEWED_FIELD,
+        ],
+      },
     },
   },
   contact: {
@@ -76,22 +211,33 @@ const PAGE_CONFIG: Record<string, PageConfig> = {
     icon: MdMail,
     href: "/contact",
     sections: {
-      hero: { label: "Hero Banner",     description: "Headline and subtitle for the Contact page." },
-      info: { label: "Contact Details",  description: "Address, phone, email, and map embed URL." },
+      hero: {
+        label: "Hero Banner",
+        description: "Headline, supporting text, and the button label.",
+        fields: [HERO_FIELDS.title, HERO_FIELDS.subtitle, HERO_FIELDS.primaryText, REVIEWED_FIELD],
+      },
+      info: {
+        label: "Contact Details",
+        description: "Contact details and the location searched in Google Maps.",
+        fields: [
+          {
+            key: "details",
+            label: "Contact details",
+            type: "array",
+            itemLabel: "Contact",
+            addLabel: "Add contact detail",
+            itemFields: [
+              { key: "icon", label: "Icon name" },
+              { key: "label", label: "Contact label" },
+              { key: "value", label: "Contact value", type: "textarea" },
+            ],
+          },
+          { key: "map_query", label: "Map search location" },
+        ],
+      },
     },
   },
 };
-
-// Fields that should render as textarea
-const LONG_FIELDS = new Set([
-  "subtitle", "description", "body", "message", "quote", "bio",
-]);
-
-// Fields that are URLs or hrefs
-const URL_FIELDS = new Set([
-  "cta_primary_href", "cta_secondary_href", "cta_href", "link_href", "href",
-  "image_url", "map_url",
-]);
 
 const URL_FIELD_ERROR = "Enter a valid URL (/, https:, mailto:, or tel:).";
 
@@ -105,18 +251,9 @@ function isValidUrlField(value: unknown): boolean {
    ──────────────────────────────────────────── */
 
 function formatFieldLabel(key: string): string {
-  if (key === "public_reviewed") return "Reviewed for public display";
   return key
     .replace(/_/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-function formatSectionLabel(page: string, section: string): string {
-  return PAGE_CONFIG[page]?.sections[section]?.label ?? formatFieldLabel(section);
-}
-
-function getSectionDescription(page: string, section: string): string {
-  return PAGE_CONFIG[page]?.sections[section]?.description ?? "";
 }
 
 /* ────────────────────────────────────────────
@@ -125,22 +262,17 @@ function getSectionDescription(page: string, section: string): string {
 
 function FieldInput({
   inputId,
-  fieldKey,
+  definition,
   value,
   error,
   onChange,
 }: {
   inputId: string;
-  fieldKey: string;
+  definition: CmsFieldConfig;
   value: unknown;
   error?: string;
   onChange: (val: unknown) => void;
 }) {
-  const isComplex = typeof value === "object" && value !== null;
-  const strVal = isComplex ? JSON.stringify(value, null, 2) : String(value ?? "");
-  const isLong = LONG_FIELDS.has(fieldKey) || strVal.length > 120 || isComplex;
-  const isUrl = URL_FIELDS.has(fieldKey);
-
   const baseClasses =
     "w-full rounded-xl border border-slate-200 bg-[#f7f8f4] px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#016936]/15 focus:border-[#016936] focus:bg-white transition-colors";
 
@@ -158,34 +290,100 @@ function FieldInput({
     );
   }
 
-  if (isLong) {
+  if (definition.type === "array") {
+    const items = Array.isArray(value) ? value : [];
+    return (
+      <fieldset className="space-y-3">
+        <legend className="text-sm font-semibold text-slate-700">{definition.label}</legend>
+        {items.map((item, index) => {
+          const record = item && typeof item === "object" && !Array.isArray(item)
+            ? item as Record<string, unknown>
+            : {};
+          return (
+            <div key={`${inputId}-${index}`} className="rounded-xl border border-slate-200 bg-white p-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <h5 className="text-sm font-semibold text-slate-700">{definition.itemLabel ?? definition.label} {index + 1}</h5>
+                <button
+                  type="button"
+                  onClick={() => onChange(items.filter((_, itemIndex) => itemIndex !== index))}
+                  className="min-h-11 rounded-lg px-3 text-sm font-semibold text-red-700 hover:bg-red-50"
+                >
+                  Remove
+                </button>
+              </div>
+              <div className="space-y-3">
+                {definition.itemFields?.map((itemField) => {
+                  const itemInputId = `${inputId}-${index}-${itemField.key}`;
+                  const itemValue = String(record[itemField.key] ?? "");
+                  return (
+                    <div key={itemField.key}>
+                      <label htmlFor={itemInputId} className="mb-1.5 block text-sm font-semibold text-slate-700">
+                        {itemField.label}
+                      </label>
+                      {itemField.type === "textarea" ? (
+                        <textarea
+                          id={itemInputId}
+                          rows={3}
+                          value={itemValue}
+                          onChange={(event) => onChange(items.map((current, itemIndex) => itemIndex === index
+                            ? { ...record, [itemField.key]: event.target.value }
+                            : current))}
+                          className={`${baseClasses} resize-y py-3`}
+                        />
+                      ) : (
+                        <input
+                          id={itemInputId}
+                          type="text"
+                          value={itemValue}
+                          onChange={(event) => onChange(items.map((current, itemIndex) => itemIndex === index
+                            ? { ...record, [itemField.key]: event.target.value }
+                            : current))}
+                          className={`${baseClasses} h-10`}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+        <button
+          type="button"
+          onClick={() => onChange([...items, Object.fromEntries((definition.itemFields ?? []).map(({ key }) => [key, ""]))])}
+          className="min-h-11 rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-700 hover:bg-white"
+        >
+          {definition.addLabel ?? "Add item"}
+        </button>
+      </fieldset>
+    );
+  }
+
+  const strVal = String(value ?? "");
+  const attributes = {
+    id: inputId,
+    "aria-invalid": error ? true : undefined,
+    "aria-describedby": error ? `${inputId}-error` : undefined,
+  };
+
+  if (definition.type === "textarea") {
     return (
       <textarea
-        id={inputId}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? `${inputId}-error` : undefined}
+        {...attributes}
         rows={Math.min(12, strVal.split("\n").length + 1)}
         value={strVal}
-        onChange={(e) => {
-          let parsed: unknown = e.target.value;
-          if (isComplex) {
-            try { parsed = JSON.parse(e.target.value); } catch { /* keep as string */ }
-          }
-          onChange(parsed);
-        }}
-        className={`${baseClasses} py-3 font-mono text-xs leading-relaxed resize-y`}
+        onChange={(event) => onChange(event.target.value)}
+        className={`${baseClasses} resize-y py-3`}
       />
     );
   }
 
   return (
     <input
-      id={inputId}
-      aria-invalid={error ? true : undefined}
-      aria-describedby={error ? `${inputId}-error` : undefined}
-      type={isUrl ? "url" : "text"}
+      {...attributes}
+      type={definition.type === "url" ? "url" : "text"}
       value={strVal}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(event) => onChange(event.target.value)}
       className={`${baseClasses} h-10`}
     />
   );
@@ -198,6 +396,7 @@ function FieldInput({
 function SectionCard({
   page,
   section,
+  sectionConfig,
   fields,
   onFieldChange,
   onSave,
@@ -206,6 +405,7 @@ function SectionCard({
 }: {
   page: string;
   section: string;
+  sectionConfig: SectionConfig;
   fields: Record<string, unknown>;
   onFieldChange: (key: string, val: unknown) => void;
   onSave: () => void;
@@ -214,8 +414,10 @@ function SectionCard({
 }) {
   const [open, setOpen] = useState(false);
   const [urlErrors, setUrlErrors] = useState<Record<string, boolean>>({});
-  const fieldEntries = Object.entries(fields);
-  const description = getSectionDescription(page, section);
+  const fieldEntries = sectionConfig.fields.map((definition) => [
+    definition,
+    fields[definition.key],
+  ] as const);
   const panelId = `cms-section-${page}-${section}`.replace(/[^a-z0-9-]/gi, "-");
 
   return (
@@ -231,10 +433,10 @@ function SectionCard({
         <div className="flex items-center gap-3 min-w-0">
           <div className="min-w-0">
             <h4 className="text-sm font-bold text-slate-900 truncate">
-              {formatSectionLabel(page, section)}
+              {sectionConfig.label}
             </h4>
-            {description && (
-              <p className="text-xs text-slate-500 truncate mt-0.5">{description}</p>
+            {sectionConfig.description && (
+              <p className="text-xs text-slate-500 truncate mt-0.5">{sectionConfig.description}</p>
             )}
           </div>
         </div>
@@ -253,33 +455,39 @@ function SectionCard({
       {/* Body */}
       <div id={panelId} hidden={!open} className="border-t border-slate-100 bg-[#fbfcf9] px-4 py-5 space-y-5 sm:px-6">
         {open && <>
-          {fieldEntries.map(([key, val]) => (
-            <div key={key}>
-              <label htmlFor={`${panelId}-${key}`} className="flex items-center gap-1.5 text-sm font-semibold text-slate-700 mb-1.5">
-                {formatFieldLabel(key)}
-                {URL_FIELDS.has(key) && (
-                  <MdOpenInNew className="text-slate-400 text-xs" />
+          {fieldEntries.map(([definition, val]) => {
+            const key = definition.key;
+            const inputId = `${panelId}-${key}`;
+            const isUrl = definition.type === "url";
+            return (
+              <div key={key}>
+                {definition.type !== "array" && (
+                  <label htmlFor={inputId} className="flex items-center gap-1.5 text-sm font-semibold text-slate-700 mb-1.5">
+                    {definition.label}
+                    {isUrl && <MdOpenInNew aria-hidden="true" className="text-slate-400 text-xs" />}
+                  </label>
                 )}
-              </label>
-              <FieldInput
-                inputId={`${panelId}-${key}`}
-                fieldKey={key}
-                value={val}
-                error={urlErrors[key] ? URL_FIELD_ERROR : undefined}
-                onChange={(v) => {
-                  onFieldChange(key, v);
-                  if (URL_FIELDS.has(key)) {
-                    setUrlErrors((prev) => ({ ...prev, [key]: !isValidUrlField(v) }));
-                  }
-                }}
-              />
-              {urlErrors[key] && (
-                <p id={`${panelId}-${key}-error`} role="alert" className="mt-1.5 text-xs font-medium text-red-700">
-                  {URL_FIELD_ERROR}
-                </p>
-              )}
-            </div>
-          ))}
+                <FieldInput
+                  inputId={inputId}
+                  definition={definition}
+                  value={val}
+                  error={urlErrors[key] ? URL_FIELD_ERROR : undefined}
+                  onChange={(v) => {
+                    onFieldChange(key, v);
+                    if (isUrl) setUrlErrors((prev) => ({ ...prev, [key]: !isValidUrlField(v) }));
+                  }}
+                />
+                {key === "public_reviewed" && (
+                  <p className="mt-1.5 text-xs leading-5 text-slate-500">Unreviewed content is hidden from the public site.</p>
+                )}
+                {urlErrors[key] && (
+                  <p id={`${inputId}-error`} role="alert" className="mt-1.5 text-xs font-medium text-red-700">
+                    {URL_FIELD_ERROR}
+                  </p>
+                )}
+              </div>
+            );
+          })}
 
           {/* Section-level save */}
           <div className="flex items-center gap-3 pt-2">
@@ -287,10 +495,10 @@ function SectionCard({
               type="button"
               onClick={() => {
                 const invalidFields = fieldEntries
-                  .filter(([key]) => URL_FIELDS.has(key))
+                  .filter(([definition]) => definition.type === "url")
                   .filter(([, value]) => !isValidUrlField(value));
                 if (invalidFields.length) {
-                  setUrlErrors(Object.fromEntries(invalidFields.map(([key]) => [key, true])));
+                  setUrlErrors(Object.fromEntries(invalidFields.map(([definition]) => [definition.key, true])));
                   return;
                 }
                 setUrlErrors({});
@@ -348,8 +556,8 @@ function PageGroup({
   const [collapsed, setCollapsed] = useState(false);
   const panelId = `cms-page-${page}`;
 
-  // All sections that exist in data for this page
-  const sectionKeys = Object.keys(data);
+  // Only expose sections whose fields are deliberately mapped to public output.
+  const sectionKeys = Object.keys(config.sections);
 
   return (
     <div className="space-y-1">
@@ -389,6 +597,7 @@ function PageGroup({
               key={section}
               page={page}
               section={section}
+              sectionConfig={config.sections[section]}
               fields={(data[section] ?? {}) as Record<string, unknown>}
               onFieldChange={(key, val) => onFieldChange(section, key, val)}
               onSave={() => onSaveSection(section)}
@@ -409,18 +618,27 @@ function PageGroup({
 export default function CMSEditor({ pages }: Props) {
   const [data, setData] = useState<PagesData>(() =>
     Object.fromEntries(
-      Object.entries(pages).map(([page, sections]) => [
-        page,
-        Object.fromEntries(
-          Object.entries(sections).map(([section, fields]) => [
-            section,
-            {
-              ...fields,
-              public_reviewed: fields.public_reviewed === true,
-            },
-          ])
-        ),
-      ])
+      Object.entries(PAGE_CONFIG)
+        .filter(([page]) => pages[page])
+        .map(([page, pageConfig]) => [
+          page,
+          Object.fromEntries(
+            Object.entries(pageConfig.sections).map(([section, sectionConfig]) => {
+              const existingFields = pages[page][section] ?? {};
+              const fields = { ...existingFields };
+              for (const definition of sectionConfig.fields) {
+                if (definition.key === "public_reviewed") {
+                  fields[definition.key] = existingFields[definition.key] === true;
+                } else if (!(definition.key in fields)) {
+                  fields[definition.key] = definition.type === "array" ? [] : "";
+                } else if (definition.type === "array" && !Array.isArray(fields[definition.key])) {
+                  fields[definition.key] = [];
+                }
+              }
+              return [section, fields];
+            })
+          ),
+        ])
     )
   );
   const [saving, setSaving] = useState<Record<string, Record<string, boolean>>>({});

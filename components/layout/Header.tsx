@@ -19,10 +19,10 @@ function Wordmark({ tone = "ink" }: { tone?: "ink" | "paper" }) {
     <Link
       href="/"
       aria-label="Sodoh Nigeria Limited"
-      className="group flex items-center gap-3 rounded-md focus-visible:outline-offset-4"
+      className="group flex min-h-[44px] items-center gap-3 rounded-md focus-visible:outline-offset-4"
     >
       <BrandMark
-        size={46}
+        size={62}
         variant="tile"
         priority
         className="transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-rotate-6 group-hover:scale-[1.04]"
@@ -193,7 +193,7 @@ export default function Header() {
             aria-label="Sodoh Nigeria Limited"
             className="flex items-center gap-2.5 rounded-md focus-visible:outline-offset-4"
           >
-            <BrandMark size={34} variant="tile" />
+            <BrandMark size={42} variant="tile" />
             <span className="display-font text-xl font-bold tracking-[-0.04em] text-[var(--ink)]">
               Sodoh
             </span>
