@@ -20,7 +20,7 @@ function Wordmark({ tone = "ink" }: { tone?: "ink" | "paper" }) {
       aria-label="Sodoh Nigeria Limited"
     >
       {tone === "paper" ? (
-        <BrandMark size={34} variant="bare" />
+        <BrandMark size={46} variant="bare" />
       ) : (
         <BrandMark size={40} variant="tile" />
       )}

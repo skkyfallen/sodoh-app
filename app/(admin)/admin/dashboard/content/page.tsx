@@ -21,6 +21,19 @@ export default async function ContentPage() {
         </p>
       </div>
 
+      <section aria-labelledby="managed-in-code-heading" className="mb-8 border-y border-slate-200 bg-white px-5 py-4 sm:px-6">
+        <h2 id="managed-in-code-heading" className="text-sm font-bold text-slate-900">Managed in code</h2>
+        <ul className="mt-2 space-y-1 text-sm text-slate-600">
+          <li>Home intro — HomeIntro</li>
+          <li>Enquiry routes — EnquiryRoutes</li>
+          <li>Home call to action — SiteCta</li>
+          <li>Products grid explanatory copy</li>
+          <li>Contact form</li>
+          <li>Header and footer</li>
+          <li>Product request dialog</li>
+        </ul>
+      </section>
+
       <CMSEditor
         pages={{
           home: homeContent,

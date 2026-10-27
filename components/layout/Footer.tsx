@@ -18,7 +18,7 @@ export default function Footer() {
           aria-label="Sodoh Nigeria Limited"
           className="block rounded-md leading-none focus-visible:outline-[#a7f3d0]"
         >
-          <BrandMark size={72} variant="bare" className="mb-6" />
+          <BrandMark size={96} variant="bare" className="mb-6" />
           <span className="display-font block text-[clamp(4.5rem,15vw,13rem)] font-bold leading-[0.9] tracking-[-0.05em] text-white">
             Sodoh
           </span>
