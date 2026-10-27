@@ -1,6 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Sans, Outfit } from "next/font/google";
-import { defaultLocale, siteName, siteUrl } from "@/lib/site";
+import {
+  city,
+  country,
+  defaultLocale,
+  googleSiteVerification,
+  siteName,
+  siteUrl,
+} from "@/lib/site";
 import "./globals.css";
 
 const bodyFont = DM_Sans({
@@ -37,6 +44,19 @@ export const metadata: Metadata = {
     title: siteName,
     description: "Explore Nigerian agricultural produce from Sodoh Nigeria Limited and contact our Abuja team.",
   },
+  applicationName: siteName,
+  authors: [{ name: siteName, url: siteUrl }],
+  creator: siteName,
+  publisher: siteName,
+  formatDetection: { telephone: true },
+  other: {
+    "geo.region": "NG-FC",
+    "geo.placename": city,
+    "geo.country": country,
+  },
+  verification: googleSiteVerification
+    ? { google: googleSiteVerification }
+    : undefined,
 };
 
 // Light-only rendering: tells the browser (including forced-dark modes

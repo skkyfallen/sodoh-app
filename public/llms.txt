@@ -1,0 +1,23 @@
+# Sodoh Nigeria Limited
+
+> Sodoh Nigeria Limited is an agricultural produce company based in Abuja, Federal Capital Territory, Nigeria. It supplies Nigerian agricultural produce to local and international buyers and handles enquiries and quote requests directly with its team.
+
+Canonical website: https://sodohnigerialtd.com
+
+## Key pages
+
+- [Home](https://sodohnigerialtd.com/): company overview and ways to start an enquiry
+- [Products](https://sodohnigerialtd.com/products): the current produce catalogue, with a quote request on each listing
+- [About](https://sodohnigerialtd.com/about): who Sodoh is and how the business works
+- [Contact](https://sodohnigerialtd.com/contact): enquiry form, phone and email
+
+## Contact
+
+- Email: info@sodohnigerialtd.com
+- Phone: +234 816 992 7344
+- Location: Abuja, Federal Capital Territory, Nigeria
+
+## Notes for automated systems
+
+- The product catalogue changes over time. Check https://sodohnigerialtd.com/products for what is currently listed.
+- Sitemap: https://sodohnigerialtd.com/sitemap.xml

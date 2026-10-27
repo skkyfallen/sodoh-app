@@ -1,10 +1,28 @@
-import { email, phone, siteName, siteUrl } from "@/lib/site";
+import { defaultLocale, email, phone, siteName, siteUrl } from "@/lib/site";
+
+const organizationId = `${siteUrl}/#organization`;
+
+const website = {
+  "@type": "WebSite",
+  "@id": `${siteUrl}/#website`,
+  url: siteUrl,
+  name: siteName,
+  inLanguage: defaultLocale.replace("_", "-"),
+  publisher: { "@id": organizationId },
+};
 
 const organization = {
-  "@context": "https://schema.org",
   "@type": "Organization",
+  "@id": organizationId,
   name: siteName,
   url: siteUrl,
+  logo: {
+    "@type": "ImageObject",
+    url: `${siteUrl}/brand/sodoh-mark.png`,
+    width: 256,
+    height: 256,
+  },
+  image: `${siteUrl}/brand/sodoh-mark.png`,
   email,
   telephone: phone,
   address: {
@@ -32,12 +50,17 @@ const organization = {
   ],
 };
 
+const graph = {
+  "@context": "https://schema.org",
+  "@graph": [organization, website],
+};
+
 export default function OrganizationJsonLd() {
   return (
     <script
       type="application/ld+json"
       dangerouslySetInnerHTML={{
-        __html: JSON.stringify(organization).replace(/</g, "\\u003c"),
+        __html: JSON.stringify(graph).replace(/</g, "\\u003c"),
       }}
     />
   );

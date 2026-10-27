@@ -124,10 +124,10 @@ export default function Header() {
           <p className="truncate text-white/70 md:hidden">Abuja, Nigeria</p>
           <div className="flex shrink-0 items-center gap-4">
             <a
-              href="mailto:info@sodohnigeria.com"
+              href="mailto:info@sodohnigerialtd.com"
               className="hidden font-medium text-white/85 transition-colors hover:text-white sm:block"
             >
-              info@sodohnigeria.com
+              info@sodohnigerialtd.com
             </a>
             <span aria-hidden="true" className="hidden h-3 w-px bg-white/25 sm:block" />
             <p className="flex items-center gap-2 font-semibold text-[#7be2a6]">
