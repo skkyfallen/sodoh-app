@@ -16,7 +16,7 @@ import {
 } from "@/lib/data";
 import type { HeroContent, AnnouncementContent } from "@/types/content";
 import OrganizationJsonLd from "@/components/seo/OrganizationJsonLd";
-import { defaultLocale, siteName } from "@/lib/site";
+import { ogImagePath, ogLocale, siteName } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: {
@@ -31,7 +31,15 @@ export const metadata: Metadata = {
       "Nigerian agricultural produce for international and local buyers, including sesame, cassava, cocoa, ginger, maize, yam, and palm oil. Request a quote from Sodoh Nigeria Limited in Abuja.",
     url: "/",
     siteName,
-    locale: defaultLocale,
+    images: [
+      {
+        url: ogImagePath,
+        width: 256,
+        height: 161,
+        alt: "Sodoh Nigeria Limited",
+      },
+    ],
+    locale: ogLocale,
     type: "website",
   },
   twitter: {
@@ -39,6 +47,7 @@ export const metadata: Metadata = {
     title: "Nigerian Agricultural Produce Exporter | Sodoh Nigeria Limited",
     description:
       "Nigerian agricultural produce for international and local buyers, including sesame, cassava, cocoa, ginger, maize, yam, and palm oil. Request a quote from Sodoh Nigeria Limited in Abuja.",
+    images: [ogImagePath],
   },
 };
 

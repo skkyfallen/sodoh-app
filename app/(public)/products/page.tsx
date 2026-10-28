@@ -8,7 +8,7 @@ import { ProductLedger } from "@/components/products/ProductLedger";
 import { getPageContent, getProducts } from "@/lib/data";
 import { safeHref } from "@/lib/utils";
 import type { HeroContent } from "@/types/content";
-import { defaultLocale, siteName } from "@/lib/site";
+import { ogImagePath, ogLocale, siteName } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: { absolute: "Nigerian Agricultural Products for Export | Sodoh Nigeria" },
@@ -19,13 +19,15 @@ export const metadata: Metadata = {
     description: "Explore Nigerian agricultural products listed by Sodoh Nigeria Limited and contact our team about product availability, specifications, and supply requirements.",
     url: "/products",
     siteName,
-    locale: defaultLocale,
+    images: [{ url: ogImagePath, width: 256, height: 161, alt: "Sodoh Nigeria Limited" }],
+    locale: ogLocale,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Nigerian Agricultural Products for Export | Sodoh Nigeria",
     description: "Explore Nigerian agricultural products listed by Sodoh Nigeria Limited and contact our team about product availability, specifications, and supply requirements.",
+    images: [ogImagePath],
   },
 };
 
