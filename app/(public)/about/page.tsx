@@ -5,6 +5,7 @@ import AnimateIn from "@/components/ui/AnimateIn";
 import { SiteCta } from "@/components/sections/SiteCta";
 import { getPageContent } from "@/lib/data";
 import { safeHref } from "@/lib/utils";
+import { ogImagePath, ogLocale } from "@/lib/site";
 import type { HeroContent } from "@/types/content";
 
 export const revalidate = 60;
@@ -18,13 +19,15 @@ export const metadata: Metadata = {
     description: "Learn about Sodoh Nigeria Limited, a Nigerian agricultural export company, and browse the products currently listed in our catalogue.",
     url: "/about",
     siteName: "Sodoh Nigeria Limited",
-    locale: "en_NG",
+    images: [{ url: ogImagePath, width: 256, height: 161, alt: "Sodoh Nigeria Limited" }],
+    locale: ogLocale,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "About Sodoh Nigeria | Nigerian Agricultural Export Company",
     description: "Learn about Sodoh Nigeria Limited, a Nigerian agricultural export company, and browse the products currently listed in our catalogue.",
+    images: [ogImagePath],
   },
 };
 

@@ -8,7 +8,7 @@ import { MdLocationOn, MdCall, MdMail } from "react-icons/md";
 import { getPageContent, getFAQs } from "@/lib/data";
 import { safeHref } from "@/lib/utils";
 import type { HeroContent } from "@/types/content";
-import { defaultLocale, email, phone, phoneTel, siteName } from "@/lib/site";
+import { email, ogImagePath, ogLocale, phone, phoneTel, siteName } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: { absolute: "Contact a Nigerian Agricultural Products Supplier | Sodoh" },
@@ -19,13 +19,15 @@ export const metadata: Metadata = {
     description: "Contact Sodoh Nigeria Limited in Abuja about Nigerian agricultural products, sourcing needs, product availability, or partnership enquiries. Call or email our team.",
     url: "/contact",
     siteName,
-    locale: defaultLocale,
+    images: [{ url: ogImagePath, width: 256, height: 161, alt: "Sodoh Nigeria Limited" }],
+    locale: ogLocale,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Contact a Nigerian Agricultural Products Supplier | Sodoh",
     description: "Contact Sodoh Nigeria Limited in Abuja about Nigerian agricultural products, sourcing needs, product availability, or partnership enquiries. Call or email our team.",
+    images: [ogImagePath],
   },
 };
 

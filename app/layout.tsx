@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Sans, Outfit } from "next/font/google";
 import {
+  bingSiteVerification,
   city,
   country,
-  defaultLocale,
   googleSiteVerification,
+  ogImagePath,
+  ogLocale,
   siteName,
   siteUrl,
 } from "@/lib/site";
@@ -35,15 +37,37 @@ export const metadata: Metadata = {
   openGraph: {
     title: siteName,
     description: "Explore Nigerian agricultural produce from Sodoh Nigeria Limited and contact our Abuja team.",
+    url: siteUrl,
     siteName,
-    locale: defaultLocale,
+    images: [
+      {
+        url: ogImagePath,
+        width: 256,
+        height: 161,
+        alt: siteName,
+      },
+    ],
+    locale: ogLocale,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: siteName,
     description: "Explore Nigerian agricultural produce from Sodoh Nigeria Limited and contact our Abuja team.",
+    images: [ogImagePath],
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: { canonical: siteUrl },
   applicationName: siteName,
   authors: [{ name: siteName, url: siteUrl }],
   creator: siteName,
@@ -55,8 +79,15 @@ export const metadata: Metadata = {
     "geo.country": country,
   },
   verification: googleSiteVerification
-    ? { google: googleSiteVerification }
-    : undefined,
+    ? {
+        google: googleSiteVerification,
+        ...(bingSiteVerification
+          ? { other: { "msvalidate.01": bingSiteVerification } }
+          : {}),
+      }
+    : bingSiteVerification
+      ? { other: { "msvalidate.01": bingSiteVerification } }
+      : undefined,
 };
 
 // Light-only rendering: tells the browser (including forced-dark modes
