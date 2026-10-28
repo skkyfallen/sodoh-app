@@ -8,6 +8,7 @@ import type { Product } from "@/types/content";
 type Props = {
   products: Product[];
   showRequest?: boolean;
+  compact?: boolean;
 };
 
 /**
@@ -15,7 +16,7 @@ type Props = {
  * No cards, no grids — reads like a price list at the market.
  * One section-level reveal covers the whole list; rows render plain.
  */
-export function ProductLedger({ products, showRequest = false }: Props) {
+export function ProductLedger({ products, showRequest = false, compact = false }: Props) {
   return (
     <AnimateIn variant="fade-up">
       <div className="border-b border-[var(--border-strong)]/60">
@@ -23,11 +24,11 @@ export function ProductLedger({ products, showRequest = false }: Props) {
           <article
             key={product.id}
             id={`product-${product.slug}`}
-            className="group grid scroll-mt-28 grid-cols-[1fr_auto] items-center gap-4 border-t border-[var(--border-strong)]/60 py-7 sm:gap-8 sm:py-8 md:grid-cols-[1fr_auto_auto] md:gap-10"
+            className={`group grid scroll-mt-28 grid-cols-[1fr_auto] items-center gap-4 border-t border-[var(--border-strong)]/60 md:grid-cols-[1fr_auto_auto] ${compact ? "py-5 sm:gap-6 sm:py-6 md:gap-7" : "py-7 sm:gap-8 sm:py-8 md:gap-10"}`}
           >
             <div className="min-w-0">
               <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-                <h3 className="display-font text-[1.65rem] font-semibold leading-tight tracking-[-0.03em] text-[var(--ink)] transition-colors group-hover:text-[var(--brand)] sm:text-4xl">
+                <h3 className={`display-font font-semibold leading-tight tracking-[-0.03em] text-[var(--ink)] transition-colors group-hover:text-[var(--brand)] ${compact ? "text-2xl sm:text-3xl" : "text-[1.65rem] sm:text-4xl"}`}>
                   {showRequest ? (
                     product.title
                   ) : (
@@ -40,11 +41,11 @@ export function ProductLedger({ products, showRequest = false }: Props) {
                   )}
                 </h3>
                 {product.region && (
-                  <span className="text-sm font-medium text-[var(--ink)]">{product.region}</span>
+                  <span className={`font-medium text-[var(--ink)] ${compact ? "text-xs sm:text-sm" : "text-sm"}`}>{product.region}</span>
                 )}
               </div>
               {product.description && (
-                <p className="mt-2 max-w-[62ch] text-[15px] leading-7 text-[var(--body)]">
+                <p className={`max-w-[62ch] text-[var(--body)] ${compact ? "mt-1.5 text-sm leading-6" : "mt-2 text-[15px] leading-7"}`}>
                   {product.description}
                 </p>
               )}
@@ -54,7 +55,7 @@ export function ProductLedger({ products, showRequest = false }: Props) {
               href={`/products#product-${product.slug}`}
               aria-hidden={showRequest ? undefined : true}
               tabIndex={showRequest ? undefined : -1}
-              className="hidden w-36 shrink-0 overflow-hidden rounded-[14px] border border-[var(--border)]/70 bg-[var(--surface-muted)] sm:block md:w-48"
+              className={`hidden shrink-0 overflow-hidden rounded-[14px] border border-[var(--border)]/70 bg-[var(--surface-muted)] sm:block ${compact ? "w-32 md:w-40" : "w-36 md:w-48"}`}
             >
               {safeHref(product.image_url, "") ? (
                 <span className="media-zoom relative block aspect-[4/3]">
@@ -74,7 +75,7 @@ export function ProductLedger({ products, showRequest = false }: Props) {
               )}
             </Link>
 
-            <div className="col-span-2 w-full sm:w-56 md:col-span-1 md:w-48">
+            <div className={`col-span-2 w-full md:col-span-1 ${compact ? "sm:w-48 md:w-40" : "sm:w-56 md:w-48"}`}>
               {showRequest ? (
                 <ProductRequestButton product={product} />
               ) : (
