@@ -51,5 +51,12 @@
     "vite": "^8.3.5",
     "vitest": "^5.0.5",
     "wrangler": "^4.100.0"
+  },
+  "overrides": {
+    "minimatch": "^11.0.1",
+    "glob": "^14.0.3",
+    "@node-minify/core": {
+      "glob": "^14.0.3"
+    }
   }
 }
