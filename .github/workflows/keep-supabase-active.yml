@@ -1,0 +1,26 @@
+name: Keep Supabase project active
+
+on:
+  schedule:
+    # Run each morning in North America (7:17 AM Eastern during standard time).
+    # GitHub Actions schedules use UTC.
+    - cron: "17 12 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  keep-active:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request Supabase-backed pages on the live app
+        run: |
+          for round in 1 2; do
+            for path in "" about products contact; do
+              url="https://sodoh.com/${path}"
+              curl --fail --silent --show-error --location --retry 3 --retry-delay 5 \
+                --header "Cache-Control: no-cache" \
+                "${url}?keepalive=${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${round}"
+            done
+          done
