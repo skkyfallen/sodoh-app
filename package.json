@@ -24,7 +24,7 @@
     "clsx": "^2.1.1",
     "doppler": "^1.0.0",
     "motion": "^14.6.0",
-    "next": "16.4.3",
+    "next": "16.4.5",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "react-icons": "^5.6.0",
@@ -43,7 +43,7 @@
     "@vitejs/plugin-react": "^6.1.2",
     "esbuild": "^0.28.1",
     "eslint": "^10",
-    "eslint-config-next": "16.4.3",
+    "eslint-config-next": "16.4.5",
     "jsdom": "^29.1.1",
     "playwright": "^1.64.1",
     "tailwindcss": "^4",
@@ -51,5 +51,12 @@
     "vite": "^8.3.5",
     "vitest": "^5.0.5",
     "wrangler": "^4.100.0"
+  },
+  "overrides": {
+    "minimatch": "^11.0.1",
+    "glob": "^14.0.3",
+    "@node-minify/core": {
+      "glob": "^14.0.3"
+    }
   }
 }
