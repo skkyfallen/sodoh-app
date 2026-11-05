@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import NextLink from "@/components/mui/NextLink";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard — Sodoh Nigeria",
@@ -13,22 +18,67 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="admin-shell flex min-h-[100dvh] flex-col md:flex-row">
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: { xs: "column", md: "row" },
+        minHeight: "100dvh",
+        bgcolor: "var(--admin-page)",
+        color: "var(--admin-ink)",
+      }}
+    >
       <AdminSidebar />
-      <main className="min-w-0 flex-1 px-5 pb-10 pt-5 sm:px-8 md:px-10 md:pb-14 md:pt-7">
-        <div className="mx-auto max-w-[1440px]">
-          <div className="mb-8 flex min-h-11 items-center justify-between gap-4 border-b border-[var(--admin-border)] pb-4">
-            <div className="flex items-center gap-3">
-              <span aria-hidden="true" className="size-2 rounded-full bg-[#016936]" />
-              <p className="text-sm font-medium text-[var(--admin-muted)]">Content and enquiries</p>
-            </div>
-            <Link href="/" className="link-arrow inline-flex min-h-11 items-center rounded-lg px-2 text-sm font-semibold text-[var(--admin-ink)] underline decoration-[var(--admin-border)] underline-offset-4 transition-colors hover:text-[#016936]">
-              View public site <span aria-hidden="true" className="arrow">→</span>
-            </Link>
-          </div>
+      <Box
+        component="main"
+        sx={{
+          minWidth: 0,
+          flex: 1,
+          px: { xs: 2.5, sm: 4, md: 5 },
+          pb: { xs: 5, md: 7 },
+          pt: { xs: 2.5, md: 3.5 },
+        }}
+      >
+        <Box sx={{ mx: "auto", maxWidth: 1440 }}>
+          <AppBar
+            position="static"
+            elevation={0}
+            sx={{
+              bgcolor: "transparent",
+              color: "var(--admin-ink)",
+              borderBottom: "1px solid var(--admin-border)",
+              mb: 4,
+            }}
+          >
+            <Toolbar disableGutters sx={{ minHeight: 44, gap: 2, py: 1.5 }}>
+              <Box
+                aria-hidden="true"
+                sx={{ width: 8, height: 8, borderRadius: "50%", bgcolor: "primary.main", flexShrink: 0 }}
+              />
+              <Typography variant="body2" sx={{ fontWeight: 500, color: "var(--admin-muted)" }}>
+                Content and enquiries
+              </Typography>
+              <Box sx={{ flexGrow: 1 }} />
+              <Button
+                component={NextLink}
+                href="/"
+                variant="text"
+                sx={{
+                  minHeight: 44,
+                  color: "var(--admin-ink)",
+                  textDecoration: "underline",
+                  textDecorationColor: "var(--admin-border)",
+                  textUnderlineOffset: 4,
+                  fontWeight: 600,
+                  "&:hover": { color: "primary.main", textDecoration: "underline" },
+                }}
+              >
+                View public site&nbsp;&nbsp;→
+              </Button>
+            </Toolbar>
+          </AppBar>
           {children}
-        </div>
-      </main>
-    </div>
+        </Box>
+      </Box>
+    </Box>
   );
 }

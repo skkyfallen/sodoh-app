@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import AnimateIn from "@/components/ui/AnimateIn";
 import { Card, CardContent } from "@/components/ui/card";
 import ContactForm from "@/components/sections/ContactForm";
+import SodohCtaButton from "@/components/sections/SodohCtaButton";
 import FAQ from "@/components/sections/FAQ";
 import { MdLocationOn, MdCall, MdMail } from "react-icons/md";
 import { getPageContent, getFAQs } from "@/lib/data";
@@ -72,9 +72,11 @@ export default async function ContactPage() {
             <h1 className="display-font max-w-[18ch] text-[clamp(3.2rem,8.5vw,7.5rem)] font-semibold leading-[0.95] tracking-[-0.05em] text-[var(--ink)] [text-wrap:balance]">{hero.title}</h1>
             <div className="mt-10 flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
               {hero.subtitle && <p className="measure text-base leading-7 text-[var(--body)] md:text-lg md:leading-8">{hero.subtitle}</p>}
-              <Link href="#contact-form" className="pressable inline-flex min-h-12 shrink-0 items-center justify-center rounded-[14px] bg-[var(--brand)] px-7 text-[15px] font-semibold text-white shadow-[0_6px_16px_rgba(1,105,54,0.18)] hover:bg-[var(--brand-hover)] dark:text-[#062a17]">
-                {hero.cta_primary_text ?? "Send a message"}
-              </Link>
+              <span className="inline-flex shrink-0">
+                <SodohCtaButton href="#contact-form" variant="primary">
+                  {hero.cta_primary_text ?? "Send a message"}
+                </SodohCtaButton>
+              </span>
             </div>
           </div>
         </div>

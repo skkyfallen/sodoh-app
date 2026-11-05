@@ -1,16 +1,29 @@
 "use client";
 
-import Link from "next/link";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "motion/react";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Collapse from "@mui/material/Collapse";
+import Divider from "@mui/material/Divider";
+import Drawer from "@mui/material/Drawer";
+import IconButton from "@mui/material/IconButton";
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import Alert from "@mui/material/Alert";
 import { createClient } from "@/lib/supabase/client";
+import NextLink from "@/components/mui/NextLink";
 import {
   MdDashboard, MdArticle, MdShoppingBag, MdMail, MdAssignment, MdBarChart,
   MdQuestionAnswer, MdStar, MdViewColumn, MdLogout, MdExpandMore,
-  MdMenu, MdClose,
+  MdMenu, MdClose, MdOpenInNew,
 } from "react-icons/md";
-import { cn } from "@/lib/utils";
+
+const DRAWER_WIDTH = 250;
 
 const CONTENT_CHILDREN = [
   { href: "/admin/dashboard/content", label: "Page text", Icon: MdArticle },
@@ -21,15 +34,18 @@ const CONTENT_CHILDREN = [
   { href: "/admin/dashboard/testimonials", label: "Testimonials", Icon: MdStar },
 ];
 
+function isActivePath(pathname: string, href: string) {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const isContentActive = CONTENT_CHILDREN.some((item) => pathname === item.href || pathname.startsWith(`${item.href}/`));
+  const isContentActive = CONTENT_CHILDREN.some((item) => isActivePath(pathname, item.href));
   const [contentOpen, setContentOpen] = useState(isContentActive);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [logoutError, setLogoutError] = useState(false);
-  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleLogout = async () => {
     setSigningOut(true);
@@ -47,112 +63,295 @@ export default function AdminSidebar() {
     }
   };
 
-  const linkClass = (href: string) => {
-    const active = pathname === href || pathname.startsWith(`${href}/`);
-    return cn(
-      "flex min-h-11 items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm font-semibold transition-all duration-200 focus-visible:outline-white",
-      active ? "bg-[var(--admin-active)] text-[#0b3b22]" : "text-white/80 hover:bg-white/10 hover:text-white"
-    );
-  };
+  const closeMobile = () => setMobileOpen(false);
 
-  const nav = (
+  const navList = (
     <>
-      <ul className="flex flex-col gap-1">
-        <li>
-          <Link href="/admin/dashboard/overview" onClick={() => setMobileOpen(false)} aria-current={pathname === "/admin/dashboard/overview" ? "page" : undefined} className={linkClass("/admin/dashboard/overview")}>
-            <MdDashboard aria-hidden="true" className="shrink-0 text-lg" />Overview
-          </Link>
-        </li>
-        <li>
-          <button type="button" onClick={() => setContentOpen((open) => !open)} aria-expanded={contentOpen} className={cn("flex min-h-11 w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-left text-sm font-semibold transition-colors focus-visible:outline-white", isContentActive ? "bg-white/10 text-white" : "text-white/80 hover:bg-white/10 hover:text-white")}>
-            <MdArticle aria-hidden="true" className="shrink-0 text-lg" />
-            <span className="flex-1">Site content</span>
-            <MdExpandMore aria-hidden="true" className={cn("transition-transform duration-200", contentOpen && "rotate-180")} />
-          </button>
-          <AnimatePresence initial={false}>
-            {contentOpen && (
-              <motion.ul
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
-                className="ml-4 mt-1 flex flex-col gap-0.5 overflow-hidden border-l border-white/20 pl-3"
-              >
-                {CONTENT_CHILDREN.map(({ href, label, Icon }) => {
-                  const active = pathname === href || pathname.startsWith(`${href}/`);
-                  return (
-                    <li key={href}>
-                      <Link href={href} onClick={() => setMobileOpen(false)} aria-current={active ? "page" : undefined} className={cn("flex min-h-11 items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-white", active ? "bg-white/10 text-[#d7f6e7]" : "text-white/70 hover:bg-white/10 hover:text-white")}>
-                        <Icon aria-hidden="true" className="shrink-0 text-base" />{label}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </motion.ul>
-            )}
-          </AnimatePresence>
-        </li>
-        <li>
-          <Link href="/admin/dashboard/messages" onClick={() => setMobileOpen(false)} aria-current={pathname.startsWith("/admin/dashboard/messages") ? "page" : undefined} className={linkClass("/admin/dashboard/messages")}>
-            <MdMail aria-hidden="true" className="shrink-0 text-lg" />Messages
-          </Link>
-        </li>
-        <li>
-          <Link href="/admin/dashboard/requests" onClick={() => setMobileOpen(false)} aria-current={pathname.startsWith("/admin/dashboard/requests") ? "page" : undefined} className={linkClass("/admin/dashboard/requests")}>
-            <MdAssignment aria-hidden="true" className="shrink-0 text-lg" />Product requests
-          </Link>
-        </li>
-      </ul>
-      <div className="mt-8 border-t border-white/15 pt-4">
-        <button type="button" onClick={handleLogout} disabled={signingOut} className="flex min-h-11 w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm font-semibold text-white/75 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-white disabled:cursor-wait disabled:opacity-60">
-          <MdLogout aria-hidden="true" className="shrink-0 text-lg" />{signingOut ? "Signing out…" : "Sign out"}
-        </button>
-        <Link href="/" onClick={() => setMobileOpen(false)} className="mt-1 flex min-h-11 items-center gap-3 rounded-[10px] px-3 py-2.5 text-sm font-semibold text-white/75 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-white">
-          View public site
-        </Link>
-        {logoutError && <p role="alert" className="mt-3 px-3 text-sm leading-5 text-[#ffd0ca]">Could not sign out. Check your connection and try again.</p>}
-      </div>
+      <List disablePadding sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+        <ListItemButton
+          component={NextLink}
+          href="/admin/dashboard/overview"
+          onClick={closeMobile}
+          selected={pathname === "/admin/dashboard/overview"}
+          aria-current={pathname === "/admin/dashboard/overview" ? "page" : undefined}
+          sx={navItemSx}
+        >
+          <ListItemIcon sx={navIconSx}>
+            <MdDashboard aria-hidden="true" size="1.25rem" />
+          </ListItemIcon>
+          <ListItemText primary="Overview" slotProps={{ primary: { sx: { fontSize: 14, fontWeight: 600 } } }} />
+        </ListItemButton>
+
+        <ListItemButton
+          onClick={() => setContentOpen((open) => !open)}
+          aria-expanded={contentOpen}
+          selected={isContentActive && !contentOpen}
+          sx={navItemSx}
+        >
+          <ListItemIcon sx={navIconSx}>
+            <MdArticle aria-hidden="true" size="1.25rem" />
+          </ListItemIcon>
+          <ListItemText primary="Site content" slotProps={{ primary: { sx: { fontSize: 14, fontWeight: 600 } } }} />
+          <MdExpandMore
+            aria-hidden="true"
+            size="1.25rem"
+            style={{
+              transition: "transform 200ms",
+              transform: contentOpen ? "rotate(180deg)" : "none",
+            }}
+          />
+        </ListItemButton>
+        <Collapse in={contentOpen} timeout="auto" unmountOnExit>
+          <List
+            disablePadding
+            sx={{
+              ml: 2,
+              mt: 0.5,
+              pl: 1.5,
+              borderLeft: "1px solid rgba(255,255,255,0.2)",
+              display: "flex",
+              flexDirection: "column",
+              gap: 0.25,
+            }}
+          >
+            {CONTENT_CHILDREN.map(({ href, label, Icon }) => {
+              const active = isActivePath(pathname, href);
+              return (
+                <ListItemButton
+                  key={href}
+                  component={NextLink}
+                  href={href}
+                  onClick={closeMobile}
+                  selected={active}
+                  aria-current={active ? "page" : undefined}
+                  sx={navChildSx}
+                >
+                  <ListItemIcon sx={navIconSx}>
+                    <Icon aria-hidden="true" size="1rem" />
+                  </ListItemIcon>
+                  <ListItemText primary={label} slotProps={{ primary: { sx: { fontSize: 13, fontWeight: 500 } } }} />
+                </ListItemButton>
+              );
+            })}
+          </List>
+        </Collapse>
+
+        <ListItemButton
+          component={NextLink}
+          href="/admin/dashboard/messages"
+          onClick={closeMobile}
+          selected={isActivePath(pathname, "/admin/dashboard/messages")}
+          aria-current={isActivePath(pathname, "/admin/dashboard/messages") ? "page" : undefined}
+          sx={navItemSx}
+        >
+          <ListItemIcon sx={navIconSx}>
+            <MdMail aria-hidden="true" size="1.25rem" />
+          </ListItemIcon>
+          <ListItemText primary="Messages" slotProps={{ primary: { sx: { fontSize: 14, fontWeight: 600 } } }} />
+        </ListItemButton>
+
+        <ListItemButton
+          component={NextLink}
+          href="/admin/dashboard/requests"
+          onClick={closeMobile}
+          selected={isActivePath(pathname, "/admin/dashboard/requests")}
+          aria-current={isActivePath(pathname, "/admin/dashboard/requests") ? "page" : undefined}
+          sx={navItemSx}
+        >
+          <ListItemIcon sx={navIconSx}>
+            <MdAssignment aria-hidden="true" size="1.25rem" />
+          </ListItemIcon>
+          <ListItemText primary="Product requests" slotProps={{ primary: { sx: { fontSize: 14, fontWeight: 600 } } }} />
+        </ListItemButton>
+      </List>
+
+      <Divider sx={{ my: 2, borderColor: "rgba(255,255,255,0.15)" }} />
+
+      <List disablePadding sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+        <ListItemButton onClick={handleLogout} disabled={signingOut} sx={navItemSx}>
+          <ListItemIcon sx={navIconSx}>
+            <MdLogout aria-hidden="true" size="1.25rem" />
+          </ListItemIcon>
+          <ListItemText
+            primary={signingOut ? "Signing out…" : "Sign out"}
+            slotProps={{ primary: { sx: { fontSize: 14, fontWeight: 600 } } }}
+          />
+        </ListItemButton>
+        <ListItemButton component={NextLink} href="/" onClick={closeMobile} sx={navItemSx}>
+          <ListItemIcon sx={navIconSx}>
+            <MdOpenInNew aria-hidden="true" size="1.25rem" />
+          </ListItemIcon>
+          <ListItemText primary="View public site" slotProps={{ primary: { sx: { fontSize: 14, fontWeight: 600 } } }} />
+        </ListItemButton>
+      </List>
+      {logoutError && (
+        <Alert severity="error" sx={{ mt: 1.5, bgcolor: "rgba(255,255,255,0.08)", color: "#ffd0ca", "& .MuiAlert-icon": { color: "#ffd0ca" } }}>
+          Could not sign out. Check your connection and try again.
+        </Alert>
+      )}
     </>
+  );
+
+  const brandBlock = (onNavigate: () => void, compact: boolean) => (
+    <Box
+      component={NextLink}
+      href="/admin/dashboard/overview"
+      onClick={onNavigate}
+      sx={{
+        display: "block",
+        borderRadius: 1,
+        py: compact ? 0 : 2,
+        px: 1,
+        color: "inherit",
+        textDecoration: "none",
+        borderBottom: compact ? "none" : "1px solid rgba(255,255,255,0.15)",
+        mb: compact ? 0 : 2,
+        "&:focus-visible": { outline: "2px solid #d7f6e7", outlineOffset: 2 },
+      }}
+    >
+      <Typography
+        component="span"
+        sx={{ display: "block", fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 600, fontSize: compact ? 18 : 20, letterSpacing: "-0.035em", lineHeight: 1.2 }}
+      >
+        Sodoh
+      </Typography>
+      <Typography
+        component="span"
+        sx={{ display: "block", mt: 0.5, fontSize: compact ? 12 : 11, fontWeight: 500, letterSpacing: "0.14em", textTransform: "uppercase", color: "rgba(255,255,255,0.6)" }}
+      >
+        Admin workspace
+      </Typography>
+    </Box>
   );
 
   return (
     <>
-      <div className="admin-sidebar sticky top-0 z-40 w-full bg-[#0c2418] px-5 py-3 text-white md:hidden">
-        <div className="flex min-h-11 items-center justify-between">
-          <Link href="/admin/dashboard/overview" className="rounded-md leading-tight focus-visible:outline-white">
-            <span className="display-font block text-lg font-semibold tracking-[-0.035em]">Sodoh</span>
-            <span className="text-xs text-white/70">Admin workspace</span>
-          </Link>
-          <button ref={mobileMenuButtonRef} type="button" onClick={() => setMobileOpen((open) => !open)} aria-expanded={mobileOpen} aria-controls="admin-mobile-navigation" aria-label={mobileOpen ? "Close admin menu" : "Open admin menu"} className="flex size-11 items-center justify-center rounded-full border border-white/30 text-white focus-visible:outline-white">
-            {mobileOpen ? <MdClose aria-hidden="true" className="text-xl" /> : <MdMenu aria-hidden="true" className="text-xl" />}
-          </button>
-        </div>
-        <AnimatePresence initial={false}>
-          {mobileOpen && (
-            <motion.nav
-              id="admin-mobile-navigation"
-              aria-label="Admin navigation"
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
-              onKeyDown={(event) => { if (event.key === "Escape") { setMobileOpen(false); mobileMenuButtonRef.current?.focus(); } }}
-              className="overflow-hidden"
-            >
-              <div className="mt-4 border-t border-white/15 pt-4">{nav}</div>
-            </motion.nav>
-          )}
-        </AnimatePresence>
-      </div>
+      {/* Mobile top bar */}
+      <AppBar
+        position="sticky"
+        elevation={0}
+        className="admin-sidebar"
+        sx={{
+          display: { xs: "block", md: "none" },
+          bgcolor: (theme) => theme.palette.admin.sidebar,
+          color: "#fff",
+        }}
+      >
+        <Toolbar sx={{ minHeight: 64, px: 2.5, justifyContent: "space-between" }}>
+          {brandBlock(closeMobile, true)}
+          <IconButton
+            type="button"
+            onClick={() => setMobileOpen((open) => !open)}
+            aria-expanded={mobileOpen}
+            aria-controls="admin-mobile-navigation"
+            aria-label={mobileOpen ? "Close admin menu" : "Open admin menu"}
+            sx={{
+              width: 44,
+              height: 44,
+              color: "#fff",
+              border: "1px solid rgba(255,255,255,0.3)",
+              "&:focus-visible": { outline: "2px solid #d7f6e7", outlineOffset: 2 },
+            }}
+          >
+            {mobileOpen ? <MdClose aria-hidden="true" size="1.35rem" /> : <MdMenu aria-hidden="true" size="1.35rem" />}
+          </IconButton>
+        </Toolbar>
+      </AppBar>
 
-      <aside className="admin-sidebar sticky top-0 hidden h-[100dvh] w-[264px] shrink-0 flex-col overflow-y-auto bg-[#0c2418] px-4 py-5 text-white md:flex">
-        <Link href="/admin/dashboard/overview" className="rounded-md border-b border-white/15 px-2 pb-5 leading-tight focus-visible:outline-white">
-          <span className="display-font block text-xl font-semibold tracking-[-0.035em]">Sodoh</span>
-          <span className="mt-0.5 block text-[11px] font-medium uppercase tracking-[0.14em] text-white/60">Admin workspace</span>
-        </Link>
-        <nav aria-label="Admin navigation" className="flex flex-1 flex-col py-5">{nav}</nav>
-        <p className="px-3 pt-3 text-xs text-white/55">Sodoh Nigeria Limited</p>
-      </aside>
+      {/* Mobile drawer */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={closeMobile}
+        ModalProps={{ keepMounted: true }}
+        aria-label="Admin navigation"
+        sx={{
+          display: { xs: "block", md: "none" },
+          "& .MuiDrawer-paper": {
+            width: DRAWER_WIDTH,
+            boxSizing: "border-box",
+            bgcolor: (theme) => theme.palette.admin.sidebar,
+            color: "#fff",
+            px: 2,
+            py: 2.5,
+          },
+        }}
+      >
+        <Box id="admin-mobile-navigation" role="navigation" aria-label="Admin navigation" sx={{ mt: 1 }}>
+          {navList}
+        </Box>
+      </Drawer>
+
+      {/* Desktop drawer */}
+      <Drawer
+        variant="permanent"
+        className="admin-sidebar"
+        sx={{
+          display: { xs: "none", md: "block" },
+          width: DRAWER_WIDTH,
+          flexShrink: 0,
+          "& .MuiDrawer-paper": {
+            width: DRAWER_WIDTH,
+            boxSizing: "border-box",
+            position: "sticky",
+            height: "100dvh",
+            top: 0,
+            bgcolor: (theme) => theme.palette.admin.sidebar,
+            color: "#fff",
+            px: 2,
+            py: 2.5,
+            border: "none",
+            overflowY: "auto",
+          },
+        }}
+      >
+        {brandBlock(() => {}, false)}
+        <Box component="nav" aria-label="Admin navigation" sx={{ display: "flex", flex: 1, flexDirection: "column" }}>
+          {navList}
+        </Box>
+        <Typography variant="caption" sx={{ px: 1.5, pt: 1.5, color: "rgba(255,255,255,0.55)" }}>
+          Sodoh Nigeria Limited
+        </Typography>
+      </Drawer>
     </>
   );
 }
+
+const navItemSx = {
+  minHeight: 44,
+  borderRadius: "10px",
+  px: 1.5,
+  py: 1.25,
+  color: "rgba(255,255,255,0.8)",
+  "&:hover": { bgcolor: "rgba(255,255,255,0.1)", color: "#fff" },
+  "&.Mui-disabled": { opacity: 0.6, color: "rgba(255,255,255,0.75)" },
+  "&.Mui-selected": {
+    bgcolor: (theme: { palette: { admin: { active: string } } }) => theme.palette.admin.active,
+    color: "#0b3b22",
+    "&:hover": { bgcolor: (theme: { palette: { admin: { active: string } } }) => theme.palette.admin.active },
+    "& .MuiListItemIcon-root": { color: "#0b3b22" },
+  },
+  "&:focus-visible": { outline: "2px solid #d7f6e7", outlineOffset: 2 },
+} as const;
+
+const navChildSx = {
+  minHeight: 44,
+  borderRadius: "8px",
+  px: 1.5,
+  py: 1,
+  color: "rgba(255,255,255,0.7)",
+  "&:hover": { bgcolor: "rgba(255,255,255,0.1)", color: "#fff" },
+  "&.Mui-selected": {
+    bgcolor: "rgba(255,255,255,0.1)",
+    color: "#d7f6e7",
+    "&:hover": { bgcolor: "rgba(255,255,255,0.1)" },
+    "& .MuiListItemIcon-root": { color: "#d7f6e7" },
+  },
+  "&:focus-visible": { outline: "2px solid #d7f6e7", outlineOffset: 2 },
+} as const;
+
+const navIconSx = {
+  minWidth: 0,
+  mr: 1.5,
+  color: "inherit",
+} as const;

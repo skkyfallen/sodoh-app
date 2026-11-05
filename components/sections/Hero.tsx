@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { HeroContent, AnnouncementContent } from "@/types/content";
 import { safeHref } from "@/lib/utils";
+import SodohCtaButton from "./SodohCtaButton";
 
 type Props = {
   hero: HeroContent;
@@ -51,15 +52,15 @@ export default function Hero({ hero, announcement }: Props) {
               )}
               <div className="flex shrink-0 flex-wrap items-center gap-3">
                 {hero.cta_primary_text && hero.cta_primary_href && (
-                  <Link href={safeHref(hero.cta_primary_href, "/products")} className="pressable inline-flex min-h-12 items-center justify-center rounded-[14px] bg-[var(--brand)] px-7 text-[15px] font-semibold text-white shadow-[0_6px_16px_rgba(1,105,54,0.18)] hover:bg-[var(--brand-hover)] dark:text-[#062a17]">
+                  <SodohCtaButton href={safeHref(hero.cta_primary_href, "/products")} variant="primary">
                     {hero.cta_primary_text}
                     <span aria-hidden="true" className="ml-2">→</span>
-                  </Link>
+                  </SodohCtaButton>
                 )}
                 {hero.cta_secondary_text && hero.cta_secondary_href && (
-                  <Link href={safeHref(hero.cta_secondary_href, "/contact")} className="pressable inline-flex min-h-12 items-center justify-center rounded-[14px] border border-white/40 px-7 text-[15px] font-semibold text-white transition-colors hover:bg-white/10">
+                  <SodohCtaButton href={safeHref(hero.cta_secondary_href, "/contact")} variant="outlineLight">
                     {hero.cta_secondary_text}
-                  </Link>
+                  </SodohCtaButton>
                 )}
               </div>
             </div>

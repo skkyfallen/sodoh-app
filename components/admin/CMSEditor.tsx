@@ -3,9 +3,23 @@
 import { useState, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { safeHref } from "@/lib/utils";
+import Accordion from "@mui/material/Accordion";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
+import CircularProgress from "@mui/material/CircularProgress";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormHelperText from "@mui/material/FormHelperText";
+import Paper from "@mui/material/Paper";
+import Snackbar from "@mui/material/Snackbar";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import {
   MdExpandMore,
-  MdExpandLess,
   MdSave,
   MdCheck,
   MdOpenInNew,
@@ -264,128 +278,135 @@ function FieldInput({
   inputId,
   definition,
   value,
-  error,
+  urlError,
   onChange,
 }: {
   inputId: string;
   definition: CmsFieldConfig;
   value: unknown;
-  error?: string;
+  urlError?: string;
   onChange: (val: unknown) => void;
 }) {
-  const baseClasses =
-    "w-full rounded-xl border border-slate-200 bg-[#f7f8f4] px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#016936]/15 focus:border-[#016936] focus:bg-white transition-colors";
-
   if (typeof value === "boolean") {
     return (
-      <input
-        id={inputId}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? `${inputId}-error` : undefined}
-        type="checkbox"
-        checked={value}
-        onChange={(event) => onChange(event.target.checked)}
-        className="size-5 accent-[#016936]"
-      />
+      <Box>
+        <FormControlLabel
+          control={
+            <Checkbox
+              id={inputId}
+              checked={value}
+              onChange={(event) => onChange(event.target.checked)}
+            />
+          }
+          label={definition.label}
+        />
+        {definition.key === "public_reviewed" && (
+          <FormHelperText sx={{ ml: 4 }}>
+            Unreviewed content is hidden from the public site.
+          </FormHelperText>
+        )}
+      </Box>
     );
   }
 
   if (definition.type === "array") {
     const items = Array.isArray(value) ? value : [];
     return (
-      <fieldset className="space-y-3">
-        <legend className="text-sm font-semibold text-slate-700">{definition.label}</legend>
-        {items.map((item, index) => {
-          const record = item && typeof item === "object" && !Array.isArray(item)
-            ? item as Record<string, unknown>
-            : {};
-          return (
-            <div key={`${inputId}-${index}`} className="rounded-xl border border-slate-200 bg-white p-4">
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <h5 className="text-sm font-semibold text-slate-700">{definition.itemLabel ?? definition.label} {index + 1}</h5>
-                <button
-                  type="button"
-                  onClick={() => onChange(items.filter((_, itemIndex) => itemIndex !== index))}
-                  className="min-h-11 rounded-lg px-3 text-sm font-semibold text-red-700 hover:bg-red-50"
-                >
-                  Remove
-                </button>
-              </div>
-              <div className="space-y-3">
-                {definition.itemFields?.map((itemField) => {
-                  const itemInputId = `${inputId}-${index}-${itemField.key}`;
-                  const itemValue = String(record[itemField.key] ?? "");
-                  return (
-                    <div key={itemField.key}>
-                      <label htmlFor={itemInputId} className="mb-1.5 block text-sm font-semibold text-slate-700">
-                        {itemField.label}
-                      </label>
-                      {itemField.type === "textarea" ? (
-                        <textarea
-                          id={itemInputId}
-                          rows={3}
-                          value={itemValue}
-                          onChange={(event) => onChange(items.map((current, itemIndex) => itemIndex === index
-                            ? { ...record, [itemField.key]: event.target.value }
-                            : current))}
-                          className={`${baseClasses} resize-y py-3`}
-                        />
-                      ) : (
-                        <input
-                          id={itemInputId}
-                          type="text"
-                          value={itemValue}
-                          onChange={(event) => onChange(items.map((current, itemIndex) => itemIndex === index
-                            ? { ...record, [itemField.key]: event.target.value }
-                            : current))}
-                          className={`${baseClasses} h-10`}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-        <button
-          type="button"
-          onClick={() => onChange([...items, Object.fromEntries((definition.itemFields ?? []).map(({ key }) => [key, ""]))])}
-          className="min-h-11 rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-700 hover:bg-white"
-        >
-          {definition.addLabel ?? "Add item"}
-        </button>
-      </fieldset>
+      <Box component="fieldset" sx={{ border: 0, p: 0, m: 0, minWidth: 0 }}>
+        <Typography component="legend" variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5, p: 0 }}>
+          {definition.label}
+        </Typography>
+        <Stack spacing={1.5}>
+          {items.map((item, index) => {
+            const record = item && typeof item === "object" && !Array.isArray(item)
+              ? item as Record<string, unknown>
+              : {};
+            return (
+              <Paper key={`${inputId}-${index}`} variant="outlined" sx={{ p: 2 }}>
+                <Box sx={{ mb: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+                    {definition.itemLabel ?? definition.label} {index + 1}
+                  </Typography>
+                  <Button
+                    type="button"
+                    color="error"
+                    onClick={() => onChange(items.filter((_, itemIndex) => itemIndex !== index))}
+                    sx={{ minHeight: 44 }}
+                  >
+                    Remove
+                  </Button>
+                </Box>
+                <Stack spacing={1.5}>
+                  {definition.itemFields?.map((itemField) => {
+                    const itemInputId = `${inputId}-${index}-${itemField.key}`;
+                    const itemValue = String(record[itemField.key] ?? "");
+                    return (
+                      <TextField
+                        key={itemField.key}
+                        id={itemInputId}
+                        label={itemField.label}
+                        multiline={itemField.type === "textarea"}
+                        rows={itemField.type === "textarea" ? 3 : undefined}
+                        fullWidth
+                        value={itemValue}
+                        onChange={(event) => onChange(items.map((current, itemIndex) => itemIndex === index
+                          ? { ...record, [itemField.key]: event.target.value }
+                          : current))}
+                      />
+                    );
+                  })}
+                </Stack>
+              </Paper>
+            );
+          })}
+          <Button
+            type="button"
+            variant="outlined"
+            onClick={() => onChange([...items, Object.fromEntries((definition.itemFields ?? []).map(({ key }) => [key, ""]))])}
+            sx={{ minHeight: 44, alignSelf: "flex-start" }}
+          >
+            {definition.addLabel ?? "Add item"}
+          </Button>
+        </Stack>
+      </Box>
     );
   }
 
   const strVal = String(value ?? "");
-  const attributes = {
-    id: inputId,
-    "aria-invalid": error ? true : undefined,
-    "aria-describedby": error ? `${inputId}-error` : undefined,
-  };
+  const describedBy = urlError ? `${inputId}-error` : undefined;
 
   if (definition.type === "textarea") {
     return (
-      <textarea
-        {...attributes}
+      <TextField
+        id={inputId}
+        label={definition.label}
+        multiline
         rows={Math.min(12, strVal.split("\n").length + 1)}
+        fullWidth
         value={strVal}
         onChange={(event) => onChange(event.target.value)}
-        className={`${baseClasses} resize-y py-3`}
       />
     );
   }
 
   return (
-    <input
-      {...attributes}
-      type={definition.type === "url" ? "url" : "text"}
-      value={strVal}
-      onChange={(event) => onChange(event.target.value)}
-      className={`${baseClasses} h-10`}
-    />
+    <>
+      <TextField
+        id={inputId}
+        label={definition.label}
+        type={definition.type === "url" ? "url" : "text"}
+        fullWidth
+        value={strVal}
+        error={Boolean(urlError)}
+        slotProps={{ htmlInput: { "aria-describedby": describedBy } }}
+        onChange={(event) => onChange(event.target.value)}
+      />
+      {urlError && (
+        <Alert severity="error" id={`${inputId}-error`} sx={{ mt: 1 }}>
+          {URL_FIELD_ERROR}
+        </Alert>
+      )}
+    </>
   );
 }
 
@@ -421,78 +442,73 @@ function SectionCard({
   const panelId = `cms-section-${page}-${section}`.replace(/[^a-z0-9-]/gi, "-");
 
   return (
-    <div className="border-y border-slate-200 bg-white">
-      {/* Header — click to toggle */}
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        aria-expanded={open}
+    <Accordion
+      expanded={open}
+      onChange={(_event, expanded) => setOpen(expanded)}
+      disableGutters
+      elevation={0}
+      sx={{ border: (theme) => `1px solid ${theme.palette.admin.border}`, borderRadius: 2, "&:before": { display: "none" } }}
+    >
+      <AccordionSummary
+        expandIcon={<MdExpandMore aria-hidden="true" size="1.25rem" />}
         aria-controls={panelId}
-        className="w-full flex items-center justify-between px-4 py-5 text-left transition-colors hover:bg-slate-50 sm:px-5"
+        id={`${panelId}-header`}
+        sx={{ px: 2.5, py: 1, minHeight: 64 }}
       >
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="min-w-0">
-            <h4 className="text-sm font-bold text-slate-900 truncate">
-              {sectionConfig.label}
-            </h4>
-            {sectionConfig.description && (
-              <p className="text-xs text-slate-500 truncate mt-0.5">{sectionConfig.description}</p>
-            )}
-          </div>
-        </div>
-        <div className="flex items-center gap-2 shrink-0 ml-3">
-          <span className="text-xs font-semibold text-slate-400">
-            {fieldEntries.length} field{fieldEntries.length !== 1 ? "s" : ""}
-          </span>
-          {open ? (
-            <MdExpandLess className="text-lg text-slate-400" />
-          ) : (
-            <MdExpandMore className="text-lg text-slate-400" />
+        <Box sx={{ minWidth: 0, mr: 2 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+            {sectionConfig.label}
+          </Typography>
+          {sectionConfig.description && (
+            <Typography variant="caption" color="text.secondary" sx={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {sectionConfig.description}
+            </Typography>
           )}
-        </div>
-      </button>
-
-      {/* Body */}
-      <div id={panelId} hidden={!open} className="border-t border-slate-100 bg-[#fbfcf9] px-4 py-5 space-y-5 sm:px-6">
-        {open && <>
+        </Box>
+        <Box sx={{ flexGrow: 1 }} />
+        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, alignSelf: "center", mr: 1 }}>
+          {fieldEntries.length} field{fieldEntries.length !== 1 ? "s" : ""}
+        </Typography>
+      </AccordionSummary>
+      <AccordionDetails id={panelId} sx={{ borderTop: (theme) => `1px solid ${theme.palette.admin.border}`, bgcolor: "#fbfcf9", px: { xs: 2.5, sm: 3 }, py: 2.5 }}>
+        <Stack spacing={2.5}>
           {fieldEntries.map(([definition, val]) => {
             const key = definition.key;
             const inputId = `${panelId}-${key}`;
             const isUrl = definition.type === "url";
             return (
-              <div key={key}>
-                {definition.type !== "array" && (
-                  <label htmlFor={inputId} className="flex items-center gap-1.5 text-sm font-semibold text-slate-700 mb-1.5">
+              <Box key={key}>
+                {definition.type !== "array" && typeof val !== "boolean" && (
+                  <Typography
+                    component="label"
+                    htmlFor={inputId}
+                    variant="subtitle2"
+                    sx={{ display: "flex", alignItems: "center", gap: 0.75, fontWeight: 600, mb: 1 }}
+                  >
                     {definition.label}
-                    {isUrl && <MdOpenInNew aria-hidden="true" className="text-slate-400 text-xs" />}
-                  </label>
+                    {isUrl && <MdOpenInNew aria-hidden="true" size="0.85rem" color="#64748b" />}
+                  </Typography>
                 )}
                 <FieldInput
                   inputId={inputId}
                   definition={definition}
                   value={val}
-                  error={urlErrors[key] ? URL_FIELD_ERROR : undefined}
+                  urlError={urlErrors[key] ? URL_FIELD_ERROR : undefined}
                   onChange={(v) => {
                     onFieldChange(key, v);
                     if (isUrl) setUrlErrors((prev) => ({ ...prev, [key]: !isValidUrlField(v) }));
                   }}
                 />
-                {key === "public_reviewed" && (
-                  <p className="mt-1.5 text-xs leading-5 text-slate-500">Unreviewed content is hidden from the public site.</p>
-                )}
-                {urlErrors[key] && (
-                  <p id={`${inputId}-error`} role="alert" className="mt-1.5 text-xs font-medium text-red-700">
-                    {URL_FIELD_ERROR}
-                  </p>
-                )}
-              </div>
+              </Box>
             );
           })}
 
           {/* Section-level save */}
-          <div className="flex items-center gap-3 pt-2">
-            <button
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, pt: 1 }}>
+            <Button
               type="button"
+              variant="contained"
+              startIcon={saving ? <CircularProgress size="0.9rem" color="inherit" /> : <MdSave aria-hidden="true" size="0.9rem" />}
               onClick={() => {
                 const invalidFields = fieldEntries
                   .filter(([definition]) => definition.type === "url")
@@ -505,30 +521,20 @@ function SectionCard({
                 onSave();
               }}
               disabled={saving}
-              className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-[#016936] px-4 text-sm font-semibold text-white transition-colors hover:bg-[#014e29] disabled:cursor-not-allowed disabled:opacity-60"
+              sx={{ minHeight: 44 }}
             >
-              {saving ? (
-                <>
-                  <span className="size-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Saving…
-                </>
-              ) : (
-                <>
-                  <MdSave className="text-sm" />
-                  Save Section
-                </>
-              )}
-            </button>
+              {saving ? "Saving…" : "Save Section"}
+            </Button>
             {saved && (
-              <span role="status" className="inline-flex items-center gap-1 text-sm font-semibold text-green-700">
-                <MdCheck className="text-sm" />
+              <Typography role="status" variant="subtitle2" sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, fontWeight: 600, color: "#15803d" }}>
+                <MdCheck aria-hidden="true" size="0.9rem" />
                 Saved
-              </span>
+              </Typography>
             )}
-          </div>
-        </>}
-      </div>
-    </div>
+          </Box>
+        </Stack>
+      </AccordionDetails>
+    </Accordion>
   );
 }
 
@@ -553,45 +559,36 @@ function PageGroup({
 }) {
   const config = PAGE_CONFIG[page];
   const Icon = config?.icon ?? MdHome;
-  const [collapsed, setCollapsed] = useState(false);
-  const panelId = `cms-page-${page}`;
 
   // Only expose sections whose fields are deliberately mapped to public output.
   const sectionKeys = Object.keys(config.sections);
 
   return (
-    <div className="space-y-1">
-      {/* Page header */}
-      <button
-        type="button"
-        onClick={() => setCollapsed(!collapsed)}
-        aria-expanded={!collapsed}
-        aria-controls={panelId}
-        className="w-full flex items-center justify-between border-b border-[#dce4dc] py-5 text-left"
+    <Accordion
+      defaultExpanded
+      disableGutters
+      elevation={0}
+      sx={{ bgcolor: "transparent", "&:before": { display: "none" } }}
+    >
+      <AccordionSummary
+        expandIcon={<MdExpandMore aria-hidden="true" size="1.25rem" />}
+        aria-controls={`cms-page-${page}`}
+        sx={{ px: 0, borderBottom: "1px solid #dce4dc", minHeight: 72 }}
       >
-        <div className="flex items-center gap-3">
-          <Icon aria-hidden="true" className="shrink-0 text-xl text-[#016936]" />
-          <div>
-            <h3 className="text-lg font-semibold text-slate-900">
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Icon aria-hidden="true" size="1.35rem" color="#016936" />
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
               {config?.label ?? formatFieldLabel(page)}
-            </h3>
-            <p className="text-sm text-slate-500">
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
               {sectionKeys.length} editable section{sectionKeys.length !== 1 ? "s" : ""}
-            </p>
-          </div>
-        </div>
-        <div className="shrink-0">
-          {collapsed ? (
-            <MdExpandMore className="text-xl text-slate-400" />
-          ) : (
-            <MdExpandLess className="text-xl text-slate-400" />
-          )}
-        </div>
-      </button>
-
-      {/* Sections */}
-      <div id={panelId} hidden={collapsed} className="space-y-3 pl-0 md:pl-10">
-        {!collapsed && <>
+            </Typography>
+          </Box>
+        </Box>
+      </AccordionSummary>
+      <AccordionDetails id={`cms-page-${page}`} sx={{ px: 0, py: 2, pl: { md: 5 } }}>
+        <Stack spacing={1.5}>
           {sectionKeys.map((section) => (
             <SectionCard
               key={section}
@@ -605,9 +602,9 @@ function PageGroup({
               saved={savedState[section] ?? false}
             />
           ))}
-        </>}
-      </div>
-    </div>
+        </Stack>
+      </AccordionDetails>
+    </Accordion>
   );
 }
 
@@ -643,6 +640,7 @@ export default function CMSEditor({ pages }: Props) {
   );
   const [saving, setSaving] = useState<Record<string, Record<string, boolean>>>({});
   const [saved, setSaved] = useState<Record<string, Record<string, boolean>>>({});
+  const [saveFailure, setSaveFailure] = useState<string | null>(null);
 
   const handleFieldChange = useCallback(
     (page: string, section: string, key: string, val: unknown) => {
@@ -686,7 +684,7 @@ export default function CMSEditor({ pages }: Props) {
 
         if (error) {
           console.error("[CMS] Save failed.");
-          alert(`Save failed: ${error.message}`);
+          setSaveFailure(`Save failed: ${error.message}`);
         } else {
           // Revalidate the public page
           try {
@@ -726,7 +724,20 @@ export default function CMSEditor({ pages }: Props) {
   const orderedPages = pageOrder.filter((p) => data[p]);
 
   return (
-    <div className="space-y-10">
+    <Stack spacing={2}>
+      <Snackbar
+        open={saveFailure !== null}
+        onClose={(_event, reason) => {
+          if (reason === "clickaway") return;
+          setSaveFailure(null);
+        }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity="error" onClose={() => setSaveFailure(null)} sx={{ width: "100%" }}>
+          {saveFailure}
+        </Alert>
+      </Snackbar>
+
       {orderedPages.map((page) => (
         <PageGroup
           key={page}
@@ -742,12 +753,10 @@ export default function CMSEditor({ pages }: Props) {
       ))}
 
       {orderedPages.length === 0 && (
-        <div className="text-center py-20">
-          <p className="text-slate-400 text-sm font-semibold">
-            No content found. Run the seed SQL to populate initial content.
-          </p>
-        </div>
+        <Alert severity="info">
+          No content found. Run the seed SQL to populate initial content.
+        </Alert>
       )}
-    </div>
+    </Stack>
   );
 }

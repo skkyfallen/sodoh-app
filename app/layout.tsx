@@ -10,6 +10,7 @@ import {
   siteName,
   siteUrl,
 } from "@/lib/site";
+import MuiThemeProvider from "@/components/mui/MuiThemeProvider";
 import "./globals.css";
 
 const bodyFont = DM_Sans({
@@ -104,7 +105,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${bodyFont.variable} ${displayFont.variable} antialiased`}>
-        {children}
+        <MuiThemeProvider>{children}</MuiThemeProvider>
       </body>
     </html>
   );

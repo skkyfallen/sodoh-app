@@ -2,6 +2,7 @@ import Link from "next/link";
 import AnimateIn from "@/components/ui/AnimateIn";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ProductLedger } from "@/components/products/ProductLedger";
+import SodohCtaButton from "./SodohCtaButton";
 import type { Product } from "@/types/content";
 
 type Props = { products: Product[] };
@@ -33,9 +34,9 @@ export default function FeaturedProduce({ products }: Props) {
             title="The catalogue is being updated"
             body="Contact our team to discuss what you are looking for."
             action={
-              <Link href="/contact" className="pressable inline-flex min-h-11 items-center justify-center rounded-[14px] bg-[var(--brand)] px-6 text-sm font-semibold text-white hover:bg-[var(--brand-hover)] dark:text-[#062a17]">
+              <SodohCtaButton href="/contact" variant="primary" size="md">
                 Contact us
-              </Link>
+              </SodohCtaButton>
             }
           />
         )}

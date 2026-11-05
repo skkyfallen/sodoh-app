@@ -1,12 +1,19 @@
 "use client";
 
-import Link from "next/link";
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
+import type { SxProps, Theme } from "@mui/material/styles";
 import HeaderMenu from "./HeaderMenu";
 import { BrandMark } from "./BrandMark";
+import NextLink from "@/components/mui/NextLink";
+import SodohCtaButton from "@/components/sections/SodohCtaButton";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { MdMenu } from "react-icons/md";
 import { cn } from "@/lib/utils";
+import { sodohButtonBaseSx } from "@/components/sections/sodoh-mui";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -16,7 +23,7 @@ const navLinks = [
 
 function Wordmark({ tone = "ink" }: { tone?: "ink" | "paper" }) {
   return (
-    <Link
+    <NextLink
       href="/"
       aria-label="Sodoh Nigeria Limited"
       className="group flex min-h-[44px] items-center gap-3 rounded-md focus-visible:outline-offset-4"
@@ -45,9 +52,57 @@ function Wordmark({ tone = "ink" }: { tone?: "ink" | "paper" }) {
           Nigeria Limited
         </span>
       </span>
-    </Link>
+    </NextLink>
   );
 }
+
+const desktopNavSx = (active: boolean): SxProps<Theme> => ({
+  ...sodohButtonBaseSx,
+  minHeight: 44,
+  paddingLeft: 1.75,
+  paddingRight: 1.75,
+  borderRadius: "10px",
+  fontSize: "1.0625rem",
+  backgroundColor: active ? "var(--brand)" : "transparent",
+  color: active ? "#ffffff" : "var(--body)",
+  boxShadow: "none",
+  "&:hover": {
+    backgroundColor: active ? "var(--brand-hover)" : "var(--surface-soft)",
+    color: active ? "#ffffff" : "var(--ink)",
+    boxShadow: "none",
+    transform: "none",
+  },
+});
+
+const slimNavSx = (active: boolean): SxProps<Theme> => ({
+  ...sodohButtonBaseSx,
+  minHeight: 40,
+  paddingLeft: 1.5,
+  paddingRight: 1.5,
+  borderRadius: "10px",
+  fontSize: "0.875rem",
+  backgroundColor: active ? "var(--brand)" : "transparent",
+  color: active ? "#ffffff" : "var(--body)",
+  boxShadow: "none",
+  "&:hover": {
+    backgroundColor: active ? "var(--brand-hover)" : "var(--surface-soft)",
+    color: active ? "#ffffff" : "var(--ink)",
+    boxShadow: "none",
+    transform: "none",
+  },
+});
+
+const menuTriggerSx: SxProps<Theme> = {
+  ...sodohButtonBaseSx,
+  display: { xs: "inline-flex", md: "none" },
+  minHeight: 48,
+  border: "1px solid var(--border-strong)",
+  color: "var(--ink)",
+  fontSize: "0.9375rem",
+  paddingLeft: 2,
+  paddingRight: 2,
+  "&:hover": { backgroundColor: "var(--surface-soft)" },
+};
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -90,28 +145,11 @@ export default function Header() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!menuOpen) return;
-    document.body.style.overflow = "hidden";
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMenuOpen(false);
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = "";
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [menuOpen]);
+  // Scroll locking, focus trapping, Escape/backdrop handling and focus
+  // restoration for the mobile menu are owned by the MUI Drawer in
+  // HeaderMenu (Modal behaviour), so no extra listeners live here.
 
-  const desktopLink = (href: string) => {
-    const active = pathname === href;
-    return cn(
-      "inline-flex min-h-11 items-center rounded-[10px] px-3.5 text-[17px] font-semibold transition-colors duration-200",
-      active
-        ? "bg-[var(--brand)] text-white dark:text-[#062a17]"
-        : "text-[var(--body)] hover:bg-[var(--surface-soft)] hover:text-[var(--ink)]"
-    );
-  };
+  const slimVisible = pastMasthead && !menuOpen;
 
   return (
     <>
@@ -146,49 +184,81 @@ export default function Header() {
         <div className="mx-auto flex max-w-[1440px] items-end justify-between gap-6 px-5 py-6 sm:px-8 md:px-12 md:py-8 lg:px-16">
           <Wordmark />
           <nav aria-label="Main navigation" className="hidden items-center gap-1.5 md:flex">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                aria-current={pathname === link.href ? "page" : undefined}
-                className={desktopLink(link.href)}
-              >
-                {link.label}
-              </Link>
-            ))}
-            <Link
-              href="/contact"
-              className="pressable ml-3 inline-flex min-h-12 items-center justify-center rounded-[14px] bg-[#0c2418] px-6 text-[15px] font-semibold text-white transition-colors hover:bg-[var(--brand)]"
-            >
-              Contact us
-            </Link>
+            {navLinks.map((link) => {
+              const active = pathname === link.href;
+              return (
+                <Button
+                  key={link.href}
+                  component={NextLink}
+                  href={link.href}
+                  aria-current={active ? "page" : undefined}
+                  sx={desktopNavSx(active)}
+                >
+                  {link.label}
+                </Button>
+              );
+            })}
+            <span className="ml-3 inline-flex">
+              <SodohCtaButton href="/contact" variant="dark">
+                Contact us
+              </SodohCtaButton>
+            </span>
           </nav>
-          <button
+          <Button
             type="button"
             onClick={openMenu}
             aria-label="Open navigation menu"
             aria-expanded={menuOpen}
             aria-haspopup="dialog"
-            className="inline-flex min-h-12 items-center gap-2 rounded-[14px] border border-[var(--border-strong)] px-4 text-[15px] font-semibold text-[var(--ink)] transition-colors hover:bg-[var(--surface-soft)] md:hidden"
+            startIcon={<MenuIcon aria-hidden="true" />}
+            sx={menuTriggerSx}
           >
-            <MdMenu aria-hidden="true" className="text-xl" />
             Menu
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Slim bar — appears only after scrolling past the masthead */}
-      <div
-        aria-hidden={!(pastMasthead && !menuOpen)}
-        className={cn(
-          "fixed inset-x-0 top-0 z-40 border-b border-[var(--border)] bg-[var(--page)]/95 backdrop-blur-md transition-[opacity,transform,visibility] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
-          pastMasthead && !menuOpen
-            ? "visible translate-y-0 opacity-100"
-            : "invisible -translate-y-full opacity-0 pointer-events-none"
-        )}
+      <AppBar
+        position="fixed"
+        elevation={0}
+        aria-hidden={!slimVisible}
+        sx={{
+          zIndex: 40,
+          backgroundColor: "color-mix(in srgb, var(--page) 95%, transparent)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          borderBottom: "1px solid var(--border)",
+          boxShadow: "none",
+          color: "var(--ink)",
+          transition:
+            "opacity 300ms cubic-bezier(0.16,1,0.3,1), transform 300ms cubic-bezier(0.16,1,0.3,1), visibility 300ms",
+          ...(slimVisible
+            ? { opacity: 1, transform: "translateY(0)", visibility: "visible" }
+            : {
+                opacity: 0,
+                transform: "translateY(-100%)",
+                visibility: "hidden",
+                pointerEvents: "none",
+              }),
+        }}
       >
-        <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between gap-4 px-5 sm:px-8 md:px-12 lg:px-16">
-          <Link
+        <Toolbar
+          disableGutters
+          sx={{
+            width: "100%",
+            maxWidth: 1440,
+            mx: "auto",
+            minHeight: 64,
+            height: 64,
+            px: { xs: 2.5, sm: 4, md: 6, lg: 8 },
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+          }}
+        >
+          <NextLink
             href="/"
             aria-label="Sodoh Nigeria Limited"
             className="flex items-center gap-2.5 rounded-md focus-visible:outline-offset-4"
@@ -197,44 +267,50 @@ export default function Header() {
             <span className="display-font text-xl font-bold tracking-[-0.04em] text-[var(--ink)]">
               Sodoh
             </span>
-          </Link>
+          </NextLink>
           <div className="flex items-center gap-2">
             <nav aria-label="Quick navigation" className="hidden items-center gap-1 md:flex">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  aria-current={pathname === link.href ? "page" : undefined}
-                  className={cn(
-                    "inline-flex min-h-10 items-center rounded-[10px] px-3 text-sm font-semibold transition-colors",
-                    pathname === link.href
-                      ? "bg-[var(--brand)] text-white dark:text-[#062a17]"
-                      : "text-[var(--body)] hover:bg-[var(--surface-soft)]"
-                  )}
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {navLinks.map((link) => {
+                const active = pathname === link.href;
+                return (
+                  <Button
+                    key={link.href}
+                    component={NextLink}
+                    href={link.href}
+                    aria-current={active ? "page" : undefined}
+                    sx={slimNavSx(active)}
+                  >
+                    {link.label}
+                  </Button>
+                );
+              })}
             </nav>
-            <Link
-              href="/contact"
-              className="inline-flex min-h-10 items-center justify-center rounded-[12px] bg-[#0c2418] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--brand)]"
-            >
+            <SodohCtaButton href="/contact" variant="dark" size="sm">
               Contact us
-            </Link>
-            <button
+            </SodohCtaButton>
+            <IconButton
               type="button"
               onClick={openMenu}
               aria-label="Open navigation menu"
               aria-expanded={menuOpen}
               aria-haspopup="dialog"
-              className="inline-flex size-11 items-center justify-center rounded-[12px] border border-[var(--border)] text-[var(--ink)] transition-colors hover:bg-[var(--surface-soft)] md:hidden"
+              sx={{
+                width: 44,
+                height: 44,
+                display: { xs: "inline-flex", md: "none" },
+                borderRadius: "12px",
+                border: "1px solid var(--border)",
+                color: "var(--ink)",
+                transition:
+                  "background-color 240ms cubic-bezier(0.16,1,0.3,1), border-color 240ms",
+                "&:hover": { backgroundColor: "var(--surface-soft)" },
+              }}
             >
-              <MdMenu aria-hidden="true" className="text-xl" />
-            </button>
+              <MenuIcon aria-hidden="true" />
+            </IconButton>
           </div>
-        </div>
-      </div>
+        </Toolbar>
+      </AppBar>
 
       <HeaderMenu
         open={menuOpen}

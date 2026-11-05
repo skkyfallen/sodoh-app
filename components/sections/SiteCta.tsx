@@ -1,5 +1,5 @@
-import Link from "next/link";
 import AnimateIn from "@/components/ui/AnimateIn";
+import SodohCtaButton from "./SodohCtaButton";
 import { safeHref } from "@/lib/utils";
 
 type Props = {
@@ -23,13 +23,10 @@ export function SiteCta({ heading, body, ctaText, ctaHref }: Props) {
             <p className="measure text-base leading-7 text-[var(--body)] md:text-lg md:leading-8">{body}</p>
           </AnimateIn>
           <AnimateIn delay={0.18} className="shrink-0">
-            <Link
-              href={safeHref(ctaHref, "/contact")}
-              className="pressable inline-flex min-h-13 items-center justify-center gap-2 rounded-[14px] bg-[var(--brand)] px-8 py-4 text-[15px] font-semibold text-white shadow-[0_6px_16px_rgba(1,105,54,0.18)] hover:bg-[var(--brand-hover)] dark:text-[#062a17]"
-            >
+            <SodohCtaButton href={safeHref(ctaHref, "/contact")} variant="primary">
               {ctaText}
               <span aria-hidden="true">→</span>
-            </Link>
+            </SodohCtaButton>
           </AnimateIn>
         </div>
       </div>

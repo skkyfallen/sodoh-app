@@ -1,5 +1,6 @@
 import { getAdminPillars } from "@/lib/data-admin";
 import CrudManager from "@/components/admin/CrudManager";
+import PageHeader from "@/components/admin/PageHeader";
 import type { FieldDef } from "@/components/admin/CrudManager";
 
 const fields: FieldDef[] = [
@@ -14,10 +15,10 @@ export default async function PillarsPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-black text-slate-900 mb-2">Pillars</h1>
-      <p className="text-slate-500 text-sm mb-8">
-        Manage the titles and descriptions shown in the homepage process section.
-      </p>
+      <PageHeader
+        title="Pillars"
+        description="Manage the titles and descriptions shown in the homepage process section."
+      />
 
       <CrudManager
         tableName="pillars"

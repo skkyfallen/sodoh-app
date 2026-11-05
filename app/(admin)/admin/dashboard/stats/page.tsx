@@ -1,5 +1,6 @@
 import { getAdminStats } from "@/lib/data-admin";
 import CrudManager from "@/components/admin/CrudManager";
+import PageHeader from "@/components/admin/PageHeader";
 import type { FieldDef } from "@/components/admin/CrudManager";
 
 const fields: FieldDef[] = [
@@ -15,10 +16,10 @@ export default async function StatsPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-black text-slate-900 mb-2">Stats</h1>
-      <p className="text-slate-500 text-sm mb-8">
-        Add only metrics you can substantiate. A metric appears publicly after it is marked reviewed.
-      </p>
+      <PageHeader
+        title="Stats"
+        description="Add only metrics you can substantiate. A metric appears publicly after it is marked reviewed."
+      />
 
       <CrudManager
         tableName="stats"

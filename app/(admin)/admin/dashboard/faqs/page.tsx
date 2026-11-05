@@ -1,5 +1,6 @@
 import { getAdminFAQs } from "@/lib/data-admin";
 import CrudManager from "@/components/admin/CrudManager";
+import PageHeader from "@/components/admin/PageHeader";
 import type { FieldDef } from "@/components/admin/CrudManager";
 
 const fields: FieldDef[] = [
@@ -15,10 +16,10 @@ export default async function FAQsPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-black text-slate-900 mb-2">FAQs</h1>
-      <p className="text-slate-500 text-sm mb-8">
-        Manage answers shown on the contact page. Only active, reviewed answers appear publicly.
-      </p>
+      <PageHeader
+        title="FAQs"
+        description="Manage answers shown on the contact page. Only active, reviewed answers appear publicly."
+      />
 
       <CrudManager
         tableName="faqs"

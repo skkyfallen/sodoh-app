@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import Image from "next/image";
 import AnimateIn from "@/components/ui/AnimateIn";
 import { SiteCta } from "@/components/sections/SiteCta";
+import SodohCtaButton from "@/components/sections/SodohCtaButton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ProductLedger } from "@/components/products/ProductLedger";
 import { getPageContent, getProducts, getStats, getTestimonials } from "@/lib/data";
@@ -73,7 +73,7 @@ export default async function ProductsPage() {
             <h1 className="display-font max-w-[18ch] text-[clamp(3.2rem,8.5vw,7.5rem)] font-semibold leading-[0.95] tracking-[-0.05em] text-white [text-wrap:balance]">{hero.title}</h1>
             <div className="mt-7 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
               {hero.subtitle && <p className="measure text-base leading-7 text-white/90 md:text-lg md:leading-8">{hero.subtitle}</p>}
-              {hero.cta_primary_text && hero.cta_primary_href && <Link href={safeHref(hero.cta_primary_href, "/contact")} className="pressable inline-flex min-h-12 shrink-0 items-center justify-center rounded-[14px] bg-[var(--brand)] px-7 text-[15px] font-semibold text-white hover:bg-[var(--brand-hover)] dark:text-[#062a17]">{hero.cta_primary_text} <span aria-hidden="true" className="ml-2">→</span></Link>}
+              {hero.cta_primary_text && hero.cta_primary_href && <SodohCtaButton href={safeHref(hero.cta_primary_href, "/contact")} variant="primary">{hero.cta_primary_text} <span aria-hidden="true" className="ml-2">→</span></SodohCtaButton>}
             </div>
           </div>
           <figcaption className="mt-7 inline-flex max-w-xs rounded-full bg-[#071a10]/70 px-4 py-2 text-[13px] font-medium leading-5 text-white backdrop-blur-sm">Representative agricultural photography</figcaption>
@@ -93,7 +93,7 @@ export default async function ProductsPage() {
                   title="The catalogue is being updated"
                   body="Contact our team to discuss what you are looking for."
                   action={
-                    <Link href="/contact" className="pressable inline-flex min-h-11 items-center justify-center rounded-[14px] bg-[var(--brand)] px-6 text-sm font-semibold text-white hover:bg-[var(--brand-hover)] dark:text-[#062a17]">Contact us</Link>
+                    <SodohCtaButton href="/contact" variant="primary" size="md">Contact us</SodohCtaButton>
                   }
                 />
               ) : (
@@ -104,9 +104,11 @@ export default async function ProductsPage() {
             <aside aria-label="Product enquiries" className="rounded-[18px] border border-[#17452c] bg-[#0c2418] p-6 text-white shadow-[0_18px_40px_rgba(7,26,16,0.12)] lg:sticky lg:top-28">
               <h3 className="display-font text-2xl font-semibold leading-tight tracking-[-0.035em] text-white [text-wrap:balance]">{ctaHeading}</h3>
               <p className="mt-3 text-sm leading-6 text-white/75">Ask our team about the products listed, along with availability, specifications, and volumes.</p>
-              <Link href={ctaHref} className="pressable mt-6 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[12px] bg-[var(--brand)] px-5 text-sm font-semibold text-white hover:bg-[var(--brand-hover)] dark:text-[#062a17]">
-                {ctaText}<span aria-hidden="true">→</span>
-              </Link>
+              <div className="mt-6">
+                <SodohCtaButton href={ctaHref} variant="primary" size="md" fullWidth>
+                  {ctaText}<span aria-hidden="true">→</span>
+                </SodohCtaButton>
+              </div>
             </aside>
           </div>
         </div>

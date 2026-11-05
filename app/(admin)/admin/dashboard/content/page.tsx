@@ -1,5 +1,11 @@
 import { getAdminPageContent } from "@/lib/data-admin";
 import CMSEditor from "@/components/admin/CMSEditor";
+import PageHeader from "@/components/admin/PageHeader";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
 
 export default async function ContentPage() {
   const [homeContent, aboutContent, productsContent, contactContent] =
@@ -12,27 +18,36 @@ export default async function ContentPage() {
 
   return (
     <>
-      <div className="mb-8">
-        <h1 className="text-2xl font-black text-slate-900 mb-1">
-          Site Content
-        </h1>
-        <p className="text-sm text-slate-500">
-          Edit copy, links, and structured content across the public site. Mark a section reviewed only after its claims are checked.
-        </p>
-      </div>
+      <PageHeader
+        title="Site Content"
+        description="Edit copy, links, and structured content across the public site. Mark a section reviewed only after its claims are checked."
+      />
 
-      <section aria-labelledby="managed-in-code-heading" className="mb-8 border-y border-slate-200 bg-white px-5 py-4 sm:px-6">
-        <h2 id="managed-in-code-heading" className="text-sm font-bold text-slate-900">Managed in code</h2>
-        <ul className="mt-2 space-y-1 text-sm text-slate-600">
-          <li>Home intro — HomeIntro</li>
-          <li>Enquiry routes — EnquiryRoutes</li>
-          <li>Home call to action — SiteCta</li>
-          <li>Products grid explanatory copy</li>
-          <li>Contact form</li>
-          <li>Header and footer</li>
-          <li>Product request dialog</li>
-        </ul>
-      </section>
+      <Paper
+        elevation={0}
+        component="section"
+        aria-labelledby="managed-in-code-heading"
+        sx={{ mb: 4, px: { xs: 2.5, sm: 3 }, py: 2, border: "1px solid var(--admin-border)" }}
+      >
+        <Typography component="h2" id="managed-in-code-heading" variant="subtitle2" sx={{ fontWeight: 700 }}>
+          Managed in code
+        </Typography>
+        <List dense disablePadding sx={{ mt: 1 }}>
+          {[
+            "Home intro — HomeIntro",
+            "Enquiry routes — EnquiryRoutes",
+            "Home call to action — SiteCta",
+            "Products grid explanatory copy",
+            "Contact form",
+            "Header and footer",
+            "Product request dialog",
+          ].map((item) => (
+            <ListItem key={item} disableGutters disablePadding sx={{ py: 0.25 }}>
+              <ListItemText primary={item} slotProps={{ primary: { variant: "body2", sx: { color: "text.secondary" } } }} />
+            </ListItem>
+          ))}
+        </List>
+      </Paper>
 
       <CMSEditor
         pages={{

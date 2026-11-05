@@ -2,12 +2,16 @@
 
 import { Suspense, useId, useState, type FormEvent } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import NextLink from "@/components/mui/NextLink";
 
 function LoginForm() {
   const router = useRouter();
@@ -62,60 +66,150 @@ function LoginForm() {
   };
 
   return (
-    <div className="admin-shell min-h-[100dvh]">
-      <header className="border-b border-[var(--admin-border)] bg-[var(--admin-surface)]">
-        <div className="mx-auto flex h-[72px] max-w-6xl items-center justify-between px-5 sm:px-8">
-          <Link href="/" className="rounded-md leading-tight focus-visible:outline-offset-4" aria-label="Sodoh Nigeria home">
-            <span className="display-font block text-xl font-semibold tracking-[-0.04em] text-[var(--admin-ink)]">Sodoh</span>
-            <span className="block text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--admin-muted)]">Nigeria Limited</span>
-          </Link>
-          <Link href="/" className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold text-[var(--admin-ink)] underline decoration-[var(--admin-border)] underline-offset-4 transition-colors hover:text-[#016936]">
+    <Box
+      sx={{
+        minHeight: "100dvh",
+        bgcolor: (theme) => theme.palette.admin.page,
+        color: (theme) => theme.palette.admin.ink,
+      }}
+    >
+      <Box
+        component="header"
+        sx={{
+          borderBottom: (theme) => `1px solid ${theme.palette.admin.border}`,
+          bgcolor: (theme) => theme.palette.admin.surface,
+        }}
+      >
+        <Box
+          sx={{
+            mx: "auto",
+            maxWidth: 1152,
+            height: 72,
+            px: { xs: 2.5, sm: 4 },
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Box
+            component={NextLink}
+            href="/"
+            aria-label="Sodoh Nigeria home"
+            sx={{ textDecoration: "none", color: "inherit", borderRadius: 1 }}
+          >
+            <Typography
+              component="span"
+              sx={{ display: "block", fontFamily: "var(--font-display), system-ui, sans-serif", fontWeight: 600, fontSize: 20, letterSpacing: "-0.04em", lineHeight: 1.2 }}
+            >
+              Sodoh
+            </Typography>
+            <Typography
+              component="span"
+              variant="caption"
+              sx={{ display: "block", fontWeight: 500, letterSpacing: "0.14em", textTransform: "uppercase", color: (theme) => theme.palette.admin.muted }}
+            >
+              Nigeria Limited
+            </Typography>
+          </Box>
+          <Button
+            component={NextLink}
+            href="/"
+            variant="text"
+            sx={{ minHeight: 44, fontWeight: 600, textDecoration: "underline", textDecorationColor: (theme) => theme.palette.admin.border, textUnderlineOffset: 4 }}
+          >
             View public site
-          </Link>
-        </div>
-      </header>
+          </Button>
+        </Box>
+      </Box>
 
-      <main className="mx-auto grid min-h-[calc(100dvh-72px)] max-w-6xl content-start items-stretch gap-8 px-5 py-10 sm:px-8 md:py-16 lg:grid-cols-[1fr_0.9fr] lg:content-center lg:items-center lg:gap-14">
-        <section className="page-enter relative overflow-hidden rounded-[18px] border border-[var(--admin-border)] bg-[#0c2418] text-white">
-          <div className="relative min-h-[260px] sm:min-h-[320px] lg:min-h-[480px]">
-            <Image
-              src="/images/nigerian-growing-fields.jpg"
-              alt="Growing fields in Nigeria"
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
-            />
-            <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[#071a10]/85 via-[#071a10]/25 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
-              <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-[#7be2a6]">Admin workspace</p>
-              <p className="display-font mt-2 max-w-[22ch] text-2xl font-semibold leading-tight tracking-[-0.03em] sm:text-3xl">
-                Keep the catalogue and enquiries current.
-              </p>
-            </div>
-          </div>
-        </section>
+      <Box
+        component="main"
+        sx={{
+          mx: "auto",
+          maxWidth: 1152,
+          px: { xs: 2.5, sm: 4 },
+          py: { xs: 5, md: 8 },
+          minHeight: "calc(100dvh - 72px)",
+          display: "grid",
+          gap: 4,
+          alignContent: { xs: "start", lg: "center" },
+          alignItems: { lg: "center" },
+          gridTemplateColumns: { lg: "1fr 0.9fr" },
+        }}
+      >
+        <Paper
+          elevation={0}
+          sx={{
+            position: "relative",
+            overflow: "hidden",
+            borderRadius: 3,
+            border: (theme) => `1px solid ${theme.palette.admin.border}`,
+            bgcolor: "#0c2418",
+            color: "#fff",
+            minHeight: { xs: 260, sm: 320, lg: 480 },
+          }}
+        >
+          <Image
+            src="/images/nigerian-growing-fields.jpg"
+            alt="Growing fields in Nigeria"
+            fill
+            priority
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            style={{ objectFit: "cover" }}
+          />
+          <Box
+            aria-hidden="true"
+            sx={{
+              position: "absolute",
+              inset: 0,
+              background: "linear-gradient(to top, rgba(7,26,16,0.85), rgba(7,26,16,0.25), transparent)",
+            }}
+          />
+          <Box sx={{ position: "absolute", insetInline: 0, bottom: 0, p: { xs: 3, sm: 4 } }}>
+            <Typography variant="overline" sx={{ fontWeight: 600, letterSpacing: "0.12em", color: "#7be2a6" }}>
+              Admin workspace
+            </Typography>
+            <Typography
+              component="p"
+              variant="h4"
+              sx={{ mt: 1, maxWidth: "22ch", fontWeight: 600, letterSpacing: "-0.03em", lineHeight: 1.15, color: "#fff" }}
+            >
+              Keep the catalogue and enquiries current.
+            </Typography>
+          </Box>
+        </Paper>
 
-        <section aria-labelledby="login-heading" className="page-enter w-full rounded-[18px] border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5 shadow-[0_16px_44px_rgba(10,42,26,0.08)] sm:p-8" style={{ animationDelay: "120ms" }}>
-          <h1 id="login-heading" className="display-font text-3xl font-semibold tracking-[-0.035em] text-[var(--admin-ink)] sm:text-4xl">
+        <Paper
+          elevation={0}
+          component="section"
+          aria-labelledby="login-heading"
+          sx={{
+            width: "100%",
+            borderRadius: 3,
+            border: (theme) => `1px solid ${theme.palette.admin.border}`,
+            p: { xs: 2.5, sm: 4 },
+            boxShadow: "0 16px 44px rgba(10,42,26,0.08)",
+          }}
+        >
+          <Typography component="h1" id="login-heading" variant="h4" sx={{ fontWeight: 600, letterSpacing: "-0.035em" }}>
             Sign in to your workspace
-          </h1>
-          <p className="mt-2 text-sm leading-6 text-[var(--admin-muted)]">
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1, lineHeight: 1.7 }}>
             Manage the Sodoh Nigeria site content, product listings, and enquiries. Use your staff account to continue.
-          </p>
+          </Typography>
 
           {error && (
-            <p id={errorId} role="alert" className="mt-6 rounded-[12px] border border-red-300 bg-red-50 px-4 py-3 text-sm font-medium leading-6 text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-100">
+            <Alert severity="error" id={errorId} sx={{ mt: 3 }}>
               {error}
-            </p>
+            </Alert>
           )}
 
-          <form onSubmit={handleLogin} className="mt-6 flex flex-col gap-5">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="admin-email">Email address</Label>
-              <Input
+          <Box component="form" onSubmit={handleLogin} sx={{ mt: 3 }}>
+            <Stack spacing={2.5}>
+              <TextField
                 id="admin-email"
                 name="email"
+                label="Email address"
                 type="email"
                 required
                 autoComplete="username"
@@ -123,42 +217,42 @@ function LoginForm() {
                 spellCheck={false}
                 value={email}
                 onChange={(event) => { setEmail(event.target.value); setError(null); }}
-                aria-invalid={Boolean(error)}
-                aria-describedby={error ? errorId : undefined}
+                error={Boolean(error)}
+                slotProps={{ htmlInput: { "aria-describedby": error ? errorId : undefined } }}
                 placeholder="staff@sodoh.com"
-                className="border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-ink)] focus:border-[#016936] focus:ring-[#016936]/20"
+                fullWidth
               />
-            </div>
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="admin-password">Password</Label>
-              <Input
+              <TextField
                 id="admin-password"
                 name="password"
+                label="Password"
                 type="password"
                 required
                 autoComplete="current-password"
                 value={password}
                 onChange={(event) => { setPassword(event.target.value); setError(null); }}
-                aria-invalid={Boolean(error)}
-                aria-describedby={error ? errorId : undefined}
+                error={Boolean(error)}
+                slotProps={{ htmlInput: { "aria-describedby": error ? errorId : undefined } }}
                 placeholder="••••••••"
-                className="border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-ink)] focus:border-[#016936] focus:ring-[#016936]/20"
+                fullWidth
               />
-            </div>
 
-            <Button
-              type="submit"
-              disabled={loading}
-              aria-busy={loading}
-              className="mt-1 w-full rounded-[12px]"
-            >
-              {loading ? "Signing in…" : "Sign in →"}
-            </Button>
-          </form>
-        </section>
-      </main>
-    </div>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={loading}
+                aria-busy={loading}
+                fullWidth
+                sx={{ minHeight: 48, borderRadius: 2 }}
+              >
+                {loading ? "Signing in…" : "Sign in →"}
+              </Button>
+            </Stack>
+          </Box>
+        </Paper>
+      </Box>
+    </Box>
   );
 }
 
@@ -166,7 +260,7 @@ export default function AdminLoginPage() {
   return (
     <>
       <meta name="robots" content="noindex, nofollow" />
-      <Suspense fallback={<div className="admin-shell grid min-h-[100dvh] place-items-center px-5 text-sm text-[var(--admin-muted)]" role="status">Loading sign-in form…</div>}>
+      <Suspense fallback={<Box role="status" sx={{ display: "grid", minHeight: "100dvh", placeItems: "center", px: 2.5, color: (theme) => theme.palette.admin.muted }}>Loading sign-in form…</Box>}>
         <LoginForm />
       </Suspense>
     </>

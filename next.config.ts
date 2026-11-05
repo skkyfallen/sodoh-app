@@ -69,6 +69,8 @@ const nextConfig: NextConfig = {
       "react-icons",
       "@supabase/supabase-js",
       "@supabase/ssr",
+      "@mui/material",
+      "@mui/icons-material",
     ],
   },
   images: {
