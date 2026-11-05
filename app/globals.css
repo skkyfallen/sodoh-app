@@ -65,9 +65,9 @@
 /* Light-only site: no OS-driven dark tokens. The .dark class is never
    applied, so dark: variants elsewhere are inert. */
 
-* {
-  box-sizing: border-box;
-}
+/* Box-sizing comes from Tailwind preflight. Do not re-declare it here:
+   an unlayered universal rule outranks MUI's layered input styles and
+   collapses MUI text fields (box-sizing content-box + input padding). */
 
 html {
   scroll-behavior: smooth;
@@ -108,6 +108,13 @@ summary {
 :focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 3px;
+}
+
+/* MUI fields show focus with their own 2px notched outline; a second
+   outer ring reads as a rendering bug. */
+.MuiInputBase-input:focus-visible,
+.MuiSelect-select:focus-visible {
+  outline: none;
 }
 
 /* ——— signature surfaces ——— */
