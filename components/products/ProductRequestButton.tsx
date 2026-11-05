@@ -2,8 +2,9 @@
 
 import { useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import Button from "@mui/material/Button";
 import type { Product } from "@/types/content";
-import { Button } from "@/components/ui/button";
+import { sodohBrandOutlineButtonSx, sodohButtonBaseSx } from "@/components/sections/sodoh-mui";
 
 const ProductRequestDialog = dynamic(() => import("./ProductRequestDialog"), {
   loading: () => null,
@@ -11,7 +12,7 @@ const ProductRequestDialog = dynamic(() => import("./ProductRequestDialog"), {
 
 type Props = { product: Product };
 
-// Load the dialog and its motion dependency only after a request is made.
+// Load the dialog dependency only after a request is made.
 export default function ProductRequestButton({ product }: Props) {
   const [open, setOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
@@ -29,7 +30,13 @@ export default function ProductRequestButton({ product }: Props) {
 
   return (
     <>
-      <Button ref={triggerRef} type="button" variant="brandOutline" onClick={openDialog} className="w-full">
+      <Button
+        ref={triggerRef}
+        type="button"
+        onClick={openDialog}
+        fullWidth
+        sx={[sodohButtonBaseSx, sodohBrandOutlineButtonSx, { minHeight: 44, fontSize: "0.875rem" }]}
+      >
         Request a quote
       </Button>
       {hasOpened && <ProductRequestDialog product={product} open={open} onClose={close} />}

@@ -1,5 +1,6 @@
 import { getAdminTestimonials } from "@/lib/data-admin";
 import CrudManager from "@/components/admin/CrudManager";
+import PageHeader from "@/components/admin/PageHeader";
 import type { FieldDef } from "@/components/admin/CrudManager";
 
 const fields: FieldDef[] = [
@@ -17,10 +18,10 @@ export default async function TestimonialsPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-black text-slate-900 mb-2">Testimonials</h1>
-      <p className="text-slate-500 text-sm mb-8">
-        Publish a real, approved customer quote only after it is marked reviewed.
-      </p>
+      <PageHeader
+        title="Testimonials"
+        description="Publish a real, approved customer quote only after it is marked reviewed."
+      />
 
       <CrudManager
         tableName="testimonials"

@@ -1,8 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { MdClose } from "react-icons/md";
+import Drawer from "@mui/material/Drawer";
+import Button from "@mui/material/Button";
+import CloseIcon from "@mui/icons-material/Close";
+import NextLink from "@/components/mui/NextLink";
+import { useEffect, useRef } from "react";
 import { BrandMark } from "./BrandMark";
 import { cn } from "@/lib/utils";
 
@@ -14,7 +16,7 @@ const navLinks = [
 
 function Wordmark({ tone = "ink" }: { tone?: "ink" | "paper" }) {
   return (
-    <Link
+    <NextLink
       href="/"
       className="flex items-center gap-3 rounded-md focus-visible:outline-offset-4"
       aria-label="Sodoh Nigeria Limited"
@@ -42,7 +44,7 @@ function Wordmark({ tone = "ink" }: { tone?: "ink" | "paper" }) {
           Nigeria Limited
         </span>
       </span>
-    </Link>
+    </NextLink>
   );
 }
 
@@ -54,94 +56,118 @@ type HeaderMenuProps = {
 
 export default function HeaderMenu({ open, pathname, onClose }: HeaderMenuProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const [mounted, setMounted] = useState(open);
-  const [previousOpen, setPreviousOpen] = useState(open);
 
-  if (open !== previousOpen) {
-    setPreviousOpen(open);
-    if (open) {
-      setMounted(true);
-    }
-  }
-
-  useEffect(() => {
-    if (open || !mounted) return;
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const timeout = window.setTimeout(() => setMounted(false), reducedMotion ? 0 : 320);
-    return () => window.clearTimeout(timeout);
-  }, [open, mounted]);
-
+  // Move focus to the close control once the drawer has opened. Deferred to
+  // the next frame so the Modal's own open-time focus handling has settled;
+  // MUI trap-focus keeps it inside and restores the trigger on close.
   useEffect(() => {
     if (!open) return;
-    closeButtonRef.current?.focus();
-  }, [open]);
-
-  if (!open && !mounted) return null;
+    const frame = window.requestAnimationFrame(() => {
+      closeButtonRef.current?.focus();
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [open ]);
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Site menu"
-      className={cn(
-        "fixed inset-0 z-[80] flex flex-col bg-[#0c2418] text-white",
-        open ? "site-menu-open" : "site-menu-closing"
-      )}
+    <Drawer
+      anchor="top"
+      open={open}
+      onClose={(_event, reason) => {
+        if (reason === "backdropClick" || reason === "escapeKeyDown") onClose();
+      }}
+      transitionDuration={320}
+      ModalProps={{ disableAutoFocus: true }}
+      slotProps={{
+        backdrop: {
+          sx: { backgroundColor: "rgba(7,26,16,0.55)" },
+        },
+        paper: {
+          role: "dialog",
+          "aria-modal": true,
+          "aria-label": "Site menu",
+          sx: {
+            height: "100%",
+            maxHeight: "100%",
+            borderRadius: 0,
+            backgroundColor: "#0c2418",
+            color: "#ffffff",
+            backgroundImage: "none",
+            boxShadow: "none",
+          },
+        },
+      }}
     >
-      <div className="mx-auto flex h-[76px] w-full max-w-[1440px] shrink-0 items-center justify-between px-5 sm:px-8">
-        <Wordmark tone="paper" />
-        <button
-          ref={closeButtonRef}
-          type="button"
-          onClick={onClose}
-          aria-label="Close navigation menu"
-          className="inline-flex min-h-12 items-center gap-2 rounded-[14px] border border-white/30 px-4 text-[15px] font-semibold text-white transition-colors hover:bg-white/10"
+      <div className="flex h-full flex-col bg-[#0c2418] text-white">
+        <div className="mx-auto flex h-[76px] w-full max-w-[1440px] shrink-0 items-center justify-between px-5 sm:px-8">
+          <Wordmark tone="paper" />
+          <Button
+            ref={closeButtonRef}
+            type="button"
+            onClick={onClose}
+            autoFocus
+            aria-label="Close navigation menu"
+            startIcon={<CloseIcon aria-hidden="true" />}
+            sx={{
+              minHeight: 48,
+              borderRadius: "14px",
+              border: "1px solid rgba(255,255,255,0.3)",
+              color: "#ffffff",
+              fontFamily: "var(--font-body), system-ui, sans-serif",
+              fontWeight: 600,
+              fontSize: "0.9375rem",
+              textTransform: "none",
+              paddingLeft: 2,
+              paddingRight: 2,
+              transition:
+                "background-color 240ms cubic-bezier(0.16,1,0.3,1), transform 240ms cubic-bezier(0.16,1,0.3,1)",
+              "&:hover": { backgroundColor: "rgba(255,255,255,0.1)" },
+            }}
+          >
+            Close
+          </Button>
+        </div>
+        <nav
+          aria-label="Menu"
+          className="mx-auto flex min-h-0 w-full max-w-[1440px] flex-1 flex-col justify-center gap-1 overflow-y-auto overscroll-contain px-5 py-4 sm:px-8"
         >
-          <MdClose aria-hidden="true" className="text-xl" />
-          Close
-        </button>
-      </div>
-      <nav
-        aria-label="Menu"
-        className="mx-auto flex min-h-0 w-full max-w-[1440px] flex-1 flex-col justify-center gap-1 overflow-y-auto overscroll-contain px-5 py-4 sm:px-8"
-      >
-        {[...navLinks, { label: "Contact", href: "/contact" }].map((link, index) => (
-          <div
-            key={link.href}
-            className="site-menu-link"
-            style={{ animationDelay: `${0.1 + index * 0.07}s` }}
-          >
-            <Link
-              href={link.href}
-              aria-current={pathname === link.href ? "page" : undefined}
-              onClick={onClose}
-              className={cn(
-                "display-font group flex items-baseline gap-4 border-b border-white/10 py-4 text-[clamp(2.4rem,9vw,4rem)] font-semibold leading-none tracking-[-0.04em] transition-colors",
-                pathname === link.href ? "text-[#7be2a6]" : "text-white hover:text-[#7be2a6]"
-              )}
+          {[...navLinks, { label: "Contact", href: "/contact" }].map((link, index) => (
+            <div
+              key={link.href}
+              className="site-menu-link"
+              style={{ animationDelay: `${0.1 + index * 0.07}s` }}
             >
-              {link.label}
-              <span
-                aria-hidden="true"
-                className="text-2xl text-white/30 transition-all duration-300 group-hover:translate-x-2 group-hover:text-[#7be2a6]"
+              <NextLink
+                href={link.href}
+                aria-current={pathname === link.href ? "page" : undefined}
+                onClick={onClose}
+                className={cn(
+                  "display-font group flex items-baseline gap-4 border-b border-white/10 py-4 text-[clamp(2.4rem,9vw,4rem)] font-semibold leading-none tracking-[-0.04em] transition-colors",
+                  pathname === link.href ? "text-[#7be2a6]" : "text-white hover:text-[#7be2a6]"
+                )}
               >
-                →
-              </span>
-            </Link>
+                {link.label}
+                <span
+                  aria-hidden="true"
+                  className="text-2xl text-white/30 transition-all duration-300 group-hover:translate-x-2 group-hover:text-[#7be2a6]"
+                >
+                  →
+                </span>
+              </NextLink>
+            </div>
+          ))}
+        </nav>
+        <div className="mx-auto w-full max-w-[1440px] shrink-0 px-5 pb-10 sm:px-8">
+          <div className="flex flex-col gap-1 border-t border-white/10 pt-5 text-sm text-white/70 sm:flex-row sm:items-center sm:justify-between">
+            <p>Abuja, Federal Capital Territory, Nigeria</p>
+            <a
+              href="mailto:info@sodohnigerialtd.com"
+              className="font-semibold text-white/85 hover:text-white"
+            >
+              info@sodohnigerialtd.com
+            </a>
           </div>
-        ))}
-      </nav>
-      <div className="mx-auto w-full max-w-[1440px] shrink-0 px-5 pb-10 sm:px-8">
-        <div className="flex flex-col gap-1 border-t border-white/10 pt-5 text-sm text-white/70 sm:flex-row sm:items-center sm:justify-between">
-          <p>Abuja, Federal Capital Territory, Nigeria</p>
-          <a
-            href="mailto:info@sodohnigerialtd.com"
-            className="font-semibold text-white/85 hover:text-white"
-          >
-            info@sodohnigerialtd.com
-          </a>
         </div>
       </div>
-    </div>
+    </Drawer>
   );
 }

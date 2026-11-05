@@ -1,10 +1,15 @@
 "use client";
 
 import { useState, type ChangeEvent, type FormEvent } from "react";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import Select from "@mui/material/Select";
+import type { SelectChangeEvent } from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import Alert from "@mui/material/Alert";
+import { sodohFieldSx, sodohPrimaryButtonSx, sodohButtonBaseSx } from "./sodoh-mui";
 
 type FormState = {
   name: string;
@@ -29,7 +34,9 @@ export default function ContactForm() {
   });
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent<string>
+  ) => {
     setForm((previous) => ({ ...previous, [event.target.name]: event.target.value }));
     if (status !== "idle") setStatus("idle");
   };
@@ -61,56 +68,117 @@ export default function ContactForm() {
       </p>
 
       {status === "success" && (
-        <div
-          key="success"
+        <Alert
+          severity="success"
           role="status"
-          className="contact-status-message mb-6 rounded-[12px] border border-[var(--border)] bg-[var(--brand-soft)] px-5 py-4 text-sm font-semibold text-[var(--ink)]"
+          className="contact-status-message"
+          sx={{
+            mb: 3,
+            borderRadius: "12px",
+            border: "1px solid var(--border)",
+            backgroundColor: "var(--brand-soft)",
+            color: "var(--ink)",
+            fontSize: "0.875rem",
+            fontWeight: 600,
+            "& .MuiAlert-icon": { color: "var(--brand)" },
+          }}
         >
           Your message was sent. We’ll be in touch as soon as we can.
-        </div>
+        </Alert>
       )}
       {status === "error" && (
-        <div
-          key="error"
+        <Alert
+          severity="error"
           role="alert"
-          className="contact-status-message mb-6 rounded-[12px] border border-red-300 bg-red-50 px-5 py-4 text-sm font-semibold text-red-800 dark:border-red-900 dark:bg-red-950 dark:text-red-100"
+          className="contact-status-message"
+          sx={{
+            mb: 3,
+            borderRadius: "12px",
+            fontSize: "0.875rem",
+            fontWeight: 600,
+            backgroundColor: "#fef2f2",
+            color: "#991b1b",
+            border: "1px solid #fecaca",
+            "& .MuiAlert-icon": { color: "#b42323" },
+          }}
         >
           We couldn’t send your message. Please try again or email us at{" "}
           <a className="underline underline-offset-2" href="mailto:info@sodohnigerialtd.com">info@sodohnigerialtd.com</a>.
-        </div>
+        </Alert>
       )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         <div className="grid gap-5 sm:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="contact-name">Name</Label>
-            <Input id="contact-name" name="name" type="text" autoComplete="name" required value={form.name} onChange={handleChange} placeholder="Your full name" />
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="contact-email">Email address</Label>
-            <Input id="contact-email" name="email" type="email" autoComplete="email" required value={form.email} onChange={handleChange} placeholder="you@example.com" />
-          </div>
+          <TextField
+            id="contact-name"
+            name="name"
+            label="Name"
+            type="text"
+            autoComplete="name"
+            required
+            fullWidth
+            value={form.name}
+            onChange={handleChange}
+            placeholder="Your full name"
+            sx={sodohFieldSx}
+          />
+          <TextField
+            id="contact-email"
+            name="email"
+            label="Email address"
+            type="email"
+            autoComplete="email"
+            required
+            fullWidth
+            value={form.email}
+            onChange={handleChange}
+            placeholder="you@example.com"
+            sx={sodohFieldSx}
+          />
         </div>
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="contact-subject">What is this about?</Label>
-          <select
+        <FormControl fullWidth sx={sodohFieldSx}>
+          <InputLabel id="contact-subject-label">What is this about?</InputLabel>
+          <Select
+            labelId="contact-subject-label"
             id="contact-subject"
             name="subject"
+            label="What is this about?"
             value={form.subject}
             onChange={handleChange}
-            className="min-h-12 w-full appearance-none rounded-[12px] border border-[var(--border)] bg-[var(--surface)] px-4 text-[15px] text-[var(--ink)] transition-colors hover:border-[var(--brand)]/50 focus:border-[var(--brand)] focus:outline-none focus:ring-2 focus:ring-[var(--brand)]/20"
           >
-            {subjects.map((subject) => <option key={subject}>{subject}</option>)}
-          </select>
-        </div>
+            {subjects.map((subject) => (
+              <MenuItem key={subject} value={subject}>
+                {subject}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="contact-message">Message</Label>
-          <Textarea id="contact-message" name="message" required rows={5} value={form.message} onChange={handleChange} placeholder="Tell us about volumes, timing, or partnership details…" />
-        </div>
+        <TextField
+          id="contact-message"
+          name="message"
+          label="Message"
+          required
+          multiline
+          rows={5}
+          fullWidth
+          value={form.message}
+          onChange={handleChange}
+          placeholder="Tell us about volumes, timing, or partnership details…"
+          sx={sodohFieldSx}
+        />
 
-        <Button type="submit" size="lg" disabled={status === "loading"} aria-busy={status === "loading"} className="w-full sm:w-max">
+        <Button
+          type="submit"
+          disabled={status === "loading"}
+          aria-busy={status === "loading"}
+          sx={[
+            sodohButtonBaseSx,
+            sodohPrimaryButtonSx,
+            { minHeight: 48, paddingLeft: 3.5, paddingRight: 3.5, fontSize: "0.9375rem", width: { xs: "100%", sm: "auto" }, alignSelf: { xs: "stretch", sm: "flex-start" } },
+          ]}
+        >
           {status === "loading" ? "Sending message…" : "Send message →"}
         </Button>
       </form>

@@ -1,7 +1,30 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Checkbox from "@mui/material/Checkbox";
+import Chip from "@mui/material/Chip";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormHelperText from "@mui/material/FormHelperText";
+import IconButton from "@mui/material/IconButton";
+import Paper from "@mui/material/Paper";
+import Snackbar from "@mui/material/Snackbar";
+import Stack from "@mui/material/Stack";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import { MdClose } from "react-icons/md";
 
 export type FieldDef = {
@@ -18,30 +41,24 @@ type Props = {
   listColumns?: string[];
 };
 
+type Notice = { message: string; severity: "success" | "error" };
+
 export default function CrudManager({ tableName, fields, initialRows, listColumns }: Props) {
   const [rows, setRows] = useState(initialRows);
   const [editing, setEditing] = useState<Record<string, unknown> | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [actionError, setActionError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
-  const savingRef = useRef(false);
-  const dialogOpen = editing !== null;
-
-  useLayoutEffect(() => {
-    savingRef.current = saving;
-  }, [saving]);
+  const [notice, setNotice] = useState<Notice | null>(null);
 
   const supabase = createClient();
   const colKeys = listColumns ?? fields.slice(0, 3).map((f) => f.key);
+  const dialogOpen = editing !== null;
 
   const openNew = () => {
-    previousFocusRef.current = document.activeElement as HTMLElement | null;
     setSaveError(null);
-    setActionError(null);
+    setNotice(null);
     const blank: Record<string, unknown> = { id: "" };
     for (const f of fields) {
       blank[f.key] = f.type === "number" ? 0 : f.type === "checkbox" ? f.key !== "public_reviewed" : "";
@@ -51,52 +68,22 @@ export default function CrudManager({ tableName, fields, initialRows, listColumn
   };
 
   const openEdit = (row: Record<string, unknown>) => {
-    previousFocusRef.current = document.activeElement as HTMLElement | null;
     setSaveError(null);
-    setActionError(null);
+    setNotice(null);
     setEditing({ ...row });
     setIsNew(false);
   };
 
-  const close = useCallback(() => {
-    if (savingRef.current) return;
+  const close = () => {
+    if (saving) return;
     setEditing(null);
     setIsNew(false);
-  }, []);
+  };
 
-  useEffect(() => {
-    if (!dialogOpen) {
-      previousFocusRef.current?.focus();
-      return;
-    }
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    dialogRef.current?.querySelector<HTMLElement>("input:not([type=checkbox]), textarea, button")?.focus();
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        close();
-      }
-      if (event.key !== "Tab" || !dialogRef.current) return;
-      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      ));
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last?.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first?.focus();
-      }
-    };
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [dialogOpen, close]);
+  const handleNoticeClose = (_event?: unknown, reason?: string) => {
+    if (reason === "clickaway") return;
+    setNotice(null);
+  };
 
   const handleSave = async () => {
     if (!editing) return;
@@ -123,6 +110,7 @@ export default function CrudManager({ tableName, fields, initialRows, listColumn
         return;
       }
       setRows((prev) => [...prev, data as Record<string, unknown>]);
+      setNotice({ message: "Item saved.", severity: "success" });
     } else {
       const { error } = await supabase
         .from(tableName as never)
@@ -134,6 +122,7 @@ export default function CrudManager({ tableName, fields, initialRows, listColumn
         return;
       }
       setRows((prev) => prev.map((row) => (row.id as string) === (editing.id as string) ? { ...row, ...payload } : row));
+      setNotice({ message: "Item saved.", severity: "success" });
     }
 
     setSaving(false);
@@ -142,155 +131,224 @@ export default function CrudManager({ tableName, fields, initialRows, listColumn
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this item?")) return;
-    setActionError(null);
+    setNotice(null);
     setDeletingId(id);
     try {
       const { error } = await supabase.from(tableName as never).delete().eq("id", id);
       if (error) throw error;
       setRows((prev) => prev.filter((r) => (r.id as string) !== id));
+      setNotice({ message: "Item deleted.", severity: "success" });
     } catch {
-      setActionError("This item could not be deleted. Check your connection and try again.");
+      setNotice({ message: "This item could not be deleted. Check your connection and try again.", severity: "error" });
     } finally {
       setDeletingId(null);
     }
   };
 
   return (
-    <div>
-      <button
+    <Box>
+      <Button
         type="button"
+        variant="contained"
         onClick={openNew}
-        className="mb-6 inline-flex min-h-11 items-center gap-3 rounded-[10px] bg-[#016936] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#014e29]"
+        sx={{ mb: 3, minHeight: 44 }}
       >
-        <span aria-hidden="true" className="text-lg leading-none">+</span> Add item
-      </button>
-      {actionError && <p role="alert" className="mb-4 rounded-[12px] border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{actionError}</p>}
+        <Box component="span" aria-hidden="true" sx={{ fontSize: "1.125rem", lineHeight: 1, mr: 1.5 }}>
+          +
+        </Box>
+        Add item
+      </Button>
 
-      {/* Table */}
-      <div className="overflow-hidden rounded-[12px] border border-[var(--admin-border)] bg-[var(--admin-surface)]">
-        <table className="w-full table-fixed text-sm">
-          <thead>
-            <tr className="border-b border-[var(--admin-border)] bg-[var(--admin-page)]">
+      <Snackbar
+        open={notice !== null}
+        autoHideDuration={notice?.severity === "error" ? null : 5000}
+        onClose={handleNoticeClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity={notice?.severity ?? "success"} onClose={() => setNotice(null)} sx={{ width: "100%" }}>
+          {notice?.message}
+        </Alert>
+      </Snackbar>
+
+      <TableContainer component={Paper} elevation={0} sx={{ border: (theme) => `1px solid ${theme.palette.admin.border}` }}>
+        <Table size="medium" aria-label="Managed items">
+          <TableHead>
+            <TableRow>
               {colKeys.map((k) => (
-                  <th key={k} className="px-3 py-3 text-left font-semibold text-[var(--admin-ink)] capitalize sm:px-4">
+                <TableCell key={k} sx={{ fontWeight: 600, textTransform: "capitalize" }}>
                   {k.replace(/_/g, " ")}
-                </th>
+                </TableCell>
               ))}
-                <th className="px-3 py-3 text-right font-semibold text-[var(--admin-ink)] sm:px-4">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
+              <TableCell align="right" sx={{ fontWeight: 600 }}>
+                Actions
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {rows.map((row) => (
-              <tr key={row.id as string} className="border-b border-[var(--admin-border)] transition-colors hover:bg-[var(--admin-page)]">
-                {colKeys.map((k) => (
-                  <td key={k} className="max-w-xs truncate px-3 py-3 text-[var(--admin-ink)] sm:px-4">
-                    {typeof row[k] === "boolean"
-                      ? row[k]
-                        ? "Yes"
-                        : "No"
-                      : String(row[k] ?? "")}
-                  </td>
-                ))}
-                <td className="px-2 py-3 text-right sm:px-4">
-                  <div className="flex flex-wrap justify-end gap-1">
-                    <button type="button" onClick={() => openEdit(row)} className="min-h-11 rounded-[10px] px-2 font-semibold text-[#016936] hover:underline">Edit</button>
-                    <button type="button" onClick={() => handleDelete(row.id as string)} disabled={deletingId !== null} className="min-h-11 rounded-[10px] px-2 font-semibold text-red-700 hover:underline disabled:cursor-wait disabled:opacity-60">{deletingId === row.id ? "Deleting…" : "Delete"}</button>
-                  </div>
-                </td>
-              </tr>
+              <TableRow key={row.id as string} hover>
+                {colKeys.map((k) =>
+                  typeof row[k] === "boolean" ? (
+                    <TableCell key={k}>
+                      <Chip
+                        size="small"
+                        label={row[k] ? "Yes" : "No"}
+                        color={row[k] ? "success" : "default"}
+                      />
+                    </TableCell>
+                  ) : (
+                    <TableCell key={k} sx={{ maxWidth: 320, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {String(row[k] ?? "")}
+                    </TableCell>
+                  )
+                )}
+                <TableCell align="right">
+                  <Stack direction="row" spacing={0.5} sx={{ justifyContent: "flex-end", flexWrap: "wrap" }}>
+                    <Button
+                      type="button"
+                      onClick={() => openEdit(row)}
+                      sx={{ minHeight: 44, minWidth: 44, color: "primary.main", fontWeight: 600 }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      type="button"
+                      color="error"
+                      onClick={() => handleDelete(row.id as string)}
+                      disabled={deletingId !== null}
+                      sx={{ minHeight: 44, minWidth: 44, fontWeight: 600 }}
+                    >
+                      {deletingId === row.id ? "Deleting…" : "Delete"}
+                    </Button>
+                  </Stack>
+                </TableCell>
+              </TableRow>
             ))}
             {rows.length === 0 && (
-              <tr>
-                <td colSpan={colKeys.length + 1} className="px-4 py-8 text-center text-[var(--admin-muted)]">
-                  No items yet. Add one to get started.
-                </td>
-              </tr>
+              <TableRow>
+                <TableCell colSpan={colKeys.length + 1}>
+                  <Alert severity="info" sx={{ my: 1 }}>
+                    No items yet. Add one to get started.
+                  </Alert>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-      {/* Edit Modal */}
-      {editing && (
-        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 p-0 backdrop-blur-sm sm:items-center sm:p-5" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}>
-          <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="crud-editor-title" className="max-h-[94dvh] w-full max-w-lg overflow-y-auto rounded-t-[12px] border border-[var(--admin-border)] bg-[var(--admin-page)] p-5 shadow-[0_24px_72px_rgba(0,0,0,0.25)] sm:max-h-[90vh] sm:rounded-[12px] sm:p-6">
-            <div className="mb-6 flex items-start justify-between gap-4">
-              <h2 id="crud-editor-title" className="display-font text-2xl font-semibold text-[var(--admin-ink)]">
-                {isNew ? "Add item" : "Edit item"}
-              </h2>
-              <button type="button" onClick={close} disabled={saving} aria-label="Close editor" className="flex size-11 shrink-0 items-center justify-center rounded-full border border-[var(--admin-border)] text-xl text-[var(--admin-ink)] transition-colors hover:bg-[var(--admin-page)] disabled:opacity-50"><MdClose aria-hidden="true" /></button>
-            </div>
-
-            <form onSubmit={(event) => { event.preventDefault(); void handleSave(); }} className="flex flex-col gap-4">
-              {fields.map((f) => {
-                const val = editing[f.key];
+      <Dialog
+        open={dialogOpen}
+        onClose={(_event, reason) => {
+          if (reason === "backdropClick" || reason === "escapeKeyDown") close();
+        }}
+        aria-labelledby="crud-editor-title"
+        fullWidth
+        maxWidth="sm"
+      >
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            void handleSave();
+          }}
+        >
+          <DialogTitle
+            id="crud-editor-title"
+            sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 2 }}
+          >
+            {isNew ? "Add item" : "Edit item"}
+            <IconButton
+              type="button"
+              onClick={close}
+              disabled={saving}
+              aria-label="Close editor"
+              sx={{ width: 44, height: 44 }}
+            >
+              <MdClose aria-hidden="true" />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent dividers>
+            <Stack spacing={2.5} sx={{ pt: 1 }}>
+              {fields.map((f, index) => {
+                const val = editing?.[f.key];
                 const inputId = `crud-field-${f.key}`;
                 if (f.type === "checkbox") {
                   return (
-                    <div key={f.key} className="flex min-h-11 items-start gap-3">
-                      <input
-                        id={inputId}
-                        type="checkbox"
-                        checked={Boolean(val)}
-                        onChange={(e) =>
-                          setEditing((prev) => (prev ? { ...prev, [f.key]: e.target.checked } : prev))
+                    <Box key={f.key}>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            id={inputId}
+                            checked={Boolean(val)}
+                            autoFocus={index === 0}
+                            onChange={(e) =>
+                              setEditing((prev) => (prev ? { ...prev, [f.key]: e.target.checked } : prev))
+                            }
+                          />
                         }
-                        className="mt-1 size-4 accent-[#016936]"
+                        label={f.label}
                       />
-                      <div>
-                        <label htmlFor={inputId} className="text-sm font-semibold text-[var(--admin-ink)]">{f.label}</label>
-                        {f.key === "public_reviewed" && (
-                          <p className="mt-1 text-xs leading-5 text-[var(--admin-muted)]">Unreviewed content is hidden from the public site.</p>
-                        )}
-                      </div>
-                    </div>
+                      {f.key === "public_reviewed" && (
+                        <FormHelperText sx={{ ml: 4 }}>
+                          Unreviewed content is hidden from the public site.
+                        </FormHelperText>
+                      )}
+                    </Box>
                   );
                 }
                 if (f.type === "textarea") {
                   return (
-                    <div key={f.key}>
-                      <label htmlFor={inputId} className="mb-1 block text-sm font-semibold text-[var(--admin-ink)]">{f.label}</label>
-                      <textarea
-                        id={inputId}
-                        rows={3}
-                        value={String(val ?? "")}
-                        onChange={(e) =>
-                          setEditing((prev) => (prev ? { ...prev, [f.key]: e.target.value } : prev))
-                        }
-                        className="w-full resize-y rounded-[12px] border border-[var(--admin-border)] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#016936]"
-                      />
-                    </div>
+                    <TextField
+                      key={f.key}
+                      id={inputId}
+                      label={f.label}
+                      multiline
+                      rows={3}
+                      fullWidth
+                      value={String(val ?? "")}
+                      slotProps={{ htmlInput: { autoFocus: index === 0 } }}
+                      onChange={(e) =>
+                        setEditing((prev) => (prev ? { ...prev, [f.key]: e.target.value } : prev))
+                      }
+                    />
                   );
                 }
                 return (
-                  <div key={f.key}>
-                    <label htmlFor={inputId} className="mb-1 block text-sm font-semibold text-[var(--admin-ink)]">{f.label}</label>
-                    <input
-                      id={inputId}
-                      type={f.type === "number" ? "number" : "text"}
-                      value={String(val ?? "")}
-                      onChange={(e) =>
-                        setEditing((prev) =>
-                          prev
-                            ? { ...prev, [f.key]: f.type === "number" ? Number(e.target.value) : e.target.value }
-                            : prev
-                        )
-                      }
-                      className="min-h-11 w-full rounded-[12px] border border-[var(--admin-border)] px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#016936]"
-                    />
-                  </div>
+                  <TextField
+                    key={f.key}
+                    id={inputId}
+                    label={f.label}
+                    type={f.type === "number" ? "number" : "text"}
+                    fullWidth
+                    value={String(val ?? "")}
+                    slotProps={{ htmlInput: { autoFocus: index === 0 } }}
+                    onChange={(e) =>
+                      setEditing((prev) =>
+                        prev
+                          ? { ...prev, [f.key]: f.type === "number" ? Number(e.target.value) : e.target.value }
+                          : prev
+                      )
+                    }
+                  />
                 );
               })}
-              {saveError && <p role="alert" className="rounded-[12px] border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{saveError}</p>}
+              {saveError && <Alert severity="error">{saveError}</Alert>}
+            </Stack>
+          </DialogContent>
+          <DialogActions sx={{ px: 3, py: 2 }}>
+            <Button type="button" onClick={close} disabled={saving} sx={{ minHeight: 44 }}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="contained" disabled={saving} aria-busy={saving} sx={{ minHeight: 44 }}>
+              {saving ? "Saving…" : "Save changes"}
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
 
-              <div className="mt-2 flex flex-col-reverse justify-end gap-3 border-t border-[var(--admin-border)] pt-4 sm:flex-row">
-                <button type="button" onClick={close} disabled={saving} className="min-h-11 rounded-[10px] bg-slate-100 px-5 text-sm font-semibold text-[var(--admin-ink)] transition-colors hover:bg-[var(--admin-active)] disabled:opacity-50">Cancel</button>
-                <button type="submit" disabled={saving} aria-busy={saving} className="min-h-11 rounded-[10px] bg-[#016936] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#015a2d] disabled:cursor-wait disabled:opacity-60">{saving ? "Saving…" : "Save changes"}</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
+      <Typography component="span" role="status" sx={{ position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" }}>
+        {notice?.severity === "success" ? notice.message : ""}
+      </Typography>
+    </Box>
   );
 }

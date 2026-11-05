@@ -2,26 +2,40 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Badge } from "@/components/ui/badge";
-import { AdminEmptyState } from "@/components/ui/empty-state";
+import Alert from "@mui/material/Alert";
+import AlertTitle from "@mui/material/AlertTitle";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
+import Paper from "@mui/material/Paper";
+import Snackbar from "@mui/material/Snackbar";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import type { ProductRequest } from "@/types/content";
 
 type Props = {
   initialRequests: ProductRequest[];
 };
 
-const badgeFor = (status: string) =>
-  status === "new" ? "success" : status === "read" ? "info" : "neutral";
+type Notice = { message: string; severity: "success" | "error" };
+
+const chipColorFor = (status: string): "success" | "info" | "default" =>
+  status === "new" ? "success" : status === "read" ? "info" : "default";
 
 export default function ProductRequestsManager({ initialRequests }: Props) {
   const [requests, setRequests] = useState(initialRequests);
   const [selected, setSelected] = useState<ProductRequest | null>(null);
-  const [actionError, setActionError] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [notice, setNotice] = useState<Notice | null>(null);
   const supabase = createClient();
 
   const updateStatus = async (id: string, status: "new" | "read" | "archived") => {
-    setActionError(null);
+    setNotice(null);
     setPendingId(id);
     try {
       const { error } = await supabase
@@ -29,7 +43,7 @@ export default function ProductRequestsManager({ initialRequests }: Props) {
         .update({ status })
         .eq("id", id);
       if (error) throw error;
-      setActionError(null);
+      setNotice(null);
       setRequests((prev) =>
         prev.map((r) => (r.id === id ? { ...r, status } : r))
       );
@@ -37,7 +51,7 @@ export default function ProductRequestsManager({ initialRequests }: Props) {
         setSelected((prev) => (prev ? { ...prev, status } : prev));
       }
     } catch {
-      setActionError("This request could not be updated. Check your connection and try again.");
+      setNotice({ message: "This request could not be updated. Check your connection and try again.", severity: "error" });
     } finally {
       setPendingId(null);
     }
@@ -45,7 +59,7 @@ export default function ProductRequestsManager({ initialRequests }: Props) {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this request?")) return;
-    setActionError(null);
+    setNotice(null);
     setPendingId(id);
     try {
       const { error } = await supabase
@@ -53,153 +67,211 @@ export default function ProductRequestsManager({ initialRequests }: Props) {
         .delete()
         .eq("id", id);
       if (error) throw error;
-      setActionError(null);
+      setNotice(null);
       setRequests((prev) => prev.filter((r) => r.id !== id));
       if (selected?.id === id) setSelected(null);
+      setNotice({ message: "Request deleted.", severity: "success" });
     } catch {
-      setActionError("This request could not be deleted. Check your connection and try again.");
+      setNotice({ message: "This request could not be deleted. Check your connection and try again.", severity: "error" });
     } finally {
       setPendingId(null);
     }
   };
 
+  const handleNoticeClose = (_event?: unknown, reason?: string) => {
+    if (reason === "clickaway") return;
+    setNotice(null);
+  };
+
   return (
-    <div className="flex flex-col gap-6 lg:flex-row">
-      {/* List */}
-      <div className="flex-1 overflow-hidden rounded-[12px] border border-[var(--admin-border)] bg-[var(--admin-surface)]">
-        <div className="max-h-[70vh] divide-y divide-[var(--admin-border)] overflow-y-auto">
-          {requests.map((r) => (
-            <button
-              key={r.id}
-              type="button"
-              aria-pressed={selected?.id === r.id}
-              disabled={pendingId !== null}
-              onClick={() => {
-                setSelected(r);
-                setActionError(null);
-                if (r.status === "new") updateStatus(r.id, "read");
-              }}
-              className={`w-full px-5 py-4 text-left transition-colors hover:bg-[var(--admin-page)] ${
-                selected?.id === r.id ? "bg-[var(--admin-active)]/60" : ""
-              }`}
+    <Box>
+      <Snackbar
+        open={notice !== null}
+        autoHideDuration={notice?.severity === "error" ? null : 5000}
+        onClose={handleNoticeClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity={notice?.severity ?? "success"} onClose={() => setNotice(null)} sx={{ width: "100%" }}>
+          {notice?.message}
+        </Alert>
+      </Snackbar>
+
+      <Stack direction={{ xs: "column", lg: "row" }} spacing={3}>
+        {/* List */}
+        <Paper elevation={0} sx={{ flex: 1, overflow: "hidden", border: (theme) => `1px solid ${theme.palette.admin.border}` }}>
+          {requests.length === 0 ? (
+            <Box sx={{ p: 2 }}>
+              <Alert severity="info">
+                No product requests yet. New quote requests will appear here.
+              </Alert>
+            </Box>
+          ) : (
+            <List
+              disablePadding
+              sx={{ maxHeight: "70vh", overflowY: "auto" }}
+              aria-label="Product requests"
             >
-              <div className="mb-1 flex items-center justify-between gap-3">
-                <span className="text-sm font-bold text-[var(--admin-ink)]">{r.name}</span>
-                <Badge variant={badgeFor(r.status) as "success" | "info" | "neutral"}>
-                  {r.status}
-                </Badge>
-              </div>
-              <p className="truncate text-xs text-[var(--admin-muted)]">Product: {r.product_title}</p>
-              <p className="text-xs text-[var(--admin-muted)]">Quantity: {r.quantity_kg} kg</p>
-              <p className="mt-0.5 text-xs text-[var(--admin-muted)]/80">
-                {new Date(r.created_at).toLocaleDateString("en-NG", {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })}
-              </p>
-            </button>
-          ))}
-          {requests.length === 0 && (
-            <div className="px-5 py-12 text-center text-sm leading-6 text-[var(--admin-muted)]">
-              No product requests yet. New quote requests will appear here.
-            </div>
+              {requests.map((r) => (
+                <ListItemButton
+                  key={r.id}
+                  type="button"
+                  aria-pressed={selected?.id === r.id}
+                  selected={selected?.id === r.id}
+                  disabled={pendingId !== null}
+                  onClick={() => {
+                    setSelected(r);
+                    setNotice(null);
+                    if (r.status === "new") updateStatus(r.id, "read");
+                  }}
+                  divider
+                  sx={{
+                    alignItems: "flex-start",
+                    px: 2.5,
+                    py: 2,
+                    "&.Mui-selected": {
+                      bgcolor: (theme) => theme.palette.admin.active,
+                      "&:hover": { bgcolor: (theme) => theme.palette.admin.active },
+                    },
+                  }}
+                >
+                  <ListItemText
+                    primary={
+                      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5, mb: 0.5 }}>
+                        <Typography component="span" variant="subtitle2" sx={{ fontWeight: 700 }}>
+                          {r.name}
+                        </Typography>
+                        <Chip size="small" label={r.status} color={chipColorFor(r.status)} />
+                      </Box>
+                    }
+                    secondary={
+                      <>
+                        <Typography component="span" variant="body2" color="text.secondary" sx={{ display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          Product: {r.product_title}
+                        </Typography>
+                        <Typography component="span" variant="body2" color="text.secondary" sx={{ display: "block" }}>
+                          Quantity: {r.quantity_kg} kg
+                        </Typography>
+                        <Typography component="span" variant="caption" color="text.secondary">
+                          {new Date(r.created_at).toLocaleDateString("en-NG", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </Typography>
+                      </>
+                    }
+                  />
+                </ListItemButton>
+              ))}
+            </List>
           )}
-        </div>
-      </div>
+        </Paper>
 
-      {/* Detail */}
-      <div className="flex-1">
-        {selected ? (
-          <div className="rounded-[12px] border border-[var(--admin-border)] bg-[var(--admin-surface)] p-6">
-            <div className="mb-4 flex items-start justify-between gap-4">
-              <div>
-                <h3 className="text-lg font-bold text-[var(--admin-ink)]">{selected.name}</h3>
-                <p className="text-sm text-[var(--admin-muted)]">{selected.email}</p>
-                {selected.phone && (
-                  <p className="text-sm text-[var(--admin-muted)]">{selected.phone}</p>
+        {/* Detail */}
+        <Box sx={{ flex: 1 }}>
+          {selected ? (
+            <Card elevation={0} sx={{ border: (theme) => `1px solid ${theme.palette.admin.border}` }}>
+              <CardContent sx={{ p: 3 }}>
+                <Stack direction="row" spacing={2} sx={{ alignItems: "flex-start", justifyContent: "space-between", mb: 2 }}>
+                  <Box>
+                    <Typography component="h3" variant="h6" sx={{ fontWeight: 700 }}>
+                      {selected.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {selected.email}
+                    </Typography>
+                    {selected.phone && (
+                      <Typography variant="body2" color="text.secondary">
+                        {selected.phone}
+                      </Typography>
+                    )}
+                  </Box>
+                  <Chip label={selected.status} color={chipColorFor(selected.status)} />
+                </Stack>
+
+                <Paper variant="outlined" sx={{ mb: 2, p: 2, bgcolor: (theme) => theme.palette.admin.page }}>
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.5 }}>
+                    Requested product
+                  </Typography>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                    {selected.product_title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                    Quantity:{" "}
+                    <Typography component="span" variant="body2" sx={{ fontWeight: 700, color: "primary.main" }}>
+                      {selected.quantity_kg} kg
+                    </Typography>
+                  </Typography>
+                </Paper>
+
+                {selected.message && (
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3, whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
+                    {selected.message}
+                  </Typography>
                 )}
-              </div>
-              <Badge variant={badgeFor(selected.status) as "success" | "info" | "neutral"}>
-                {selected.status}
-              </Badge>
-            </div>
 
-            <div className="mb-4 rounded-[12px] border border-[var(--admin-border)] bg-[var(--admin-page)] p-4">
-              <p className="mb-1 text-sm font-semibold text-[var(--admin-muted)]">
-                Requested product
-              </p>
-              <p className="text-base font-bold text-[var(--admin-ink)]">
-                {selected.product_title}
-              </p>
-              <p className="mt-1 text-sm text-[var(--admin-muted)]">
-                Quantity:{" "}
-                <span className="font-bold text-[#016936]">
-                  {selected.quantity_kg} kg
-                </span>
-              </p>
-            </div>
+                <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 3 }}>
+                  {new Date(selected.created_at).toLocaleString("en-NG")}
+                </Typography>
 
-            {selected.message && (
-              <p className="mb-6 whitespace-pre-wrap text-sm leading-relaxed text-[var(--admin-muted)]">
-                {selected.message}
-              </p>
-            )}
-
-            <p className="mb-6 text-xs text-[var(--admin-muted)]/80">
-              {new Date(selected.created_at).toLocaleString("en-NG")}
-            </p>
-
-            <div className="flex flex-wrap gap-2">
-              {selected.status !== "new" && (
-                <button
-                  type="button"
-                  onClick={() => updateStatus(selected.id, "new")}
-                  disabled={pendingId !== null}
-                  className="inline-flex min-h-11 items-center rounded-[10px] border border-[var(--admin-border)] bg-[var(--admin-active)] px-4 text-sm font-semibold text-[#145c34] transition-colors hover:brightness-95"
-                >
-                  Mark New
-                </button>
-              )}
-              {selected.status !== "read" && (
-                <button
-                  type="button"
-                  onClick={() => updateStatus(selected.id, "read")}
-                  disabled={pendingId !== null}
-                  className="inline-flex min-h-11 items-center rounded-[10px] border border-[#c4d9ec] bg-[#e8eff6] px-4 text-sm font-semibold text-[#244d6d] transition-colors hover:brightness-95"
-                >
-                  Mark Read
-                </button>
-              )}
-              {selected.status !== "archived" && (
-                <button
-                  type="button"
-                  onClick={() => updateStatus(selected.id, "archived")}
-                  disabled={pendingId !== null}
-                  className="inline-flex min-h-11 items-center rounded-[10px] border border-[var(--admin-border)] bg-[var(--admin-page)] px-4 text-sm font-semibold text-[var(--admin-ink)] transition-colors hover:bg-[var(--admin-active)]"
-                >
-                  Archive
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => handleDelete(selected.id)}
-                disabled={pendingId !== null}
-                className="inline-flex min-h-11 items-center rounded-[10px] border border-[#f3c1c1] bg-[#fdecec] px-4 text-sm font-semibold text-[#a12323] transition-colors hover:brightness-95"
-              >
-                {pendingId === selected.id ? "Updating…" : "Delete"}
-              </button>
-            </div>
-            {pendingId === selected.id && <p role="status" className="mt-3 text-sm text-[var(--admin-muted)]">Updating request…</p>}
-            {actionError && <p role="alert" className="mt-4 rounded-[10px] border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">{actionError}</p>}
-          </div>
-        ) : (
-          <AdminEmptyState
-            title="No request selected"
-            body="Select a request to review its details and update its status."
-          />
-        )}
-      </div>
-    </div>
+                <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap" }}>
+                  {selected.status !== "new" && (
+                    <Button
+                      type="button"
+                      variant="outlined"
+                      onClick={() => updateStatus(selected.id, "new")}
+                      disabled={pendingId !== null}
+                      sx={{ minHeight: 44 }}
+                    >
+                      Mark New
+                    </Button>
+                  )}
+                  {selected.status !== "read" && (
+                    <Button
+                      type="button"
+                      variant="outlined"
+                      onClick={() => updateStatus(selected.id, "read")}
+                      disabled={pendingId !== null}
+                      sx={{ minHeight: 44 }}
+                    >
+                      Mark Read
+                    </Button>
+                  )}
+                  {selected.status !== "archived" && (
+                    <Button
+                      type="button"
+                      variant="outlined"
+                      onClick={() => updateStatus(selected.id, "archived")}
+                      disabled={pendingId !== null}
+                      sx={{ minHeight: 44 }}
+                    >
+                      Archive
+                    </Button>
+                  )}
+                  <Button
+                    type="button"
+                    variant="outlined"
+                    color="error"
+                    onClick={() => handleDelete(selected.id)}
+                    disabled={pendingId !== null}
+                    sx={{ minHeight: 44 }}
+                  >
+                    {pendingId === selected.id ? "Updating…" : "Delete"}
+                  </Button>
+                </Stack>
+                {pendingId === selected.id && <Typography role="status" variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>Updating request…</Typography>}
+              </CardContent>
+            </Card>
+          ) : (
+            <Stack spacing={1.5}>
+              <Alert severity="info">
+                <AlertTitle>No request selected</AlertTitle>
+                Select a request to review its details and update its status.
+              </Alert>
+            </Stack>
+          )}
+        </Box>
+      </Stack>
+    </Box>
   );
 }

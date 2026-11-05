@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import Image from "next/image";
 import AnimateIn from "@/components/ui/AnimateIn";
 import { SiteCta } from "@/components/sections/SiteCta";
+import SodohCtaButton from "@/components/sections/SodohCtaButton";
 import { getPageContent } from "@/lib/data";
 import { safeHref } from "@/lib/utils";
 import { ogImagePath, ogLocale } from "@/lib/site";
@@ -112,8 +112,8 @@ export default async function AboutPage() {
             <div className="mt-10 flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
               {hero.subtitle && <p className="measure text-base leading-7 text-white/90 md:text-lg md:leading-8">{hero.subtitle}</p>}
               <div className="flex shrink-0 flex-wrap gap-3">
-                {hero.cta_primary_text && hero.cta_primary_href && <Link href={safeHref(hero.cta_primary_href, "/products")} className="pressable inline-flex min-h-12 items-center justify-center rounded-[14px] bg-[var(--brand)] px-7 text-[15px] font-semibold text-white hover:bg-[var(--brand-hover)] dark:text-[#062a17]">{hero.cta_primary_text} <span aria-hidden="true" className="ml-2">→</span></Link>}
-                {hero.cta_secondary_text && hero.cta_secondary_href && <Link href={safeHref(hero.cta_secondary_href, "/contact")} className="pressable inline-flex min-h-12 items-center justify-center rounded-[14px] border border-white/40 px-7 text-[15px] font-semibold text-white transition-colors hover:bg-white/10">{hero.cta_secondary_text}</Link>}
+                {hero.cta_primary_text && hero.cta_primary_href && <SodohCtaButton href={safeHref(hero.cta_primary_href, "/products")} variant="primary">{hero.cta_primary_text} <span aria-hidden="true" className="ml-2">→</span></SodohCtaButton>}
+                {hero.cta_secondary_text && hero.cta_secondary_href && <SodohCtaButton href={safeHref(hero.cta_secondary_href, "/contact")} variant="outlineLight">{hero.cta_secondary_text}</SodohCtaButton>}
               </div>
             </div>
           </div>
